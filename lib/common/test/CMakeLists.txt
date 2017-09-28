@@ -6,7 +6,7 @@ add_executable(Test ${Common_Test_SOURCES})
 
 target_link_libraries(Test 
 	${Boost_LIBRARIES}
-	${POCO_LIBRARIES}
+	${POCO_LIBS}
 	${GTest_LIBRARIES}
 )
 
