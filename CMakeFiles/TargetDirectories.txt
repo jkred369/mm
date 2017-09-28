@@ -1,0 +1,6 @@
+/home/suoalex/workspaces/mm/CMakeFiles/edit_cache.dir
+/home/suoalex/workspaces/mm/CMakeFiles/rebuild_cache.dir
+/home/suoalex/workspaces/mm/lib/CMakeFiles/edit_cache.dir
+/home/suoalex/workspaces/mm/lib/CMakeFiles/rebuild_cache.dir
+/home/suoalex/workspaces/mm/lib/common/CMakeFiles/edit_cache.dir
+/home/suoalex/workspaces/mm/lib/common/CMakeFiles/rebuild_cache.dir
