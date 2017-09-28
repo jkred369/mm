@@ -18,5 +18,8 @@ include_directories(${GTEST_INCLUDE_DIRS})
 # compiler options
 set(CMAKE_CXX_FLAGS "-g -Wall -O2 -pipe -std=c++11")
 
+# testing
+set(BUILD_TESTING ON)
+
 # project structure
 add_subdirectory(lib)
