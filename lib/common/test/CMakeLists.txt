@@ -18,3 +18,10 @@ target_link_libraries(Test
 )
 
 add_test(CommonTest, Test)
+
+add_custom_command(
+     TARGET Test
+     COMMENT "Run tests"
+     POST_BUILD 
+     COMMAND Test
+)
