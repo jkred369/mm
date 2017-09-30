@@ -22,7 +22,10 @@ set(GTEST_INCLUDE_DIR "/usr/include/gtest")
 set(GTEST_LIB_DIR "/usr/lib/gtest-1.8.0")
 set(GTEST_LIBS
 	"${GTEST_LIB_DIR}/libgtest.a"
-	"${GTEST_LIB_DIR}/libgmock.a")
+	"${GTEST_LIB_DIR}/libgtest_main.a"
+	"${GTEST_LIB_DIR}/libgmock.a"
+	"${GTEST_LIB_DIR}/libgmock_main.a"
+)
 
 include_directories(${GTEST_INCLUDE_DIRS})
 

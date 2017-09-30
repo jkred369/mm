@@ -14,7 +14,7 @@ target_include_directories(Test PUBLIC
 target_link_libraries(Test 
 	${Boost_LIBRARIES}
 	${POCO_LIBS}
-	${GTest_LIBRARIES}
+	${GTEST_LIBS}
 )
 
 add_test(CommonTest, Test)
