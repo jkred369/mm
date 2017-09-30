@@ -8,6 +8,7 @@
 #ifndef LIB_COMMON_CONDITION_HPP_
 #define LIB_COMMON_CONDITION_HPP_
 
+#include <condition_variable>
 #include <mutex>
 
 namespace mm
@@ -63,7 +64,7 @@ namespace mm
 		Mutex mutex;
 
 		// The lock used by the condition.
-		std::unique_lock<Lock> lock;
+		std::unique_lock<Mutex> lock;
 
 		// The condition variable itself.
 		std::condition_variable cv;

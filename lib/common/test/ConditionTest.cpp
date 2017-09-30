@@ -18,7 +18,7 @@ namespace mm
 			done = true;
 		});
 
-		std::thread t2([condition] ()
+		std::thread t2([&condition] ()
 		{
 			condition.notifyOne();
 		});
