@@ -27,6 +27,7 @@ set(GTEST_LIBS
 include_directories(${GTEST_INCLUDE_DIRS})
 
 # compiler options
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-g -Wall -O2 -pipe -pthread -std=c++11")
 
 # testing

@@ -1,11 +1,9 @@
-#pragma once
-
 #include <chrono>
 #include <thread>
 
 #include <gtest/gtest.h>
 
-#include <Condition.hpp>
+#include "Condition.hpp"
 
 namespace mm
 {
