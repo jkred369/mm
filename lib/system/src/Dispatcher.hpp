@@ -9,11 +9,15 @@
 #define LIB_SYSTEM_DISPATCHER_HPP_
 
 #include <cstdint>
+#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <vector>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/lockfree/queue.hpp>
 
 #include <Poco/Hash.h>
 
@@ -27,7 +31,7 @@ namespace mm
 	//
 	// The queue is expected to be thread-safe and the thread will execute tasks from the queue.
 	//
-	template<typename Queue> class TaskRunner
+	template<typename Mutex = std::mutex> class TaskRunner
 	{
 	public:
 
@@ -62,7 +66,7 @@ namespace mm
 				return;
 			}
 
-			thread = new std::thread([] ()
+			thread = new std::thread([this] ()
 			{
 				std::shared_ptr<Runnable> runnable;
 
@@ -70,11 +74,16 @@ namespace mm
 				{
 					if (queue.pop(runnable))
 					{
-						runnable();
+						(*runnable)();
 					}
 					else if (waitOnEmpty)
 					{
-						condition.wait();
+						// enter inactive thread wait
+						std::unique_lock<Mutex> lock(mutex);
+						while (queue.empty())
+						{
+							condition.wait(lock);
+						}
 					}
 				}
 			});
@@ -96,16 +105,17 @@ namespace mm
 		//
 		// runnable : The task to be executed.
 		//
-		void submit(std::shared_ptr<Runnable>& runnable)
+		void submit(boost::shared_ptr<Runnable>& runnable)
 		{
 			bool wasEmpty = waitOnEmpty ? queue.empty() : false;
 
-			queue.push_back(runnable);
+			queue.push(runnable);
 
 			// notify where needed - we know there is only 1 thread waiting at most.
 			if (wasEmpty && waitOnEmpty)
 			{
-				condition.notifyOne();
+				std::lock_guard<Mutex> guard(mutex);
+				condition.notify_one();
 			}
 		}
 
@@ -120,11 +130,14 @@ namespace mm
 		// Pointer to actual thread.
 		std::thread* thread;
 
-		// Condition used for queue notify.
-		Condition condition;
+		// Mutex used for queue notify.
+		Mutex mutex;
+
+		// The condition variable used.
+		std::condition_variable condition;
 
 		// The queue structure holding the tasks.
-		Queue<std::shared_ptr<Runnable> > queue;
+		boost::lockfree::queue<boost::shared_ptr<Runnable> > queue;
 
 	};
 
@@ -133,7 +146,7 @@ namespace mm
 	//
 	// The tasks are separated into queues based on the hash value of the key submitted.
 	//
-	template<typename Key, typename Thread, typename Queue> class HashDispatcher
+	template<typename Key = std::int32_t, typename Mutex = std::mutex> class HashDispatcher
 	{
 	public:
 
@@ -150,6 +163,21 @@ namespace mm
 			runners(threadCount),
 			function(function)
 		{
+			for (TaskRunner<Mutex>& runner : runners)
+			{
+				runner.start();
+			}
+		}
+
+		//
+		// Destructor. Will stop all the execution internally.
+		//
+		~HashDispatcher()
+		{
+			for (TaskRunner<Mutex>& runner : runners)
+			{
+				runner.stop();
+			}
 		}
 
 		//
@@ -158,7 +186,7 @@ namespace mm
 		// key : The key for the task.
 		// runnable : The task to be executed.
 		//
-		void submit(Key key, std::shared_ptr<Runnable>& runnable)
+		void submit(Key& key, std::shared_ptr<Runnable>& runnable)
 		{
 			runners[function(key) % runners.size()].submit(runnable);
 		}
@@ -169,7 +197,7 @@ namespace mm
 		static const Poco::Hash<Key> DEFAULT_HASH;
 
 		// The task runners.
-		std::vector<TaskRunner> runners;
+		std::vector<TaskRunner<Mutex> > runners;
 
 		// The hash function.
 		const HashFunction& function;

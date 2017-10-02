@@ -9,7 +9,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.58.0 COMPONENTS filesystem regex) 
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(POCO_INCLUDE_DIR "/usr/include/poco")
+set(POCO_INCLUDE_DIR "/usr/include/poco-1.7.9")
 set(POCO_LIB_DIR "/usr/lib/poco-1.7.9")
 set(POCO_LIBS
 	"${POCO_LIB_DIR}/libPocoNet.so"

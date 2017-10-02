@@ -1,10 +1,9 @@
 #include <chrono>
 #include <thread>
-#include <iostream>
 
 #include <gtest/gtest.h>
 
-#include "../src/CountDownLatch.hpp"
+#include "CountDownLatch.hpp"
 
 namespace mm
 {
