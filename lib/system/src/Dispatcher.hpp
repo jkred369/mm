@@ -15,6 +15,8 @@
 #include <thread>
 #include <vector>
 
+#include <Poco/Hash.h>
+
 namespace mm
 {
 	typedef std::function<void()> Runnable;
@@ -136,16 +138,17 @@ namespace mm
 	public:
 
 		// The hash function type.
-		typedef std::function<std::int32_t(const Key&) const> HashFunction;
+		typedef std::function<size_t(const Key&) const> HashFunction;
 
 		//
 		// Constructor.
 		//
 		// threadCount : number of threads in the dispatcher.
+		// function : The hash function.
 		//
-		HashDispatcher(const HashFunction& function, size_t threadCount = 4) :
-			function(function),
-			runners(threadCount)
+		HashDispatcher(size_t threadCount = 4, const HashFunction& function = DEFAULT_HASH) :
+			runners(threadCount),
+			function(function)
 		{
 		}
 
@@ -162,11 +165,14 @@ namespace mm
 
 	private:
 
-		// The hash function.
-		const HashFunction& function;
+		// The default hash function used.
+		static const Poco::Hash<Key> DEFAULT_HASH;
 
 		// The task runners.
 		std::vector<TaskRunner> runners;
+
+		// The hash function.
+		const HashFunction& function;
 	};
 }
 
