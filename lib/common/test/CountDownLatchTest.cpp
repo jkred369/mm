@@ -79,4 +79,36 @@ namespace mm
 		t2.join();
 		t3.join();
 	}
+
+	TEST(CountDownLatchTest, NegativeCase)
+	{
+		mm::CountDownLatch<> latch(1);
+		bool done = false;
+
+		std::thread t1([&latch, &done] ()
+		{
+			latch.wait();
+			done = true;
+		});
+
+		std::thread t2([&latch] ()
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			latch.countDown();
+		});
+
+		std::thread t3([&latch] ()
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			latch.countDown();
+		});
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(30));
+		ASSERT_TRUE(done);
+
+		t1.join();
+		t2.join();
+		t3.join();
+	}
+
 }

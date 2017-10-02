@@ -26,7 +26,7 @@ namespace mm
 		//
 		// count : The total count.
 		//
-		CountDownLatch(std::int32_t count) : count(count)
+		CountDownLatch(std::uint32_t count) : count(count)
 		{
 		}
 
@@ -48,7 +48,10 @@ namespace mm
 		inline void countDown()
 		{
 			std::lock_guard<std::mutex> guard(mutex);
-			--count;
+			if (count > 0)
+			{
+				--count;
+			}
 
 			cv.notify_all();
 		}
@@ -59,7 +62,7 @@ namespace mm
 		Mutex mutex;
 
 		// The count of the count down latch.
-		std::int32_t count;
+		std::uint32_t count;
 
 		// The condition variable itself.
 		std::condition_variable cv;
