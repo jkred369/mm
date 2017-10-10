@@ -145,22 +145,20 @@ namespace mm
 	//
 	// The tasks are separated into queues based on the hash value of the key submitted.
 	//
-	template<typename Key = std::int32_t, typename Mutex = std::mutex> class HashDispatcher
+	template<
+		typename Key = std::int32_t,
+		typename Mutex = std::mutex,
+		typename Hash = std::hash<Key>
+	> class HashDispatcher
 	{
 	public:
-
-		// The hash function type.
-		typedef std::function<size_t(const Key&) const> HashFunction;
 
 		//
 		// Constructor.
 		//
 		// threadCount : number of threads in the dispatcher.
-		// function : The hash function.
 		//
-		HashDispatcher(size_t threadCount = 4, const HashFunction& function = DEFAULT_HASH) :
-			runners(threadCount),
-			function(function)
+		HashDispatcher(size_t threadCount = 4) : runners(threadCount)
 		{
 			for (TaskRunner<Mutex>& runner : runners)
 			{
@@ -187,19 +185,16 @@ namespace mm
 		//
 		void submit(Key& key, std::shared_ptr<Runnable>& runnable)
 		{
-			runners[function(key) % runners.size()].submit(runnable);
+			runners[hash(key) % runners.size()].submit(runnable);
 		}
 
 	private:
 
-		// The default hash function used.
-		static const Poco::Hash<Key> DEFAULT_HASH;
+		// The hash function / object used.
+		Hash hash;
 
 		// The task runners.
 		std::vector<TaskRunner<Mutex> > runners;
-
-		// The hash function.
-		const HashFunction& function;
 	};
 }
 
