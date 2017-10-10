@@ -9,6 +9,28 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 find_package(Boost 1.58.0 COMPONENTS filesystem regex) 
 include_directories(${Boost_INCLUDE_DIRS})
 
+set(TBB_INCLUDE_DIR "/usr/include/tbb-2018.1")
+set(TBB_LIB_DIR "/usr/lib/tbb-2018.1/lib")
+set(TBB_LIBS
+	"${POCO_LIB_DIR}/libtbb_debug.so"
+	"${POCO_LIB_DIR}/libtbb_debug.so.2"
+	"${POCO_LIB_DIR}/libtbbmalloc_debug.so"
+	"${POCO_LIB_DIR}/libtbbmalloc_debug.so.2"
+	"${POCO_LIB_DIR}/libtbbmalloc_proxy_debug.so"
+	"${POCO_LIB_DIR}/libtbbmalloc_proxy_debug.so.2"
+	"${POCO_LIB_DIR}/libtbbmalloc_proxy.so"
+	"${POCO_LIB_DIR}/libtbbmalloc_proxy.so.2"
+	"${POCO_LIB_DIR}/libtbbmalloc.so"
+	"${POCO_LIB_DIR}/libtbbmalloc.so.2"
+	"${POCO_LIB_DIR}/libtbb_preview_debug.so"
+	"${POCO_LIB_DIR}/libtbb_preview_debug.so.2"
+	"${POCO_LIB_DIR}/libtbb_preview.so"
+	"${POCO_LIB_DIR}/libtbb_preview.so.2"
+	"${POCO_LIB_DIR}/libtbb.so"
+	"${POCO_LIB_DIR}/libtbb.so.2")
+
+include_directories(${TBB_INCLUDE_DIR})
+
 set(POCO_INCLUDE_DIR "/usr/include/poco-1.7.9")
 set(POCO_LIB_DIR "/usr/lib/poco-1.7.9")
 set(POCO_LIBS
@@ -27,7 +49,7 @@ set(GTEST_LIBS
 	"${GTEST_LIB_DIR}/libgmock_main.a"
 )
 
-include_directories(${GTEST_INCLUDE_DIRS})
+include_directories(${GTEST_INCLUDE_DIR})
 
 # compiler options
 set(CMAKE_CXX_STANDARD 11)

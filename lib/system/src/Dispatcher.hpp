@@ -17,7 +17,7 @@
 #include <vector>
 
 #include <boost/shared_ptr.hpp>
-#include <boost/lockfree/queue.hpp>
+#include <tbb/concurrent_queue.h>
 
 #include <Poco/Hash.h>
 
@@ -31,7 +31,7 @@ namespace mm
 	//
 	// The queue is expected to be thread-safe and the thread will execute tasks from the queue.
 	//
-	template<typename Mutex = std::mutex> class TaskRunner
+	template<typename Queue = tbb::concurrent_queue, typename Mutex = std::mutex> class TaskRunner
 	{
 	public:
 
@@ -137,7 +137,7 @@ namespace mm
 		std::condition_variable condition;
 
 		// The queue structure holding the tasks.
-		boost::lockfree::queue<boost::shared_ptr<Runnable> > queue;
+		Queue<boost::shared_ptr<Runnable> > queue;
 
 	};
 
