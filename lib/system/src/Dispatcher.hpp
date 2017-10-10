@@ -16,7 +16,6 @@
 #include <thread>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <tbb/concurrent_queue.h>
 
 #include <Poco/Hash.h>
@@ -31,7 +30,7 @@ namespace mm
 	//
 	// The queue is expected to be thread-safe and the thread will execute tasks from the queue.
 	//
-	template<typename Queue = tbb::concurrent_queue, typename Mutex = std::mutex> class TaskRunner
+	template<typename Mutex = std::mutex> class TaskRunner
 	{
 	public:
 
@@ -72,7 +71,7 @@ namespace mm
 
 				while (!stopRequested)
 				{
-					if (queue.pop(runnable))
+					if (queue.try_pop(runnable))
 					{
 						(*runnable)();
 					}
@@ -105,7 +104,7 @@ namespace mm
 		//
 		// runnable : The task to be executed.
 		//
-		void submit(boost::shared_ptr<Runnable>& runnable)
+		void submit(std::shared_ptr<Runnable>& runnable)
 		{
 			bool wasEmpty = waitOnEmpty ? queue.empty() : false;
 
@@ -137,7 +136,7 @@ namespace mm
 		std::condition_variable condition;
 
 		// The queue structure holding the tasks.
-		Queue<boost::shared_ptr<Runnable> > queue;
+		tbb::concurrent_queue<std::shared_ptr<Runnable> > queue;
 
 	};
 
