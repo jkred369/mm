@@ -96,6 +96,14 @@ namespace mm
 		void stop()
 		{
 			stopRequested = true;
+
+			// signal the thread to check flag if needed
+			if (waitOnEmpty && queue.empty())
+			{
+				std::lock_guard<Mutex> guard(mutex);
+				condition.notify_one();
+			}
+
 			thread->join();
 		}
 

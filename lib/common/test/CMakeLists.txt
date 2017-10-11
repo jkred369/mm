@@ -13,6 +13,7 @@ target_include_directories(CommonTest PUBLIC
 
 target_link_libraries(CommonTest 
 	${Boost_LIBRARIES}
+	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
 )

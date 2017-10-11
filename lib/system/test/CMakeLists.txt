@@ -14,6 +14,7 @@ target_include_directories(SystemTest PUBLIC
 
 target_link_libraries(SystemTest 
 	${Boost_LIBRARIES}
+	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
 	${Common}

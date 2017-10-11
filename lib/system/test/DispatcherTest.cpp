@@ -15,10 +15,11 @@ namespace mm
 		std::int32_t id = 1;
 		bool done = false;
 
-		std::shared_ptr<Runnable> task([&done] () {
+		Runnable runnable = [&done] () {
 			done = true;
-		});
+		};
 
+		std::shared_ptr<Runnable> task(&runnable);
 		dispatcher.submit(id, task);
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
