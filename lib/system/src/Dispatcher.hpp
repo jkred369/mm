@@ -68,13 +68,13 @@ namespace mm
 
 			thread = new std::thread([this] ()
 			{
-				std::shared_ptr<Runnable> runnable;
+				Runnable runnable;
 
 				while (!stopRequested.load())
 				{
 					if (queue.try_pop(runnable))
 					{
-						(*runnable)();
+						runnable();
 					}
 					else if (waitOnEmpty)
 					{
@@ -113,7 +113,7 @@ namespace mm
 		//
 		// runnable : The task to be executed.
 		//
-		void submit(std::shared_ptr<Runnable>& runnable)
+		void submit(const Runnable& runnable)
 		{
 			bool wasEmpty = waitOnEmpty ? queue.empty() : false;
 
@@ -145,7 +145,7 @@ namespace mm
 		std::condition_variable condition;
 
 		// The queue structure holding the tasks.
-		tbb::concurrent_queue<std::shared_ptr<Runnable> > queue;
+		tbb::concurrent_queue<Runnable> queue;
 
 	};
 
@@ -192,7 +192,7 @@ namespace mm
 		// key : The key for the task.
 		// runnable : The task to be executed.
 		//
-		void submit(Key& key, std::shared_ptr<Runnable>& runnable)
+		void submit(const Key& key, const Runnable& runnable)
 		{
 			runners[hash(key) % runners.size()].submit(runnable);
 		}

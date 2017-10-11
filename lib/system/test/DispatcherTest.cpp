@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <chrono>
+#include <iostream>
 #include <thread>
 
 #include <gtest/gtest.h>
@@ -15,10 +16,7 @@ namespace mm
 		std::int32_t id = 1;
 		bool done = false;
 
-		std::shared_ptr<Runnable> task(new Runnable([&done] () {
-			done = true;
-		}));
-		dispatcher.submit(id, task);
+		dispatcher.submit(id, [&done] () { done = true; });
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		ASSERT_TRUE(done);
