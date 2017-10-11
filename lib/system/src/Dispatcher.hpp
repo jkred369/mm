@@ -8,6 +8,7 @@
 #ifndef LIB_SYSTEM_DISPATCHER_HPP_
 #define LIB_SYSTEM_DISPATCHER_HPP_
 
+#include <atomic>
 #include <cstdint>
 #include <condition_variable>
 #include <functional>
@@ -69,7 +70,7 @@ namespace mm
 			{
 				std::shared_ptr<Runnable> runnable;
 
-				while (!stopRequested)
+				while (!stopRequested.load())
 				{
 					if (queue.try_pop(runnable))
 					{
@@ -79,7 +80,7 @@ namespace mm
 					{
 						// enter inactive thread wait
 						std::unique_lock<Mutex> lock(mutex);
-						while (queue.empty())
+						while (queue.empty() && !stopRequested.load())
 						{
 							condition.wait(lock);
 						}
@@ -95,13 +96,13 @@ namespace mm
 		//
 		void stop()
 		{
-			stopRequested = true;
+			stopRequested.store(true);
 
 			// signal the thread to check flag if needed
 			if (waitOnEmpty && queue.empty())
 			{
 				std::lock_guard<Mutex> guard(mutex);
-				condition.notify_one();
+				condition.notify_all();
 			}
 
 			thread->join();
@@ -118,11 +119,11 @@ namespace mm
 
 			queue.push(runnable);
 
-			// notify where needed - we know there is only 1 thread waiting at most.
+			// notify where needed
 			if (wasEmpty && waitOnEmpty)
 			{
 				std::lock_guard<Mutex> guard(mutex);
-				condition.notify_one();
+				condition.notify_all();
 			}
 		}
 
@@ -132,7 +133,7 @@ namespace mm
 		const bool waitOnEmpty;
 
 		// Flag if stop is called.
-		bool stopRequested;
+		std::atomic<bool> stopRequested;
 
 		// Pointer to actual thread.
 		std::thread* thread;
