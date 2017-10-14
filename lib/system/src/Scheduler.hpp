@@ -99,9 +99,11 @@ namespace mm
 					}
 					else
 					{
+						std::unique_lock<std::recursive_timed_mutex> lock(mutex);
+
+						lock.lock();
 						nextTaskTimestamp.store(runnable.timestampInNanos);
 
-						std::unique_lock<std::recursive_timed_mutex> lock(mutex);
 						condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
 					}
 				}
@@ -142,14 +144,15 @@ namespace mm
 			queue.push({timestamp, runnable});
 
 			bool queueJumped = timestamp < nextTaskTimestamp.load();
-			if (queueJumped)
-			{
-				nextTaskTimestamp.store(timestamp);
-			}
 
 			if (wasEmpty || queueJumped)
 			{
 				std::lock_guard<std::recursive_timed_mutex> guard(mutex);
+				if (queueJumped)
+				{
+					nextTaskTimestamp.store(timestamp);
+				}
+
 				condition.notify_all();
 			}
 		}
