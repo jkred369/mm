@@ -91,7 +91,6 @@ namespace mm
 				// deal with the task or wait
 				if (hasTask)
 				{
-					nextTaskTimestamp.store(runnable.timestampInNanos);
 					std::int64_t periodInNanos = Timer.getTimeInNanos() - runnable.timestampInNanos;
 
 					if (periodInNanos <= 0)
@@ -100,6 +99,8 @@ namespace mm
 					}
 					else
 					{
+						nextTaskTimestamp.store(runnable.timestampInNanos);
+
 						std::unique_lock<std::recursive_timed_mutex> lock(mutex);
 						condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
 					}
