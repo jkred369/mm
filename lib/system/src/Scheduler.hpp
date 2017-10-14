@@ -34,21 +34,20 @@ namespace mm
 		//
 		// Overload the operator for comparison.
 		//
-		// lhs : First argument.
-		// rhs : Second argument.
+		// rhs : Comparand.
 		//
 		// return : true if timestampInNanos in lhs less than that in rhs.
 		//
-		bool operator < (const DelayedRunnable& lhs, const DelayedRunnable& rhs) const
+		bool operator < (const DelayedRunnable& rhs) const
 		{
-			return lhs.timestampInNanos < rhs.timestampInNanos;
+			return timestampInNanos < rhs.timestampInNanos;
 		}
 	};
 
 	//
 	// The scheduler working together with dispatcher.
 	//
-	template<typename Key = std::int32_t, typename Timer = HighResTimer, typename Dispatcher> class Scheduler
+	template<typename Dispatcher, typename Key = std::int32_t, typename Timer = HighResTimer> class DefaultScheduler
 	{
 	public:
 
@@ -57,7 +56,7 @@ namespace mm
 		//
 		// dispatcher : The dispatcher which will execute the actual task.
 		//
-		Scheduler(Dispatcher& dispatcher) : dispatcher(dispatcher), stopRequested(false), scheduleThread(run)
+		DefaultScheduler(Dispatcher& dispatcher) : dispatcher(dispatcher), stopRequested(false), scheduleThread(run)
 		{
 		}
 
@@ -91,7 +90,7 @@ namespace mm
 				// deal with the task or wait
 				if (hasTask)
 				{
-					std::int64_t periodInNanos = Timer.getTimeInNanos() - runnable.timestampInNanos;
+					std::int64_t periodInNanos = timer.getTimeInNanos() - runnable.timestampInNanos;
 
 					if (periodInNanos <= 0)
 					{
@@ -99,7 +98,7 @@ namespace mm
 					}
 					else
 					{
-						std::unique_lock<std::recursive_timed_mutex> lock(mutex);
+						std::unique_lock<std::mutex> lock(mutex);
 
 						lock.lock();
 						nextTaskTimestamp.store(runnable.timestampInNanos);
@@ -110,7 +109,7 @@ namespace mm
 				else
 				{
 					// enter inactive thread wait for next task
-					std::unique_lock<std::recursive_timed_mutex> lock(mutex);
+					std::unique_lock<std::mutex> lock(mutex);
 					while (queue.empty() && !stopRequested.load())
 					{
 						condition.wait(lock);
@@ -128,7 +127,7 @@ namespace mm
 		//
 		void schedule(const Key key, const Runnable& runnable, std::int64_t delay)
 		{
-			scheduleAt(key, runnable, Timer.getTimeInNanos() + delay);
+			scheduleAt(key, runnable, timer.getTimeInNanos() + delay);
 		}
 
 		//
@@ -147,7 +146,7 @@ namespace mm
 
 			if (wasEmpty || queueJumped)
 			{
-				std::lock_guard<std::recursive_timed_mutex> guard(mutex);
+				std::lock_guard<std::mutex> guard(mutex);
 				if (queueJumped)
 				{
 					nextTaskTimestamp.store(timestamp);
@@ -169,13 +168,13 @@ namespace mm
 		{
 			Runnable recursiveRunnable = [this, runnable, interval]()
 			{
-				std::int64_t startTime = Timer.getTimeInNanos();
+				std::int64_t startTime = timer.getTimeInNanos();
 				runnable();
 
 				this->scheduleAt(recursiveRunnable, startTime + interval);
 			};
 
-			scheduleAt(key, recursiveRunnable, Timer.getTimeInNanos() + delay);
+			scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + delay);
 		}
 
 		//
@@ -191,10 +190,10 @@ namespace mm
 			Runnable recursiveRunnable = [this, runnable, interval]()
 			{
 				runnable();
-				this->scheduleAt(recursiveRunnable, Timer.getTimeInNanos() + interval);
+				this->scheduleAt(recursiveRunnable, timer.getTimeInNanos() + interval);
 			};
 
-			scheduleAt(recursiveRunnable, Timer.getTimeInNanos() + delay);
+			scheduleAt(recursiveRunnable, timer.getTimeInNanos() + delay);
 		}
 
 	private:
@@ -206,16 +205,16 @@ namespace mm
 		Timer timer;
 
 		// The next task to execute with the smallest timestamp (i.e. fastest execution).
-		atomic<std::int64_t> nextTaskTimestamp;
+		std::atomic<std::int64_t> nextTaskTimestamp;
 
 		// The priority queue for the tasks.
 		tbb::concurrent_priority_queue<DelayedRunnable> queue;
 
 		// The mutex for scheduling.
-		std::recursive_timed_mutex mutex;
+		std::mutex mutex;
 
 		// The condition variable used.
-		std::condition_variable condition;
+		std::condition_variable_any condition;
 
 		// Flag if stop is requested
 		std::atomic<bool> stopRequested;
