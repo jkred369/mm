@@ -68,32 +68,45 @@ namespace mm
 		//
 		void run()
 		{
-			bool awaiting = false;
+			bool hasTask = false;
 			DelayedRunnable runnable;
 
 			while (!stopRequested.load())
 			{
-				if (awaiting)
+				// make sure the runnable is the next to execute
+				if (hasTask)
 				{
-					queue.push(runnable);
-					awaiting = false;
-				}
-
-				if (queue.try_pop(runnable))
-				{
-					std::int64_t periodInNanos = Timer.getTimeInNanos() - runnable.timestampInNanos;
-					if (periodInNanos <= 0)
+					if (nextTaskTimestamp.load() < runnable.timestampInNanos)
 					{
-						runnable.runnable();
-					}
-					else
-					{
-						awaiting = true;
+						// we know the try pop will at least retrieve 1 item
+						queue.push(runnable);
+						queue.try_pop(runnable);
 					}
 				}
 				else
 				{
-					// enter inactive thread wait
+					hasTask = queue.try_pop(runnable);
+				}
+
+				// deal with the task or wait
+				if (hasTask)
+				{
+					nextTaskTimestamp.store(runnable.timestampInNanos);
+					std::int64_t periodInNanos = Timer.getTimeInNanos() - runnable.timestampInNanos;
+
+					if (periodInNanos <= 0)
+					{
+						dispatcher.submit(runnable.runnable());
+					}
+					else
+					{
+						std::unique_lock<std::recursive_timed_mutex> lock(mutex);
+						condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
+					}
+				}
+				else
+				{
+					// enter inactive thread wait for next task
 					std::unique_lock<std::recursive_timed_mutex> lock(mutex);
 					while (queue.empty() && !stopRequested.load())
 					{
@@ -106,26 +119,34 @@ namespace mm
 		//
 		// Schedule a given task.
 		//
+		// key : The key for the runnable.
 		// runnable : The task to schedule.
 		// delay : The delay in nanoseconds.
 		//
-		void schedule(const Runnable& runnable, std::int64_t delay)
+		void schedule(const Key key, const Runnable& runnable, std::int64_t delay)
 		{
-			scheduleAt(runnable, Timer.getTimeInNanos() + delay);
+			scheduleAt(key, runnable, Timer.getTimeInNanos() + delay);
 		}
 
 		//
 		// Schedule a given task.
 		//
+		// key : The key for the runnable.
 		// runnable : The task to schedule.
 		// timestamp : The time to execute the task.
 		//
-		void scheduleAt(const Runnable& runnable, std::int64_t timestamp)
+		void scheduleAt(const Key key, const Runnable& runnable, std::int64_t timestamp)
 		{
 			bool wasEmpty = queue.empty();
 			queue.push({timestamp, runnable});
 
-			if (wasEmpty)
+			bool queueJumped = timestamp < nextTaskTimestamp.load();
+			if (queueJumped)
+			{
+				nextTaskTimestamp.store(timestamp);
+			}
+
+			if (wasEmpty || queueJumped)
 			{
 				std::lock_guard<std::recursive_timed_mutex> guard(mutex);
 				condition.notify_all();
@@ -135,11 +156,12 @@ namespace mm
 		//
 		// Schedule a task at fixed rate.
 		//
+		// key : The key for the runnable.
 		// runnable : The task to schedule.
 		// delay : The initial delay in nanoseconds.
 		// interval : The interval in nanoseconds between 2 task start time.
 		//
-		void scheduleAtFixedRate(const Runnable& runnable, std::int64_t delay, std::int64_t interval)
+		void scheduleAtFixedRate(const Key key, const Runnable& runnable, std::int64_t delay, std::int64_t interval)
 		{
 			Runnable recursiveRunnable = [this, runnable, interval]()
 			{
@@ -149,17 +171,18 @@ namespace mm
 				this->scheduleAt(recursiveRunnable, startTime + interval);
 			};
 
-			scheduleAt(recursiveRunnable, Timer.getTimeInNanos() + delay);
+			scheduleAt(key, recursiveRunnable, Timer.getTimeInNanos() + delay);
 		}
 
 		//
 		// Schedule a task with fixed delay.
 		//
+		// key : The key for the runnable.
 		// runnable : The task to schedule.
 		// delay : The initial delay in nanoseconds.
 		// interval : The interval in nanoseconds between task end and next task start.
 		//
-		void scheduleWithFixedDelay(const Runnable& runnable, std::int64_t delay, std::int64_t interval)
+		void scheduleWithFixedDelay(const Key key, const Runnable& runnable, std::int64_t delay, std::int64_t interval)
 		{
 			Runnable recursiveRunnable = [this, runnable, interval]()
 			{
@@ -178,7 +201,7 @@ namespace mm
 		// The timer used for scheduling.
 		Timer timer;
 
-		// The next task in the queue with the smallest timestamp (i.e. fastest execution).
+		// The next task to execute with the smallest timestamp (i.e. fastest execution).
 		atomic<std::int64_t> nextTaskTimestamp;
 
 		// The priority queue for the tasks.
