@@ -130,6 +130,18 @@ namespace mm
 		//
 		// key : The key for the runnable.
 		// runnable : The task to schedule.
+		// delay : The delay as duration object.
+		//
+		inline void schedule(const Key key, const Runnable& runnable, const std::chrono::duration& delay)
+		{
+			schedule(key, runnable, std::chrono::duration_cast<std::chrono::nanoseconds>(duration));
+		}
+
+		//
+		// Schedule a given task.
+		//
+		// key : The key for the runnable.
+		// runnable : The task to schedule.
 		// delay : The delay in nanoseconds.
 		//
 		void schedule(const Key key, const Runnable& runnable, std::int64_t delay)
@@ -142,9 +154,21 @@ namespace mm
 		//
 		// key : The key for the runnable.
 		// runnable : The task to schedule.
+		// timestamp : The time to execute the task as time point.
+		//
+		inline void scheduleAt(const Key key, const Runnable& runnable, const std::chrono::time_point& timestamp)
+		{
+			scheduleAt(key, runnable, timestamp.time_since_epoch() / std::chrono::nanoseconds(1));
+		}
+
+		//
+		// Schedule a given task.
+		//
+		// key : The key for the runnable.
+		// runnable : The task to schedule.
 		// timestamp : The time to execute the task.
 		//
-		void scheduleAt(const Key key, const Runnable& runnable, std::int64_t timestamp)
+		void scheduleAt(const Key key, const Runnable& runnable, const std::chrono:: std::int64_t timestamp)
 		{
 			bool wasEmpty = queue.empty();
 			queue.push({timestamp, runnable});
@@ -169,12 +193,31 @@ namespace mm
 		//
 		// key : The key for the runnable.
 		// runnable : The task to schedule.
+		// delay : The initial delay as duration object.
+		// interval : The interval as duration object between 2 task start time.
+		//
+		inline void scheduleAtFixedRate(
+				const Key key,
+				const Runnable& runnable,
+				const std::chrono::duration delay,
+				const std::chrono::duration interval)
+		{
+			scheduleAtFixedRate(key, runnable,
+					std::chrono::duration_cast<std::chrono::nanoseconds>(delay),
+					std::chrono::duration_cast<std::chrono::nanoseconds>(interval));
+		}
+
+		//
+		// Schedule a task at fixed rate.
+		//
+		// key : The key for the runnable.
+		// runnable : The task to schedule.
 		// delay : The initial delay in nanoseconds.
 		// interval : The interval in nanoseconds between 2 task start time.
 		//
 		void scheduleAtFixedRate(const Key key, const Runnable& runnable, std::int64_t delay, std::int64_t interval)
 		{
-			Runnable recursiveRunnable = [this, runnable, interval]()
+			Runnable recursiveRunnable = [this, &recursiveRunnable, runnable, interval]()
 			{
 				std::int64_t startTime = timer.getTimeInNanos();
 				runnable();
@@ -190,12 +233,31 @@ namespace mm
 		//
 		// key : The key for the runnable.
 		// runnable : The task to schedule.
+		// delay : The initial delay as duration object.
+		// interval : The interval as duration object between task end and next task start.
+		//
+		inline void scheduleWithFixedDelay(
+				const Key key,
+				const Runnable& runnable,
+				const std::chrono::duration delay,
+				const std::chrono::duration interval)
+		{
+			scheduleWithFixedDelay(key, runnable,
+					std::chrono::duration_cast<std::chrono::nanoseconds>(delay),
+					std::chrono::duration_cast<std::chrono::nanoseconds>(interval));
+		}
+
+		//
+		// Schedule a task with fixed delay.
+		//
+		// key : The key for the runnable.
+		// runnable : The task to schedule.
 		// delay : The initial delay in nanoseconds.
 		// interval : The interval in nanoseconds between task end and next task start.
 		//
 		void scheduleWithFixedDelay(const Key key, const Runnable& runnable, std::int64_t delay, std::int64_t interval)
 		{
-			Runnable recursiveRunnable = [this, runnable, interval]()
+			Runnable recursiveRunnable = [this, &recursiveRunnable, runnable, interval]()
 			{
 				runnable();
 				this->scheduleAt(recursiveRunnable, timer.getTimeInNanos() + interval);
