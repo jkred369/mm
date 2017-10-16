@@ -68,6 +68,7 @@ namespace mm
 		void run()
 		{
 			bool hasTask = false;
+			std::cv_status status;
 			DelayedRunnable runnable;
 
 			while (!stopRequested.load())
@@ -95,21 +96,27 @@ namespace mm
 					if (periodInNanos <= 0)
 					{
 						dispatcher.submit(runnable.runnable());
+						hasTask = false;
 					}
 					else
 					{
-						std::unique_lock<std::mutex> lock(mutex);
+						std::unique_lock<std::recursive_mutex> lock(mutex);
 
 						lock.lock();
 						nextTaskTimestamp.store(runnable.timestampInNanos);
 
-						condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
+						status = condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
+						if (status == std::cv_status::timeout)
+						{
+							dispatcher.submit(runnable.runnable());
+							hasTask = false;
+						}
 					}
 				}
 				else
 				{
 					// enter inactive thread wait for next task
-					std::unique_lock<std::mutex> lock(mutex);
+					std::unique_lock<std::recursive_mutex> lock(mutex);
 					while (queue.empty() && !stopRequested.load())
 					{
 						condition.wait(lock);
@@ -146,7 +153,8 @@ namespace mm
 
 			if (wasEmpty || queueJumped)
 			{
-				std::lock_guard<std::mutex> guard(mutex);
+				std::lock_guard<std::recursive_mutex> guard(mutex);
+
 				if (queueJumped)
 				{
 					nextTaskTimestamp.store(timestamp);
@@ -211,7 +219,7 @@ namespace mm
 		tbb::concurrent_priority_queue<DelayedRunnable> queue;
 
 		// The mutex for scheduling.
-		std::mutex mutex;
+		std::recursive_mutex mutex;
 
 		// The condition variable used.
 		std::condition_variable_any condition;
