@@ -119,7 +119,7 @@ namespace mm
 				const Runnable& runnable,
 				const std::chrono::time_point<Clock, Duration>& timestamp)
 		{
-			scheduleAt(key, runnable, timestamp.time_since_epoch() / std::chrono::nanoseconds(1));
+			scheduleAt(key, runnable, timePointToEpochNanos(timestamp));
 		}
 
 		//
@@ -132,7 +132,7 @@ namespace mm
 		void scheduleAt(const Key key, const Runnable& runnable, std::int64_t timestamp)
 		{
 			bool wasEmpty = queue.empty();
-			queue.push({timestamp, runnable});
+			queue.push({key, runnable, timestamp});
 
 			bool queueJumped = timestamp < nextTaskTimestamp.load();
 
@@ -182,12 +182,12 @@ namespace mm
 				std::int64_t delay,
 				std::int64_t interval)
 		{
-			Runnable recursiveRunnable = [this, &recursiveRunnable, runnable, interval]()
+			Runnable recursiveRunnable = [this, &recursiveRunnable, key, runnable, interval]()
 			{
 				std::int64_t startTime = timer.getTimeInNanos();
 				runnable();
 
-				this->scheduleAt(recursiveRunnable, startTime + interval);
+				this->scheduleAt(key, recursiveRunnable, startTime + interval);
 			};
 
 			scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + delay);
@@ -222,13 +222,13 @@ namespace mm
 		//
 		void scheduleWithFixedDelay(const Key key, const Runnable& runnable, std::int64_t delay, std::int64_t interval)
 		{
-			Runnable recursiveRunnable = [this, &recursiveRunnable, runnable, interval]()
+			Runnable recursiveRunnable = [this, &recursiveRunnable, key, runnable, interval]()
 			{
 				runnable();
-				this->scheduleAt(recursiveRunnable, timer.getTimeInNanos() + interval);
+				this->scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + interval);
 			};
 
-			scheduleAt(recursiveRunnable, timer.getTimeInNanos() + delay);
+			scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + delay);
 		}
 
 	protected:
@@ -240,7 +240,7 @@ namespace mm
 		{
 			bool hasTask = false;
 			std::cv_status status;
-			DelayedRunnable runnable;
+			DelayedRunnable<Key> runnable;
 
 			while (!stopRequested.load())
 			{
@@ -266,7 +266,7 @@ namespace mm
 
 					if (periodInNanos <= 0)
 					{
-						dispatcher.submit(runnable.runnable());
+						dispatcher.submit(runnable.key, runnable.runnable);
 						hasTask = false;
 					}
 					else
@@ -279,7 +279,7 @@ namespace mm
 						status = condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
 						if (status == std::cv_status::timeout)
 						{
-							dispatcher.submit(runnable.runnable());
+							dispatcher.submit(runnable.key, runnable.runnable);
 							hasTask = false;
 						}
 					}
