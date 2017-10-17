@@ -76,6 +76,13 @@ namespace mm
 			if (!stopRequested.load() || scheduleThread.joinable())
 			{
 				stopRequested.store(true);
+
+				// notify then wait for thread
+				{
+					std::lock_guard<std::recursive_mutex> guard(mutex);
+					condition.notify_all();
+				}
+
 				scheduleThread.join();
 			}
 		}
