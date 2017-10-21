@@ -141,13 +141,11 @@ namespace mm
 			bool wasEmpty = queue.empty();
 			queue.push({key, runnable, timestamp});
 
-			bool queueJumped = timestamp < nextTaskTimestamp.load();
-
-			if (wasEmpty || queueJumped)
+			if (wasEmpty || timestamp < nextTaskTimestamp.load())
 			{
 				std::lock_guard<std::recursive_mutex> guard(mutex);
 
-				if (queueJumped)
+				if (timestamp < nextTaskTimestamp.load())
 				{
 					nextTaskTimestamp.store(timestamp);
 				}
@@ -279,8 +277,14 @@ namespace mm
 					else
 					{
 						std::unique_lock<std::recursive_mutex> lock(mutex);
-
 						lock.lock();
+
+						// when this happens we need to re-examine the queue and stop flag.
+						if (nextTaskTimestamp.load() < runnable.timestampInNanos || stopRequested.load())
+						{
+							continue;
+						}
+
 						nextTaskTimestamp.store(runnable.timestampInNanos);
 
 						status = condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
