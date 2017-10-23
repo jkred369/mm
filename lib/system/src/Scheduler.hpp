@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <iostream>
 #include <mutex>
 #include <thread>
 
@@ -45,7 +46,7 @@ namespace mm
 		//
 		bool operator < (const DelayedRunnable& rhs) const
 		{
-			return timestampInNanos < rhs.timestampInNanos;
+			return timestampInNanos > rhs.timestampInNanos;
 		}
 	};
 
@@ -79,7 +80,7 @@ namespace mm
 
 				// notify then wait for thread
 				{
-					std::lock_guard<std::recursive_mutex> guard(mutex);
+					std::lock_guard<std::mutex> guard(mutex);
 					condition.notify_all();
 				}
 
@@ -138,18 +139,11 @@ namespace mm
 		//
 		void scheduleAt(const Key key, const Runnable& runnable, std::int64_t timestamp)
 		{
-			bool wasEmpty = queue.empty();
 			queue.push({key, runnable, timestamp});
 
-			if (wasEmpty || timestamp < nextTaskTimestamp.load())
+			// we always notify here so the scheduler thread will re-check the queue.
 			{
-				std::lock_guard<std::recursive_mutex> guard(mutex);
-
-				if (timestamp < nextTaskTimestamp.load())
-				{
-					nextTaskTimestamp.store(timestamp);
-				}
-
+				std::lock_guard<std::mutex> guard(mutex);
 				condition.notify_all();
 			}
 		}
@@ -244,7 +238,8 @@ namespace mm
 		void run()
 		{
 			bool hasTask = false;
-			std::cv_status status;
+			std::cv_status status = std::cv_status::no_timeout;
+
 			DelayedRunnable<Key> runnable;
 
 			while (!stopRequested.load())
@@ -252,22 +247,14 @@ namespace mm
 				// make sure the runnable is the next to execute
 				if (hasTask)
 				{
-					if (nextTaskTimestamp.load() < runnable.timestampInNanos)
-					{
-						// we know the try pop will at least retrieve 1 item
-						queue.push(runnable);
-						queue.try_pop(runnable);
-					}
+					queue.push(runnable);
 				}
-				else
-				{
-					hasTask = queue.try_pop(runnable);
-				}
+				hasTask = queue.try_pop(runnable);
 
 				// deal with the task or wait
 				if (hasTask)
 				{
-					std::int64_t periodInNanos = timer.getTimeInNanos() - runnable.timestampInNanos;
+					std::int64_t periodInNanos = runnable.timestampInNanos - timer.getTimeInNanos();
 
 					if (periodInNanos <= 0)
 					{
@@ -276,18 +263,9 @@ namespace mm
 					}
 					else
 					{
-						std::unique_lock<std::recursive_mutex> lock(mutex);
-						lock.lock();
-
-						// when this happens we need to re-examine the queue and stop flag.
-						if (nextTaskTimestamp.load() < runnable.timestampInNanos || stopRequested.load())
-						{
-							continue;
-						}
-
-						nextTaskTimestamp.store(runnable.timestampInNanos);
-
+						std::unique_lock<std::mutex> lock(mutex);
 						status = condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
+
 						if (status == std::cv_status::timeout)
 						{
 							dispatcher.submit(runnable.key, runnable.runnable);
@@ -298,7 +276,7 @@ namespace mm
 				else
 				{
 					// enter inactive thread wait for next task
-					std::unique_lock<std::recursive_mutex> lock(mutex);
+					std::unique_lock<std::mutex> lock(mutex);
 					while (queue.empty() && !stopRequested.load())
 					{
 						condition.wait(lock);
@@ -315,14 +293,11 @@ namespace mm
 		// The timer used for scheduling.
 		Timer timer;
 
-		// The next task to execute with the smallest timestamp (i.e. fastest execution).
-		std::atomic<std::int64_t> nextTaskTimestamp;
-
 		// The priority queue for the tasks.
 		tbb::concurrent_priority_queue<DelayedRunnable<Key> > queue;
 
 		// The mutex for scheduling.
-		std::recursive_mutex mutex;
+		std::mutex mutex;
 
 		// The condition variable used.
 		std::condition_variable_any condition;
