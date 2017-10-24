@@ -80,7 +80,7 @@ namespace mm
 
 				// notify then wait for thread
 				{
-					std::lock_guard<std::mutex> guard(mutex);
+					std::lock_guard<std::recursive_mutex> guard(mutex);
 					condition.notify_all();
 				}
 
@@ -143,7 +143,7 @@ namespace mm
 
 			// we always notify here so the scheduler thread will re-check the queue.
 			{
-				std::lock_guard<std::mutex> guard(mutex);
+				std::lock_guard<std::recursive_mutex> guard(mutex);
 				condition.notify_all();
 			}
 		}
@@ -239,8 +239,9 @@ namespace mm
 		{
 			bool hasTask = false;
 			std::cv_status status = std::cv_status::no_timeout;
-
 			DelayedRunnable<Key> runnable;
+
+			std::unique_lock<std::recursive_mutex> lock(mutex);
 
 			while (!stopRequested.load())
 			{
@@ -263,7 +264,6 @@ namespace mm
 					}
 					else
 					{
-						std::unique_lock<std::mutex> lock(mutex);
 						status = condition.wait_for(lock, std::chrono::nanoseconds(periodInNanos));
 
 						if (status == std::cv_status::timeout)
@@ -276,7 +276,6 @@ namespace mm
 				else
 				{
 					// enter inactive thread wait for next task
-					std::unique_lock<std::mutex> lock(mutex);
 					while (queue.empty() && !stopRequested.load())
 					{
 						condition.wait(lock);
@@ -297,7 +296,7 @@ namespace mm
 		tbb::concurrent_priority_queue<DelayedRunnable<Key> > queue;
 
 		// The mutex for scheduling.
-		std::mutex mutex;
+		std::recursive_mutex mutex;
 
 		// The condition variable used.
 		std::condition_variable_any condition;
