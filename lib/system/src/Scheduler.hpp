@@ -15,6 +15,7 @@
 
 #include <tbb/concurrent_priority_queue.h>
 
+#include <SpinLockGuard.hpp>
 #include <Timer.hpp>
 #include <TimeUtil.hpp>
 
@@ -86,7 +87,7 @@ namespace mm
 
 				// notify then wait for thread
 				{
-					std::lock_guard<Mutex> guard(mutex);
+					SpinLockGuard<Mutex> guard(mutex);
 					condition.notify_all();
 				}
 
@@ -155,7 +156,7 @@ namespace mm
 
 			// we always notify here so the scheduler thread will re-check the queue.
 			{
-				std::lock_guard<Mutex> guard(mutex);
+				SpinLockGuard<Mutex> guard(mutex);
 				condition.notify_all();
 			}
 		}
