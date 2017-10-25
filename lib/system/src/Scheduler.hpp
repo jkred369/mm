@@ -37,6 +37,9 @@ namespace mm
 		// The timestamp as number of nanoseconds from epoch.
 		std::int64_t timestampInNanos;
 
+		// The repeatitive period in nanoseconds.
+		std::int64_t periodInNanos;
+
 		//
 		// Overload the operator for comparison.
 		//
@@ -100,7 +103,7 @@ namespace mm
 				const Runnable& runnable,
 				const std::chrono::duration<Rep, Period>& delay)
 		{
-			schedule(key, runnable, durationToEpochNanos(delay));
+			schedule(key, runnable, durationToNanos(delay));
 		}
 
 		//
@@ -136,10 +139,16 @@ namespace mm
 		// key : The key for the runnable.
 		// runnable : The task to schedule.
 		// timestamp : The time to execute the task.
+		// period : The repeat period in nanoseconds.
 		//
-		void scheduleAt(const Key key, const Runnable& runnable, std::int64_t timestamp)
+		void scheduleAt(const Key key, const Runnable& runnable, std::int64_t timestamp, std::int64_t period = 0)
 		{
-			queue.push({key, runnable, timestamp});
+			if (stopRequested.load())
+			{
+				return;
+			}
+
+			queue.push({key, runnable, timestamp, period});
 
 			// we always notify here so the scheduler thread will re-check the queue.
 			{
@@ -163,8 +172,8 @@ namespace mm
 				const std::chrono::duration<Rep, Period>& interval)
 		{
 			scheduleAtFixedRate(key, runnable,
-					durationToEpochNanos(delay),
-					durationToEpochNanos(interval));
+					durationToNanos(delay),
+					durationToNanos(interval));
 		}
 
 		//
@@ -181,53 +190,7 @@ namespace mm
 				std::int64_t delay,
 				std::int64_t interval)
 		{
-			Runnable recursiveRunnable = [this, &recursiveRunnable, key, runnable, interval]()
-			{
-				std::int64_t startTime = timer.getTimeInNanos();
-				runnable();
-
-				this->scheduleAt(key, recursiveRunnable, startTime + interval);
-			};
-
-			scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + delay);
-		}
-
-		//
-		// Schedule a task with fixed delay.
-		//
-		// key : The key for the runnable.
-		// runnable : The task to schedule.
-		// delay : The initial delay as duration object.
-		// interval : The interval as duration object between task end and next task start.
-		//
-		template <typename Rep, typename Period> inline void scheduleWithFixedDelay(
-				const Key key,
-				const Runnable& runnable,
-				const std::chrono::duration<Rep, Period>& delay,
-				const std::chrono::duration<Rep, Period>& interval)
-		{
-			scheduleWithFixedDelay(key, runnable,
-					durationToEpochNanos(delay),
-					durationToEpochNanos(interval));
-		}
-
-		//
-		// Schedule a task with fixed delay.
-		//
-		// key : The key for the runnable.
-		// runnable : The task to schedule.
-		// delay : The initial delay in nanoseconds.
-		// interval : The interval in nanoseconds between task end and next task start.
-		//
-		void scheduleWithFixedDelay(const Key key, const Runnable& runnable, std::int64_t delay, std::int64_t interval)
-		{
-			Runnable recursiveRunnable = [this, &recursiveRunnable, key, runnable, interval]()
-			{
-				runnable();
-				this->scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + interval);
-			};
-
-			scheduleAt(key, recursiveRunnable, timer.getTimeInNanos() + delay);
+			scheduleAt(key, runnable, timer.getTimeInNanos() + delay, interval);
 		}
 
 	protected:
@@ -261,6 +224,15 @@ namespace mm
 					{
 						dispatcher.submit(runnable.key, runnable.runnable);
 						hasTask = false;
+
+						if (runnable.periodInNanos != 0)
+						{
+							queue.push({
+								runnable.key,
+								runnable.runnable,
+								runnable.timestampInNanos + runnable.periodInNanos,
+								runnable.periodInNanos});
+						}
 					}
 					else
 					{
@@ -270,6 +242,15 @@ namespace mm
 						{
 							dispatcher.submit(runnable.key, runnable.runnable);
 							hasTask = false;
+
+							if (runnable.periodInNanos != 0)
+							{
+								queue.push({
+									runnable.key,
+									runnable.runnable,
+									runnable.timestampInNanos + runnable.periodInNanos,
+									runnable.periodInNanos});
+							}
 						}
 					}
 				}

@@ -45,13 +45,13 @@ namespace mm
 	    return timePoint.time_since_epoch() / std::chrono::milliseconds(1);
 	};
 
-	template<typename Duration> inline std::int64_t durationToEpochNanos(const Duration& duration)
+	template<typename Duration> inline std::int64_t durationToNanos(const Duration& duration)
 	{
 	    static_assert(is_chrono_duration<Duration>::value, "duration must be a std::chrono::duration");
 		return std::chrono::duration_cast<std::chrono::nanoseconds>(duration) / std::chrono::nanoseconds(1);
 	};
 
-	template<typename Duration> inline std::int64_t durationToEpochMillis(const Duration& duration)
+	template<typename Duration> inline std::int64_t durationToMillis(const Duration& duration)
 	{
 		static_assert(is_chrono_duration<Duration>::value, "duration must be a std::chrono::duration");
 		return std::chrono::duration_cast<std::chrono::milliseconds>(duration) / std::chrono::milliseconds(1);
