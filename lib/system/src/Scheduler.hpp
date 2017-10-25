@@ -10,7 +10,6 @@
 
 #include <atomic>
 #include <cstdint>
-#include <iostream>
 #include <mutex>
 #include <thread>
 
@@ -56,7 +55,11 @@ namespace mm
 	//
 	// The scheduler working together with dispatcher.
 	//
-	template<typename Dispatcher, typename Key = std::int32_t, typename Timer = HighResTimer> class DefaultScheduler
+	template<
+		typename Dispatcher,
+		typename Key = std::int32_t,
+		typename Mutex = std::mutex,
+		typename Timer = HighResTimer> class DefaultScheduler
 	{
 	public:
 
@@ -83,7 +86,7 @@ namespace mm
 
 				// notify then wait for thread
 				{
-					std::lock_guard<std::recursive_mutex> guard(mutex);
+					std::lock_guard<Mutex> guard(mutex);
 					condition.notify_all();
 				}
 
@@ -152,7 +155,7 @@ namespace mm
 
 			// we always notify here so the scheduler thread will re-check the queue.
 			{
-				std::lock_guard<std::recursive_mutex> guard(mutex);
+				std::lock_guard<Mutex> guard(mutex);
 				condition.notify_all();
 			}
 		}
@@ -204,7 +207,7 @@ namespace mm
 			std::cv_status status = std::cv_status::no_timeout;
 			DelayedRunnable<Key> runnable;
 
-			std::unique_lock<std::recursive_mutex> lock(mutex);
+			std::unique_lock<Mutex> lock(mutex);
 
 			while (!stopRequested.load())
 			{
@@ -273,11 +276,11 @@ namespace mm
 		// The timer used for scheduling.
 		Timer timer;
 
+		// The mutex for scheduling.
+		Mutex mutex;
+
 		// The priority queue for the tasks.
 		tbb::concurrent_priority_queue<DelayedRunnable<Key> > queue;
-
-		// The mutex for scheduling.
-		std::recursive_mutex mutex;
 
 		// The condition variable used.
 		std::condition_variable_any condition;
