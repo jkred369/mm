@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_SYSTEM_DISPATCHER_HPP_
-#define LIB_SYSTEM_DISPATCHER_HPP_
+#ifndef LIB_THREADING_DISPATCHER_HPP_
+#define LIB_THREADING_DISPATCHER_HPP_
 
 #include <atomic>
 #include <cstdint>
@@ -207,4 +207,4 @@ namespace mm
 	};
 }
 
-#endif /* LIB_SYSTEM_DISPATCHER_HPP_ */
+#endif /* LIB_THREADING_DISPATCHER_HPP_ */

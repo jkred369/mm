@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_SYSTEM_SRC_SCHEDULER_HPP_
-#define LIB_SYSTEM_SRC_SCHEDULER_HPP_
+#ifndef LIB_THREADING_SRC_SCHEDULER_HPP_
+#define LIB_THREADING_SRC_SCHEDULER_HPP_
 
 #include <atomic>
 #include <cstdint>
@@ -19,7 +19,7 @@
 #include <Timer.hpp>
 #include <TimeUtil.hpp>
 
-#include "Dispatcher.hpp"
+#include "../../threading/src/Dispatcher.hpp"
 
 namespace mm
 {
@@ -296,4 +296,4 @@ namespace mm
 
 
 
-#endif /* LIB_SYSTEM_SRC_SCHEDULER_HPP_ */
+#endif /* LIB_THREADING_SRC_SCHEDULER_HPP_ */
