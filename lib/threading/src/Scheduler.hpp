@@ -19,7 +19,7 @@
 #include <Timer.hpp>
 #include <TimeUtil.hpp>
 
-#include "../../threading/src/Dispatcher.hpp"
+#include "Dispatcher.hpp"
 
 namespace mm
 {

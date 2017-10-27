@@ -1,5 +1,3 @@
-#include "../../threading/src/Dispatcher.hpp"
-
 #include <cstdint>
 #include <chrono>
 #include <iostream>
@@ -7,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include "Dispatcher.hpp"
 
 namespace mm
 {
