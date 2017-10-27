@@ -19,7 +19,7 @@ namespace mm
 	//
 	// The task wrapper.
 	//
-	template<typename Key = std::int32_t, typename Dispatcher> class RunnableWrapper
+	template<typename Dispatcher, typename Key = std::int32_t> class RunnableWrapper
 	{
 	public:
 
@@ -28,13 +28,15 @@ namespace mm
 		//
 		RunnableWrapper(
 				const Key& key,
-				Runnable& runnable,
+				Runnable& task,
 				Dispatcher& dispatcher,
-				atomic<std::int32_t>& counter) :
+				std::atomic<std::int32_t>& counter,
+				Runnable& rescheduleTask) :
 					key(key),
-					runnable(runnable),
+					task(task),
 					dispatcher(dispatcher),
-					counter(counter)
+					counter(counter),
+					rescheduleTask(rescheduleTask)
 		{
 			counter.store(1);
 		}
@@ -46,7 +48,7 @@ namespace mm
 		{
 			if (counter.fetch_sub(1) > 1)
 			{
-				dispatcher.dispatch(RunnableWrapper(key, runnable, dispatcher, counter));
+				dispatcher.submit(key, rescheduleTask);
 			}
 		}
 
@@ -55,7 +57,13 @@ namespace mm
 		//
 		void operator() ()
 		{
-			runnable();
+			try
+			{
+				task();
+			}
+			catch (...)
+			{
+			}
 		}
 
 	private:
@@ -64,19 +72,22 @@ namespace mm
 		const Key& key;
 
 		// The actual task.
-		Runnable& runnable;
+		Runnable& task;
 
 		// The dispatcher.
 		Dispatcher& dispatcher;
 
 		// The counter used.
-		atomic<std::int32_t>& counter;
-	}
+		std::atomic<std::int32_t>& counter;
+
+		// The task for reschedule.
+		Runnable& rescheduleTask;
+	};
 
 	//
 	// The worker class so that the inner task will only be executed once.
 	//
-	template<typename Key = std::int32_t, typename Dispatcher> class DispatchOnceWorker
+	template<typename Dispatcher, typename Key = std::int32_t> class DispatchOnceWorker
 	{
 	public:
 
@@ -87,12 +98,12 @@ namespace mm
 		// runnable : The actual task.
 		// dispatcher : The dispatcher instance.
 		//
-		DispatchOnceWorker(const Key& key, Runnable& runnable, Dispatcher& dispatcher)
-			: key(key), dispatcher(dispatcher)
+		DispatchOnceWorker(const Key& key, Runnable& task, Dispatcher& dispatcher)
+			: key(key), task(task), dispatcher(dispatcher)
 		{
-			this->runnable = [] ()
+			runnable = [this] ()
 			{
-				RunnableWrapper(this->key, runnable, this->dispatcher, counter)();
+				RunnableWrapper<Dispatcher, Key>(this->key, this->task, this->dispatcher, counter, runnable)();
 			};
 		}
 
@@ -103,23 +114,26 @@ namespace mm
 		{
 			if (counter.fetch_add(1) == 0)
 			{
-				dispatcher.dispatch(runnable);
+				dispatcher.submit(key, runnable);
 			}
 		}
 
 	private:
 
+		// The dispatch counter.
+		std::atomic<std::int32_t> counter;
+
 		// Key of the task.
 		const Key key;
 
-		// The task to dispatch.
-		Runnable runnable;
+		// The actual task.
+		Runnable task;
 
 		// The dispatcher used.
 		Dispatcher& dispatcher;
 
-		// The dispatch counter.
-		atomic<std::uint32_t> counter;
+		// The task to dispatch.
+		Runnable runnable;
 	};
 }
 
