@@ -11,79 +11,12 @@
 #include <atomic>
 #include <cstdint>
 #include <exception>
+#include <iostream>
 
 #include "Runnable.hpp"
 
 namespace mm
 {
-	//
-	// The task wrapper.
-	//
-	template<typename Dispatcher, typename Key = std::int32_t> class RunnableWrapper
-	{
-	public:
-
-		//
-		// Constructor.
-		//
-		RunnableWrapper(
-				const Key& key,
-				Runnable& task,
-				Dispatcher& dispatcher,
-				std::atomic<std::int32_t>& counter,
-				Runnable& rescheduleTask) :
-					key(key),
-					task(task),
-					dispatcher(dispatcher),
-					counter(counter),
-					rescheduleTask(rescheduleTask)
-		{
-			counter.store(1);
-		}
-
-		//
-		// Destructor. Reschedules where appropriate.
-		//
-		~RunnableWrapper()
-		{
-			if (counter.fetch_sub(1) > 1)
-			{
-				dispatcher.submit(key, rescheduleTask);
-			}
-		}
-
-		//
-		// The calling operator.
-		//
-		void operator() ()
-		{
-			try
-			{
-				task();
-			}
-			catch (...)
-			{
-			}
-		}
-
-	private:
-
-		// The key for the task.
-		const Key& key;
-
-		// The actual task.
-		Runnable& task;
-
-		// The dispatcher.
-		Dispatcher& dispatcher;
-
-		// The counter used.
-		std::atomic<std::int32_t>& counter;
-
-		// The task for reschedule.
-		Runnable& rescheduleTask;
-	};
-
 	//
 	// The worker class so that the inner task will only be executed once.
 	//
@@ -99,11 +32,11 @@ namespace mm
 		// dispatcher : The dispatcher instance.
 		//
 		DispatchOnceWorker(const Key& key, Runnable& task, Dispatcher& dispatcher)
-			: key(key), task(task), dispatcher(dispatcher)
+			: key(key), task(task), dispatcher(dispatcher), counter(0)
 		{
 			runnable = [this] ()
 			{
-				RunnableWrapper<Dispatcher, Key>(this->key, this->task, this->dispatcher, counter, runnable)();
+				RunnableWrapper(*this)();
 			};
 		}
 
@@ -118,10 +51,61 @@ namespace mm
 			}
 		}
 
-	private:
+	protected:
 
-		// The dispatch counter.
-		std::atomic<std::int32_t> counter;
+		//
+		// The wrapper which does the job on dispatcher. Implemented for RAII.
+		//
+		//
+		//
+		class RunnableWrapper
+		{
+		public:
+
+			//
+			// Constructor.
+			//
+			// worker : The worker used.
+			//
+			RunnableWrapper(DispatchOnceWorker<Dispatcher, Key>& worker) : worker(worker)
+			{
+				worker.counter.store(1);
+			}
+
+			//
+			// Destructor. Reschedules where appropriate.
+			//
+			~RunnableWrapper()
+			{
+				if (worker.counter.fetch_sub(1) > 1)
+				{
+					worker.dispatcher.submit(worker.key, worker.runnable);
+				}
+			}
+
+			//
+			// The calling operator.
+			//
+			void operator() ()
+			{
+				try
+				{
+					worker.runnable();
+				}
+				catch (...)
+				{
+				}
+			}
+
+		private:
+
+			// The worker used.
+			DispatchOnceWorker<Dispatcher, Key>& worker;
+		};
+
+		friend class RunnableWrapper;
+
+	private:
 
 		// Key of the task.
 		const Key key;
@@ -131,6 +115,9 @@ namespace mm
 
 		// The dispatcher used.
 		Dispatcher& dispatcher;
+
+		// The dispatch counter.
+		std::atomic<std::int32_t> counter;
 
 		// The task to dispatch.
 		Runnable runnable;
