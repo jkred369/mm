@@ -90,7 +90,7 @@ namespace mm
 			{
 				try
 				{
-					worker.runnable();
+					worker.task();
 				}
 				catch (...)
 				{
