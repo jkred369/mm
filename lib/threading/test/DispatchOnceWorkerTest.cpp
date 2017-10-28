@@ -49,4 +49,27 @@ namespace mm
 		ASSERT_EQ(count, 1);
 	}
 
+	TEST(DispatchOnceWorkerTest, TwiceCase)
+	{
+		HashDispatcher<std::int32_t, std::mutex> dispatcher(2);
+
+		std::int32_t id = 1;
+		std::int32_t count = 0;
+		CountDownLatch<> latch(1);
+
+		Runnable task = [&count, &latch] () { ++count; latch.wait(); };
+
+		DispatchOnceWorker<HashDispatcher<std::int32_t, std::mutex> > worker(id, task, dispatcher);
+		worker.dispatch();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		worker.dispatch();
+		worker.dispatch();
+
+		latch.countDown();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+		ASSERT_EQ(count, 2);
+	}
+
 }
