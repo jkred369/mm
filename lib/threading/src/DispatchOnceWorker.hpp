@@ -11,7 +11,6 @@
 #include <atomic>
 #include <cstdint>
 #include <exception>
-#include <iostream>
 
 #include "Runnable.hpp"
 
