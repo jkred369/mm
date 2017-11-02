@@ -14,18 +14,22 @@ namespace mm
 		ObjectPool<std::int64_t> pool(1, false);
 		ASSERT_TRUE(!pool.empty());
 
-		std::int64_t* value = pool.get();
-		ASSERT_TRUE(value != nullptr);
-		ASSERT_TRUE(pool.empty());
-		ASSERT_TRUE(pool.get() == nullptr);
+		{
+			std::int64_t* value = pool.get();
+			ASSERT_TRUE(value != nullptr);
+			ASSERT_TRUE(pool.empty());
+			ASSERT_TRUE(pool.get() == nullptr);
 
-		pool.release(value);
-		ASSERT_TRUE(!pool.empty());
+			pool.release(value);
+			ASSERT_TRUE(!pool.empty());
+		}
 
-		std::int64_t* value = pool.get();
-		ASSERT_TRUE(value != nullptr);
-		ASSERT_TRUE(pool.empty());
-		ASSERT_TRUE(pool.get() == nullptr);
+		{
+			std::int64_t* value = pool.get();
+			ASSERT_TRUE(value != nullptr);
+			ASSERT_TRUE(pool.empty());
+			ASSERT_TRUE(pool.get() == nullptr);
+		}
 	}
 
 }

@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <cassert>
+#include <condition_variable>
 #include <mutex>
 #include <memory>
 
@@ -52,12 +53,14 @@ namespace mm
 		//
 		// size : The fixed size of the object pool.
 		//
-		ObjectPool(size_t size, bool blocking = true) : blocking(blocking), size(size), pool(new Node[size]), first(pool[0])
+		ObjectPool(size_t size, bool blocking = true) : blocking(blocking), size(size), pool(new Node[size]), first(&pool[0])
 		{
-			for (size_t i = 0; i < size; ++i)
+			for (size_t i = 0; i < size - 1; ++i)
 			{
-				pool[i].next.store(pool[i + 1]);
+				pool[i].next.store(&pool[i + 1]);
 			}
+
+			pool[size - 1].next.store(nullptr);
 		}
 
 		//
@@ -114,8 +117,8 @@ namespace mm
 				}
 			}
 
-			result.next.store(nullptr);
-			return new (result.objectBuffer) ObjectType();
+			result->next.store(nullptr);
+			return new (result->objectBuffer) ObjectType();
 		}
 
 		//
@@ -136,7 +139,7 @@ namespace mm
 		//
 		// Node in the pool.
 		//
-		template<typename ObjectType> struct Node
+		struct Node
 		{
 			// Pointer to the pool for destruction.
 			ObjectPool* pool;
@@ -156,7 +159,7 @@ namespace mm
 		void release(Node* node)
 		{
 			// sanity check
-			if (node < pool[0] || node > pool[size - 1])
+			if (node < &pool[0] || node > &pool[size - 1])
 			{
 				delete node;
 				return;
