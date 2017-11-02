@@ -78,7 +78,7 @@ namespace mm
 		//
 		bool empty()
 		{
-			return first.load() != nullptr;
+			return first.load() == nullptr;
 		}
 
 		//
