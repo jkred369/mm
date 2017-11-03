@@ -28,10 +28,6 @@ namespace mm
 		//
 		class Recyclable
 		{
-			// non-copyable class
-			Recyclable(const Recyclable& ) = delete;
-			Recyclable& operator = (const Recyclable& ) = delete;
-
 			//
 			// Destructor - put the object back to the pool.
 			//
@@ -117,7 +113,9 @@ namespace mm
 				}
 			}
 
+			result->pool = this;
 			result->next.store(nullptr);
+
 			return new (result->objectBuffer) ObjectType();
 		}
 
@@ -128,8 +126,8 @@ namespace mm
 		//
 		void release(ObjectType* object)
 		{
-			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
-			assert(reinterpret_cast<ObjectPool*> (node) == this);
+			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (object) - sizeof(void*));
+			assert(node->pool == this);
 
 			release(node);
 		}
