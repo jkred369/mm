@@ -132,8 +132,6 @@ namespace mm
 			release(node);
 		}
 
-	protected:
-
 		//
 		// Release an object into the queue. The node must be originally from the buffer. Otherwise this method is a no-op.
 		//

@@ -19,8 +19,15 @@ namespace mm
 	//
 	template<typename ObjectType, typename Mutex = std::recursive_mutex> class Recyclable
 	{
+	public:
+
 		// Type for the object pool node.
 		typedef typename ObjectPool<ObjectType, Mutex>::Node Node;
+
+		// virtual destructor.
+		virtual ~Recyclable()
+		{
+		}
 
 		//
 		// Increase the reference count. Use node next as a hack because its not used when object is out of pool.
@@ -39,8 +46,8 @@ namespace mm
 			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
 			if (reinterpret_cast<std::atomic<INT> > (node->next).fetch_sub(1) == 1)
 			{
-				~Recyclable();
-				node->pool.release(node);
+				this->~Recyclable();
+				node->pool->release(node);
 			}
 		}
 	};
@@ -51,7 +58,7 @@ namespace mm
 	template<typename ObjectType, typename Mutex = std::recursive_mutex> inline void intrusive_ptr_add_ref(
 			Recyclable<ObjectType, Mutex>* recyclable)
 	{
-		recyclable.addRef();
+		recyclable->addRef();
 	}
 
 	//
@@ -60,7 +67,7 @@ namespace mm
 	template<typename ObjectType, typename Mutex = std::recursive_mutex> inline void intrusive_ptr_release(
 			Recyclable<ObjectType, Mutex>* recyclable)
 	{
-		recyclable.release();
+		recyclable->release();
 	}
 }
 

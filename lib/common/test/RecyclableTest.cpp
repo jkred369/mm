@@ -22,7 +22,6 @@ namespace mm
 		std::atomic<std::int64_t>* counter;
 	};
 
-	/*
 	TEST(RecyclableTest, ClassCase)
 	{
 		std::atomic<std::int64_t> counter;
@@ -54,6 +53,5 @@ namespace mm
 		ASSERT_TRUE(counter.load() == 2);
 		ASSERT_TRUE(value1 == value2);
 	}
-	*/
 
 }
