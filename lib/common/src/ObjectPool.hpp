@@ -14,6 +14,8 @@
 #include <mutex>
 #include <memory>
 
+#include "NativeDefinition.hpp"
+
 namespace mm
 {
 	//
@@ -24,17 +26,30 @@ namespace mm
 	public:
 
 		//
-		// The class as root class for all object in the pool.
+		// The class as root class for all object in the pool. Implementing methods for intrusive_ptr.
 		//
 		class Recyclable
 		{
 			//
-			// Destructor - put the object back to the pool.
+			// Increase the reference count. Use node next as a hack because its not used when object is out of pool.
 			//
-			virtual ~Recyclable()
+			void addRef()
 			{
 				Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
-				node->pool->release(node);
+				reinterpret_cast<std::atomic<INT> > (node->next).fetch_add(1);
+			}
+
+			//
+			// Decrease the reference count and optionally release the object.
+			//
+			void release()
+			{
+				Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
+				if (reinterpret_cast<std::atomic<INT> > (node->next).fetch_sub(1) == 1)
+				{
+					~Recyclable();
+					node->pool.release(node);
+				}
 			}
 		};
 
@@ -207,6 +222,25 @@ namespace mm
 		// Conditoin for empty
 		std::condition_variable_any condition;
 	};
+
+	//
+	// Intrusive pointer functions.
+	//
+	template<typename ObjectType, typename Mutex> inline void intrusive_ptr_add_ref(
+			typename ObjectPool<ObjectType, Mutex>::Recyclable* recyclable)
+	{
+		recyclable.addRef();
+	}
+
+	//
+	// Intrusive pointer functions.
+	//
+	template<typename ObjectType, typename Mutex> inline void intrusive_ptr_release(
+			typename ObjectPool<ObjectType, Mutex>::Recyclable* recyclable)
+	{
+		recyclable.release();
+	}
+
 }
 
 
