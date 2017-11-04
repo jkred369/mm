@@ -16,7 +16,7 @@ namespace mm
 	{
 		~TestClass()
 		{
-			counter->fetch_sub(1);
+			counter->fetch_add(1);
 		}
 
 		std::atomic<std::int64_t>* counter;
@@ -24,7 +24,7 @@ namespace mm
 
 	TEST(RecyclableTest, ClassCase)
 	{
-		std::atomic<std::int64_t> counter;
+		std::atomic<std::int64_t> counter(0);
 		ObjectPool<TestClass> pool(2, false);
 		ASSERT_TRUE(!pool.empty());
 
@@ -32,7 +32,7 @@ namespace mm
 		TestClass* value2 = nullptr;
 		{
 			boost::intrusive_ptr<TestClass> value = pool.get();
-			ASSERT_TRUE(value != nullptr);
+			ASSERT_TRUE(value.get() != nullptr);
 			ASSERT_TRUE(!pool.empty());
 
 			value->counter = &counter;
@@ -43,7 +43,7 @@ namespace mm
 
 		{
 			boost::intrusive_ptr<TestClass> value = pool.get();
-			ASSERT_TRUE(value != nullptr);
+			ASSERT_TRUE(value.get() != nullptr);
 			ASSERT_TRUE(!pool.empty());
 
 			value->counter = &counter;

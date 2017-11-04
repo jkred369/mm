@@ -36,6 +36,9 @@ namespace mm
 			// Buffer for the object.
 			char objectBuffer[ sizeof(ObjectType) ];
 
+			// The reference count.
+			std::atomic<std::int64_t> refCount;
+
 			// Pointer to next node.
 			std::atomic<Node*> next;
 		};

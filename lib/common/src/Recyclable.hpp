@@ -35,7 +35,7 @@ namespace mm
 		void addRef()
 		{
 			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
-			reinterpret_cast<std::atomic<INT> > (node->next).fetch_add(1);
+			node->refCount.fetch_add(1);
 		}
 
 		//
@@ -44,7 +44,7 @@ namespace mm
 		void release()
 		{
 			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
-			if (reinterpret_cast<std::atomic<INT> > (node->next).fetch_sub(1) == 1)
+			if (node->refCount.fetch_sub(1) == 1)
 			{
 				this->~Recyclable();
 				node->pool->release(node);
