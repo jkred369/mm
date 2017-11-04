@@ -41,46 +41,81 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, ClassCase)
+	TEST(ObjectPoolTest, MultipleCase)
 	{
-		struct TestClass : public ObjectPool<TestClass>::Recyclable
-		{
-			~TestClass()
-			{
-				counter->fetch_sub(1);
-			}
-
-			std::atomic<std::int64_t>* counter;
-		};
-
-		std::atomic<std::int64_t> counter;
-		ObjectPool<TestClass> pool(2, false);
+		ObjectPool<std::int64_t> pool(4, false);
 		ASSERT_TRUE(!pool.empty());
 
-		TestClass* value1 = nullptr;
-		TestClass* value2 = nullptr;
-		{
-			boost::intrusive_ptr<TestClass> value = pool.get();
-			ASSERT_TRUE(value != nullptr);
-			ASSERT_TRUE(!pool.empty());
-
-			value->counter = &counter;
-			value1 = value.get();
-		}
-
-		ASSERT_TRUE(counter.load() == 1);
+		std::int64_t* value1 = nullptr;
+		std::int64_t* value2 = nullptr;
 
 		{
-			boost::intrusive_ptr<TestClass> value = pool.get();
+			std::int64_t* value = pool.get();
 			ASSERT_TRUE(value != nullptr);
-			ASSERT_TRUE(!pool.empty());
+			value1 = value;
+			*value = 1;
 
-			value->counter = &counter;
-			value2 = value.get();
+			ASSERT_TRUE(!pool.empty());
+			pool.release(value);
 		}
 
-		ASSERT_TRUE(counter.load() == 2);
+		{
+			std::int64_t* value = pool.get();
+			ASSERT_TRUE(value != nullptr);
+			ASSERT_TRUE(*value == 0);
+
+			value2 = value;
+
+			ASSERT_TRUE(!pool.empty());
+			pool.release(value);
+		}
+
 		ASSERT_TRUE(value1 == value2);
+
+		// take all out then return
+		{
+			std::int64_t* values[4];
+
+			for (int i = 0; i < 4; ++i)
+			{
+				values[i] = pool.get();
+				ASSERT_TRUE(values[i] != nullptr);
+			}
+
+			ASSERT_TRUE(pool.empty());
+			ASSERT_TRUE(pool.get() == nullptr);
+
+			for (int i = 0; i < 4; ++i)
+			{
+				for (int j = i + 1; j < 4; ++j)
+				{
+					ASSERT_TRUE(values[i] != values[j]);
+				}
+			}
+
+			// release all then re-take
+			for (int i = 0; i < 4; ++i)
+			{
+				pool.release(values[i]);
+			}
+
+			for (int i = 0; i < 4; ++i)
+			{
+				values[i] = pool.get();
+				ASSERT_TRUE(values[i] != nullptr);
+			}
+
+			ASSERT_TRUE(pool.empty());
+			ASSERT_TRUE(pool.get() == nullptr);
+
+			for (int i = 0; i < 4; ++i)
+			{
+				for (int j = i + 1; j < 4; ++j)
+				{
+					ASSERT_TRUE(values[i] != values[j]);
+				}
+			}
+		}
 	}
 
 }

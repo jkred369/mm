@@ -26,34 +26,19 @@ namespace mm
 	public:
 
 		//
-		// The class as root class for all object in the pool. Implementing methods for intrusive_ptr.
+		// Node in the pool.
 		//
-		class Recyclable
+		struct Node
 		{
-			//
-			// Increase the reference count. Use node next as a hack because its not used when object is out of pool.
-			//
-			void addRef()
-			{
-				Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
-				reinterpret_cast<std::atomic<INT> > (node->next).fetch_add(1);
-			}
+			// Pointer to the pool for destruction.
+			ObjectPool* pool;
 
-			//
-			// Decrease the reference count and optionally release the object.
-			//
-			void release()
-			{
-				Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
-				if (reinterpret_cast<std::atomic<INT> > (node->next).fetch_sub(1) == 1)
-				{
-					~Recyclable();
-					node->pool.release(node);
-				}
-			}
+			// Buffer for the object.
+			char objectBuffer[ sizeof(ObjectType) ];
+
+			// Pointer to next node.
+			std::atomic<Node*> next;
 		};
-
-		friend class Recyclable;
 
 		// non-copyable class
 		ObjectPool(const ObjectPool& ) = delete;
@@ -150,21 +135,6 @@ namespace mm
 	protected:
 
 		//
-		// Node in the pool.
-		//
-		struct Node
-		{
-			// Pointer to the pool for destruction.
-			ObjectPool* pool;
-
-			// Buffer for the object.
-			char objectBuffer[ sizeof(ObjectType) ];
-
-			// Pointer to next node.
-			std::atomic<Node*> next;
-		};
-
-		//
 		// Release an object into the queue. The node must be originally from the buffer. Otherwise this method is a no-op.
 		//
 		// node : The node to be released.
@@ -222,24 +192,6 @@ namespace mm
 		// Conditoin for empty
 		std::condition_variable_any condition;
 	};
-
-	//
-	// Intrusive pointer functions.
-	//
-	template<typename ObjectType, typename Mutex> inline void intrusive_ptr_add_ref(
-			typename ObjectPool<ObjectType, Mutex>::Recyclable* recyclable)
-	{
-		recyclable.addRef();
-	}
-
-	//
-	// Intrusive pointer functions.
-	//
-	template<typename ObjectType, typename Mutex> inline void intrusive_ptr_release(
-			typename ObjectPool<ObjectType, Mutex>::Recyclable* recyclable)
-	{
-		recyclable.release();
-	}
 
 }
 
