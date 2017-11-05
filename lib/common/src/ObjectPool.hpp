@@ -75,7 +75,7 @@ namespace mm
 		//
 		// return : true if the pool is empty.
 		//
-		bool empty()
+		bool empty() const
 		{
 			return first.load() == nullptr;
 		}
