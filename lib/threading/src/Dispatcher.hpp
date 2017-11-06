@@ -20,10 +20,10 @@
 
 #include <Poco/Hash.h>
 
+#include "Runnable.hpp"
+
 namespace mm
 {
-	typedef std::function<void()> Runnable;
-
 	//
 	// The basic execution unit of a hash dispatcher, this class is simply
 	// a thread taking all tasks from a given queue.
