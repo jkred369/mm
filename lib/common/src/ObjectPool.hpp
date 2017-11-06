@@ -14,8 +14,6 @@
 #include <mutex>
 #include <memory>
 
-#include "NativeDefinition.hpp"
-
 namespace mm
 {
 	//

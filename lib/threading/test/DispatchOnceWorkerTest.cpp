@@ -5,8 +5,7 @@
 
 #include <gtest/gtest.h>
 
-#include <CountDownLatch.hpp>
-
+#include "CountDownLatch.hpp"
 #include "Dispatcher.hpp"
 #include "DispatchOnceWorker.hpp"
 

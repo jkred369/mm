@@ -5,12 +5,11 @@
 
 #include <gtest/gtest.h>
 
-#include <CountDownLatch.hpp>
-#include <TimeUtil.hpp>
-
+#include "CountDownLatch.hpp"
 #include "Dispatcher.hpp"
 #include "Scheduler.hpp"
 #include "ScheduleOnceWorker.hpp"
+#include "TimeUtil.hpp"
 
 namespace mm
 {

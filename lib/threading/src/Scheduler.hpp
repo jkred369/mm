@@ -15,12 +15,11 @@
 
 #include <tbb/concurrent_priority_queue.h>
 
-#include <SpinLockGuard.hpp>
-#include <Timer.hpp>
-#include <TimeUtil.hpp>
-
 #include "Dispatcher.hpp"
 #include "Runnable.hpp"
+#include "SpinLockGuard.hpp"
+#include "Timer.hpp"
+#include "TimeUtil.hpp"
 
 namespace mm
 {
