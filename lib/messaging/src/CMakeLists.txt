@@ -1,4 +1,4 @@
 # target
 file(GLOB_RECURSE Messaging_SOURCES "*.cpp")
 
-# add_library(Messaging ${Messaging_SOURCES})
+# add_library(Messaging SHARED ${Messaging_SOURCES})
