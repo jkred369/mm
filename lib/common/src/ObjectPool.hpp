@@ -145,7 +145,6 @@ namespace mm
 			// sanity check
 			if (node < &pool[0] || node > &pool[size - 1])
 			{
-				delete node;
 				return;
 			}
 
