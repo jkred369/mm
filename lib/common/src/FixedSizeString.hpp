@@ -91,8 +91,10 @@ namespace mm
 		//
 		char* toStr() const
 		{
-			char* result = new char[length];
+			char* result = new char[length + 1];
+
 			std::strncpy(result, buffer, length);
+			result[length] = 0;
 
 			return result;
 		}
