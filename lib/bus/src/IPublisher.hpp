@@ -8,6 +8,10 @@
 #ifndef LIB_BUS_SRC_IPUBLISHER_HPP_
 #define LIB_BUS_SRC_IPUBLISHER_HPP_
 
+#include <memory>
+
+#include <IConsumer.hpp>
+#include <ISubscription.hpp>
 #include <Message.hpp>
 
 namespace mm
@@ -24,9 +28,36 @@ namespace mm
 		//
 		// Publish a message to the bus.
 		//
-		// message : The message to be published.
+		// subscription : The topic on which the message will be delivered.
+		// message : Shared pointer to the message to be published.
 		//
-		virtual void publish(const std::string& topic, const Message& message) = 0;
+		virtual void publish(const ISubscription& subscription, const std::shared_ptr<Message> message) = 0;
+
+		//
+		// Add the consumer to the publisher.
+		//
+		// consumer : The consumer.
+		//
+		virtual void addConsumer(IConsumer& consumer) = 0;
+
+		//
+		// Remove the given consumer from the publisher.
+		//
+		// consumer : The consumer to be removed.
+		//
+		virtual void removeConsumer(IConsumer& consumer) = 0;
+
+		//
+		// Get the count of consumer.
+		//
+		// return : The count of the consumers.
+		//
+		virtual size_t getConsumerCount() const = 0;
+
+		//
+		// Remove all the consumers.
+		//
+		virtual void removeAll() = 0;
 	};
 }
 

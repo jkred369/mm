@@ -8,12 +8,14 @@
 #ifndef LIB_BUS_SRC_SOURCETYPE_HPP_
 #define LIB_BUS_SRC_SOURCETYPE_HPP_
 
+#include <cstdint>
+
 namespace mm
 {
 	//
 	// The source type enum.
 	//
-	enum class SourceType
+	enum class SourceType : std::int16_t
 	{
 
 	};
