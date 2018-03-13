@@ -102,8 +102,6 @@ namespace mm
 		// Header of the message.
 		MessageHeader header;
 
-	private:
-
 	};
 }
 
