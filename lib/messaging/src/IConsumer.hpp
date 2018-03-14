@@ -28,7 +28,7 @@ namespace mm
 		//
 		// message : The given message to be consumed.
 		//
-		virtual void consume(const std::shared_ptr<Message> message);
+		virtual void consume(const std::shared_ptr<Message> message) = 0;
 	};
 }
 

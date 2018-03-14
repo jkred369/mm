@@ -90,6 +90,27 @@ namespace mm
 	{
 	public:
 
+		// The CSV separator.
+		constexpr char CSV_SEPARATOR = ',';
+
+		// The line separator.
+		constexpr char LINE_SEPARATOR = '\n';
+
+		// The CSV separator as string.
+		constexpr std::string CSV_SEPARATOR_STRING = std::string(CSV_SEPARATOR);
+
+		// THe line separator as string.
+		constexpr std::string LINE_SEPARATOR_STRING = std::string(LINE_SEPARATOR);
+
+		// The date time format as string.
+		constexpr std::string DATETIME_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss.SSS";
+
+		// The date format as string.
+		constexpr std::string DATE_FORMAT_STRING = "yyyy-MM-dd";
+
+		// The time format as string.
+		constexpr std::string TIME_FORMAT_STRING = "HH:mm:ss.SSS";
+
 		//
 		// Virtual destructor.
 		//
