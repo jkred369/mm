@@ -14,7 +14,7 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
-#include <sfinae.hpp>
+#include "SFINAE.hpp"
 
 namespace mm
 {
