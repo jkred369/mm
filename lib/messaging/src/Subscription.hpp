@@ -16,7 +16,7 @@ namespace mm
 	//
 	// The subscription class provides the default implementation for the subscription interface.
 	//
-	class Subscription : BaseSubscription, SingletonInstance<Subscription>
+	class Subscription : public BaseSubscription, public SingletonInstance<Subscription>
 	{
 	public:
 

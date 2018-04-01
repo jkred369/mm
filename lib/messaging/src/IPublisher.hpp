@@ -23,7 +23,9 @@ namespace mm
 	{
 	public:
 
-		virtual ~IPublisher();
+		virtual ~IPublisher()
+		{
+		}
 
 		//
 		// Publish a message to the bus.

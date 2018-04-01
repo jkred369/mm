@@ -14,6 +14,8 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
+#include <sfinae.hpp>
+
 namespace mm
 {
 	//
@@ -28,6 +30,16 @@ namespace mm
 	> class SingletonInstance
 	{
 	public:
+
+		//
+		// Constructor.
+		//
+		// size : The default size of the internal set.
+		//
+		SingletonInstance(size_t size = 8) : INSTANCES(size)
+		{
+			static_assert(sfinae::has_equal<ValueType>::value, "VaueType must implement == operator.");
+		}
 
 		//
 		// Get the singleton instance for the value type class on the process.

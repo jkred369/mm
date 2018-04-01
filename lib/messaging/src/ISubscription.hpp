@@ -8,6 +8,8 @@
 #ifndef LIB_BUS_SRC_ISUBSCRIPTION_HPP_
 #define LIB_BUS_SRC_ISUBSCRIPTION_HPP_
 
+#include <cstdint>
+
 #include <DataType.hpp>
 #include <SourceType.hpp>
 
@@ -20,21 +22,23 @@ namespace mm
 	{
 	public:
 
-		virtual ~ISubscription();
+		virtual ~ISubscription()
+		{
+		}
 
 		//
 		// Get the source type.
 		//
 		// return : The source type.
 		//
-		virtual SourceType sourceType() const = 0;
+		virtual SourceType getSourceType() const = 0;
 
 		//
 		// Get the data type.
 		//
 		// return : The data type.
 		//
-		virtual DataType dataType() const = 0;
+		virtual DataType getDataType() const = 0;
 
 		//
 		// Get the key.
