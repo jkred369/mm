@@ -9,6 +9,7 @@
 #define LIB_COMMON_SRC_SINGLETONINSTANCE_HPP_
 
 #include <functional>
+#include <memory>
 #include <unordered_set>
 
 #include <boost/thread/locks.hpp>
@@ -18,6 +19,14 @@
 
 namespace mm
 {
+	template<typename ValueType> struct SingletonHash
+	{
+		std::size_t operator()(const ValueType& value) const
+		{
+			return value.hashValue();
+		}
+	};
+
 	//
 	// This class defines a singleton instance set where each constructed instance must be a singleton
 	// within the same process.
@@ -26,7 +35,7 @@ namespace mm
 	//
 	template<
 		typename ValueType,
-		typename Hash = std::hash<ValueType>
+		typename Hash = SingletonHash<ValueType>
 	> class SingletonInstance
 	{
 	public:
@@ -36,9 +45,10 @@ namespace mm
 		//
 		// size : The default size of the internal set.
 		//
-		SingletonInstance(size_t size = 8) : INSTANCES(size)
+		SingletonInstance()
 		{
 			static_assert(sfinae::has_equal<ValueType>::value, "VaueType must implement == operator.");
+			// static_assert(sfinae::has_hash_value<ValueType>::value, "ValueType must implement hashValue() function");
 		}
 
 		//
@@ -52,13 +62,13 @@ namespace mm
 		//
 		template<typename ... Params> static const ValueType& getInstance(Params ... params)
 		{
-			ValueType value(&params...);
+			ValueType value(params...);
 
 			{
 				boost::upgrade_lock<boost::shared_mutex> lock(MUTEX);
 
 				// insert if not found
-				std::unordered_set<ValueType>::iterator it = INSTANCES.find(value);
+				typename std::unordered_set<ValueType, Hash>::iterator it = INSTANCES.find(value);
 				if (it == INSTANCES.end())
 				{
 					boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
@@ -74,7 +84,7 @@ namespace mm
 	private:
 
 		// The set of instances.
-		static std::unordered_set<ValueType> INSTANCES;
+		static std::unordered_set<ValueType, Hash> INSTANCES;
 
 		// The mutex for accessing the instances.
 		static boost::shared_mutex MUTEX;

@@ -8,6 +8,8 @@
 #ifndef LIB_MESSAGING_SRC_SUBSCRIPTION_HPP_
 #define LIB_MESSAGING_SRC_SUBSCRIPTION_HPP_
 
+#include <functional>
+
 #include <ISubscription.hpp>
 #include <SingletonInstance.hpp>
 

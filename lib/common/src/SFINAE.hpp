@@ -24,6 +24,13 @@ namespace mm
 		{
 			enum { value = !std::is_same<decltype(*(T*)(0) == *(Arg*)(0)), No>::value };
 		};
+
+		template<typename T> No hashValue(const T&);
+
+		template<typename T> struct has_hash_value
+		{
+			enum { value = !std::is_same<decltype(std::declval<T>().hashValue()), No>::value };
+		};
 	}
 }
 
