@@ -35,9 +35,18 @@ set(GTEST_LIBS
 
 include_directories(${GTEST_INCLUDE_DIR})
 
+set(FEMAS_INCLUDE_DIR "/usr/include/femas")
+set(FEMAS_LIB_DIR "/usr/lib/femas")
+set(FEMAS_LIBS
+	"${FEMAS_LIB_DIR}/libUSTPmduserapi.so"
+	"${FEMAS_LIB_DIR}/libUSTPtraderapi.so"
+)
+
+include_directories(${FEMAS_INCLUDE_DIR})
+
 # compiler options
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-g -Wall -O2 -pipe -pthread -std=c++11")
+set(CMAKE_CXX_FLAGS "-g -Wall -O2 -pipe -pthread -std=c++14")
 
 # testing
 set(BUILD_TESTING ON)
