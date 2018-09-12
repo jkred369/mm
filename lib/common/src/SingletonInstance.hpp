@@ -48,7 +48,7 @@ namespace mm
 		SingletonInstance()
 		{
 			static_assert(sfinae::has_equal<ValueType>::value, "VaueType must implement == operator.");
-			// static_assert(sfinae::has_hash_value<ValueType>::value, "ValueType must implement hashValue() function");
+			static_assert(sfinae::has_hash_value<ValueType>::value, "ValueType must implement hashValue() function");
 		}
 
 		//
