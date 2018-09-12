@@ -118,6 +118,16 @@ namespace mm
 		{
 		}
 
+		//
+		// Get the message header.
+		//
+		// return : the message header.
+		//
+		const MessageHeader& getHeader() const
+		{
+			return header;
+		}
+
 	protected:
 
 		// Header of the message.
