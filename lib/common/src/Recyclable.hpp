@@ -24,6 +24,13 @@ namespace mm
 		// Type for the object pool node.
 		typedef typename ObjectPool<ObjectType, Mutex>::Node Node;
 
+		// Constructor - initialize the ref count.
+		Recyclable()
+		{
+			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (this) - sizeof(void*));
+			node->refCount.store(0);
+		}
+
 		// virtual destructor.
 		virtual ~Recyclable()
 		{

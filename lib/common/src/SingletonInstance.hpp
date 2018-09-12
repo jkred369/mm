@@ -91,6 +91,11 @@ namespace mm
 	};
 }
 
+template<typename ValueType, typename Hash>
+std::unordered_set<ValueType, Hash> mm::SingletonInstance<ValueType, Hash>::INSTANCES;
+
+template<typename ValueType, typename Hash>
+boost::shared_mutex mm::SingletonInstance<ValueType, Hash>::MUTEX;
 
 
 #endif /* LIB_COMMON_SRC_SINGLETONINSTANCE_HPP_ */

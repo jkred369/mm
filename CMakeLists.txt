@@ -6,7 +6,7 @@ set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF)
  
-find_package(Boost 1.58.0 COMPONENTS filesystem regex) 
+find_package(Boost 1.58.0 COMPONENTS date_time filesystem regex system thread) 
 include_directories(${Boost_INCLUDE_DIRS})
 
 set(TBB_INCLUDE_DIR "/usr/include/tbb-2018.1")
@@ -46,7 +46,7 @@ include_directories(${FEMAS_INCLUDE_DIR})
 
 # compiler options
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-g -Wall -O2 -pipe -pthread -std=c++14")
+set(CMAKE_CXX_FLAGS "-g -Wall -O3 -pipe -pthread -std=c++14 -lboost_thread -lboost_system")
 
 # testing
 set(BUILD_TESTING ON)
