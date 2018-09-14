@@ -12,6 +12,8 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
+#include <ISubscriber.hpp>
+
 namespace mm
 {
 	//
@@ -19,7 +21,9 @@ namespace mm
 	//
 	//
 	//
-	class FemasMarketDataSession : public CUstpFtdcMduserSpi
+	class FemasMarketDataSession :
+			public CUstpFtdcMduserSpi,
+			public ISubscriber
 	{
 	public:
 

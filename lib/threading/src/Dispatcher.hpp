@@ -48,10 +48,6 @@ namespace mm
 		//
 		~TaskRunner()
 		{
-			if (thread != nullptr)
-			{
-				delete thread;
-			}
 		}
 
 		//
@@ -60,12 +56,12 @@ namespace mm
 		void start()
 		{
 			// sanity check
-			if (thread != nullptr)
+			if (thread.get() != nullptr)
 			{
 				return;
 			}
 
-			thread = new std::thread([this] ()
+			thread.reset(new std::thread([this] ()
 			{
 				Runnable runnable;
 
@@ -85,7 +81,7 @@ namespace mm
 						}
 					}
 				}
-			});
+			}));
 		}
 
 		//
@@ -135,7 +131,7 @@ namespace mm
 		std::atomic<bool> stopRequested;
 
 		// Pointer to actual thread.
-		std::thread* thread;
+		std::unique_ptr<std::thread> thread;
 
 		// Mutex used for queue notify.
 		Mutex mutex;
