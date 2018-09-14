@@ -9,9 +9,6 @@
 #define LIB_MESSAGING_MESSAGE_HPP_
 
 #include <cstdint>
-#include <mutex>
-
-#include <Recyclable.hpp>
 
 namespace mm
 {
@@ -86,7 +83,7 @@ namespace mm
 	//
 	// The base class for all messages.
 	//
-	template<typename ObjectType, typename Mutex = std::recursive_mutex> class Message : public Recyclable<ObjectType, Mutex>
+	class Message
 	{
 	public:
 
@@ -117,21 +114,6 @@ namespace mm
 		virtual ~Message()
 		{
 		}
-
-		//
-		// Get the message header.
-		//
-		// return : the message header.
-		//
-		const MessageHeader& getHeader() const
-		{
-			return header;
-		}
-
-	protected:
-
-		// Header of the message.
-		MessageHeader header;
 
 	};
 }

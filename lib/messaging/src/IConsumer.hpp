@@ -10,11 +10,12 @@
 
 #include <memory>
 
-#include <Message.hpp>
-
 namespace mm
 {
-	class IConsumer
+	//
+	// This class defines interface for the message consumer.
+	//
+	template<typename Message> class IConsumer
 	{
 	public:
 
@@ -28,7 +29,7 @@ namespace mm
 		//
 		// message : The given message to be consumed.
 		//
-		virtual void consume(const std::shared_ptr<Message> message) = 0;
+		virtual void consume(const std::shared_ptr<const Message>& message) = 0;
 	};
 }
 

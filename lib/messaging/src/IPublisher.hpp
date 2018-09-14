@@ -19,7 +19,7 @@ namespace mm
 	//
 	// The publisher defines the interface for sending a message.
 	//
-	class IPublisher
+	template<typename Message> class IPublisher
 	{
 	public:
 
@@ -33,7 +33,7 @@ namespace mm
 		// subscription : The topic on which the message will be delivered.
 		// message : Shared pointer to the message to be published.
 		//
-		virtual void publish(const ISubscription& subscription, const std::shared_ptr<Message> message) = 0;
+		virtual void publish(const ISubscription& subscription, const std::shared_ptr<const Message> message) = 0;
 	};
 }
 

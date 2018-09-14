@@ -19,7 +19,7 @@ namespace mm
 	//
 	// The subscriber defines the interface for subscribing to a message.
 	//
-	class ISubscriber
+	template<typename Message> class ISubscriber
 	{
 	public:
 
@@ -39,14 +39,14 @@ namespace mm
 		//
 		// consumer : The consumer.
 		//
-		virtual void addConsumer(IConsumer& consumer) = 0;
+		virtual void addConsumer(IConsumer<Message>& consumer) = 0;
 
 		//
 		// Remove the given consumer from the subscriber.
 		//
 		// consumer : The consumer to be removed.
 		//
-		virtual void removeConsumer(IConsumer& consumer) = 0;
+		virtual void removeConsumer(IConsumer<Message>& consumer) = 0;
 
 		//
 		// Get the count of consumer.

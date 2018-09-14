@@ -12,7 +12,8 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
-#include <ISubscriber.hpp>
+#include <MarketDataMessage.hpp>
+#include <SubscriberAdapter.hpp>
 
 namespace mm
 {
@@ -23,7 +24,7 @@ namespace mm
 	//
 	class FemasMarketDataSession :
 			public CUstpFtdcMduserSpi,
-			public ISubscriber
+			public SubscriberAdapter<MarketDataMessage>
 	{
 	public:
 
