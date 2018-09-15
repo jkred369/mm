@@ -9,6 +9,7 @@
 #define LIB_MESSAGING_MESSAGE_HPP_
 
 #include <cstdint>
+#include <string>
 
 namespace mm
 {
@@ -56,7 +57,7 @@ namespace mm
 		//
 		// return : Size of the message buffer.
 		//
-		size_t getSize() const
+		std::size_t getSize() const
 		{
 			return *reinterpret_cast<const std::uint32_t*> (value[4]);
 		}

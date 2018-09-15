@@ -46,6 +46,7 @@ namespace mm
 		}
 
 		// actually stop the service
+		// it's commented that session->join() isn't stable?
 		session->RegisterSpi(nullptr);
 		session->Release();
 		session = nullptr;
