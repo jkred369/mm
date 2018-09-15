@@ -17,7 +17,7 @@ namespace mm
 	//
 	// The class provides a default implementation of the ISubscriber interface.
 	//
-	template<typename Message, typename Key=std::int64_t> class SubscriberAdapter : public ISubscriber<Message>
+	template<typename Message, typename Key=std::int64_t> class SubscriberAdapter : public ISubscriber<Message, Key>
 	{
 	public:
 
@@ -26,6 +26,10 @@ namespace mm
 		}
 
 		virtual void subscribe(const ISubscription<Key>& subscription) override
+		{
+		}
+
+		virtual void unsubscribe(const ISubscription<Key>& subscription) override
 		{
 		}
 

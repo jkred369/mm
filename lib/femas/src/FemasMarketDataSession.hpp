@@ -51,6 +51,12 @@ namespace mm
 		virtual void stop() override;
 
 		//
+		// subscriber functionality.
+		//
+		virtual void subscribe(const ISubscription<std::int64_t>& subscription) override;
+		virtual void unsubscribe(const ISubscription<std::int64_t>& subscription) override;
+
+		//
 		// Fired when the session is connected.
 		//
 		virtual void OnFrontConnected() override;

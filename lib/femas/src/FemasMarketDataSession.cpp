@@ -5,6 +5,8 @@
  *      Author: suoalex
  */
 
+#include <fmt/format.h>
+
 #include <Log.hpp>
 
 #include "FemasMarketDataSession.hpp"
@@ -50,6 +52,22 @@ namespace mm
 		session->RegisterSpi(nullptr);
 		session->Release();
 		session = nullptr;
+	}
+
+	void FemasMarketDataSession::subscribe(const ISubscription<std::int64_t>& subscription)
+	{
+		fmt::format_int format(subscription.getKey());
+
+		const char* request = {format.c_str()};
+		const int result = session->SubMarketData(request, 1);
+	}
+
+	void FemasMarketDataSession::unsubscribe(const ISubscription<std::int64_t>& subscription)
+	{
+		fmt::format_int format(subscription.getKey());
+
+		const char* request = {format.c_str()};
+		int result = session->UnSubMarketData(request, 1);
 	}
 
 	void FemasMarketDataSession::OnFrontConnected()

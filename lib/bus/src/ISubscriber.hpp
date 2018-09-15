@@ -35,6 +35,13 @@ namespace mm
 		virtual void subscribe(const ISubscription<Key>& subscription) = 0;
 
 		//
+		// Unsubscribe to a message.
+		//
+		// subscription : The topic to unsubscribe.
+		//
+		virtual void unsubscribe(const ISubscription<Key>& subscription) = 0;
+
+		//
 		// Add the consumer to the subscriber.
 		//
 		// consumer : The consumer.
