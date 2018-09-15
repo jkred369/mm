@@ -12,12 +12,34 @@
 namespace mm
 {
 	FemasMarketDataSession::FemasMarketDataSession() :
-		session(CUstpFtdcMduserApi::CreateFtdcMduserApi())
+		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
+		stopFlag(false)
 	{
+		// TODO determine if need to pass a config file to create API
+		session->RegisterSpi(this);
+		session->Init();
 	}
 
 	FemasMarketDataSession::~FemasMarketDataSession()
 	{
+		stop();
+	}
+
+	bool FemasMarketDataSession::start()
+	{
+	}
+
+	void FemasMarketDataSession::stop()
+	{
+		// sanity check
+		if (!stopFlag.compare_exchange_strong(false, true))
+		{
+			return;
+		}
+
+		// actually stop the service
+		session->RegiesterSpi(nullptr);
+		session->Release();
 	}
 
 	void FemasMarketDataSession::OnFrontConnected()

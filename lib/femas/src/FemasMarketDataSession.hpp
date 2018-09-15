@@ -8,10 +8,12 @@
 #ifndef LIB_FEMAS_SRC_FEMASMARKETDATASESSION_HPP_
 #define LIB_FEMAS_SRC_FEMASMARKETDATASESSION_HPP_
 
+#include <atomic>
 #include <memory>
 
 #include <femas/USTPFtdcMduserApi.h>
 
+#include <IService.hpp>
 #include <MarketDataMessage.hpp>
 #include <SubscriberAdapter.hpp>
 
@@ -23,6 +25,7 @@ namespace mm
 	//
 	//
 	class FemasMarketDataSession :
+			public IService,
 			public CUstpFtdcMduserSpi,
 			public SubscriberAdapter<MarketDataMessage>
 	{
@@ -39,6 +42,12 @@ namespace mm
 		// Destructor.
 		//
 		virtual ~FemasMarketDataSession();
+
+		//
+		// service interface.
+		//
+		virtual bool start() override;
+		virtual void stop() override;
 
 		//
 		// Fired when the session is connected.
@@ -184,6 +193,9 @@ namespace mm
 
 		// The actual API session.
 		std::unique_ptr<CUstpFtdcMduserApi> session;
+
+		// Flag if stop is called or in process.
+		std::atomic<bool> stopFlag;
 	};
 }
 
