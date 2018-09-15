@@ -58,16 +58,28 @@ namespace mm
 	{
 		fmt::format_int format(subscription.getKey());
 
-		const char* request = {format.c_str()};
+		// femas requires char* without writing to it
+		char* request[1] = {const_cast<char*> (format.c_str())};
 		const int result = session->SubMarketData(request, 1);
+
+		if (result != 0)
+		{
+			LOGERR << "Error subscribing to " << subscription.getKey() << ENDLOG;
+		}
 	}
 
 	void FemasMarketDataSession::unsubscribe(const ISubscription<std::int64_t>& subscription)
 	{
 		fmt::format_int format(subscription.getKey());
 
-		const char* request = {format.c_str()};
+		// femas requires char* without writing to it
+		char* request[1] = {const_cast<char*> (format.c_str())};
 		int result = session->UnSubMarketData(request, 1);
+
+		if (result != 0)
+		{
+			LOGERR << "Error unsubscribing from " << subscription.getKey() << ENDLOG;
+		}
 	}
 
 	void FemasMarketDataSession::OnFrontConnected()
