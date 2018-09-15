@@ -40,7 +40,7 @@ namespace mm
 		}
 
 		// actually stop the service
-		session->RegiesterSpi(nullptr);
+		session->RegisterSpi(nullptr);
 		session->Release();
 	}
 

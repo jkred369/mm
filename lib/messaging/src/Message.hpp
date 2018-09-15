@@ -19,7 +19,7 @@ namespace mm
 	{
 	public:
 
-		template<typename ObjectType, typename Mutex> friend class Message;
+		friend class Message;
 
 		//
 		// Get the environment symbol.
@@ -94,10 +94,10 @@ namespace mm
 		constexpr char LINE_SEPARATOR = '\n';
 
 		// The CSV separator as string.
-		constexpr std::string CSV_SEPARATOR_STRING = std::string(CSV_SEPARATOR);
+		constexpr std::string CSV_SEPARATOR_STRING = std::string(1, CSV_SEPARATOR);
 
 		// THe line separator as string.
-		constexpr std::string LINE_SEPARATOR_STRING = std::string(LINE_SEPARATOR);
+		constexpr std::string LINE_SEPARATOR_STRING = std::string(1, LINE_SEPARATOR);
 
 		// The date time format as string.
 		constexpr std::string DATETIME_FORMAT_STRING = "yyyy-MM-dd HH:mm:ss.SSS";

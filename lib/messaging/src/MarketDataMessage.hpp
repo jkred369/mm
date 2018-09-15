@@ -33,7 +33,7 @@ namespace mm
 	public:
 
 		// The maximum market data depth.
-		constexpr size_t MAX_DEPTH = 5;
+		static constexpr size_t MAX_DEPTH = 5;
 
 		// Instrument ID.
 		InstrumentIDType instrumentId;

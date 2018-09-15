@@ -74,7 +74,7 @@ namespace mm
 		std::vector<IConsumer<Message>*> consumers;
 
 		// The mutex for accessing the consumer.
-		std::mutex mutex;
+		mutable std::mutex mutex;
 	};
 }
 
