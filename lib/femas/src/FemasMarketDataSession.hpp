@@ -13,6 +13,7 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
+#include <EnumType.hpp>
 #include <IService.hpp>
 #include <MarketDataMessage.hpp>
 #include <SubscriberAdapter.hpp>
@@ -191,8 +192,15 @@ namespace mm
 			return std::make_shared<MarketDataMessage>();
 		}
 
+		// The int value for bid
+		static constexpr int BID = toValue(Side::BID);
+
+		// The int value for ask
+		static constexpr int ASK = toValue(Side::ASK);
+
 		// The actual API session.
-		std::unique_ptr<CUstpFtdcMduserApi> session;
+		// Note that we cannot use unique_ptr etc here as the destructor is protected.
+		CUstpFtdcMduserApi* session;
 
 		// Flag if stop is called or in process.
 		std::atomic<bool> stopFlag;

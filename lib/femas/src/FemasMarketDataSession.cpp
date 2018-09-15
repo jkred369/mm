@@ -15,6 +15,9 @@ namespace mm
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false)
 	{
+		static_assert(BID >= 0, "Bid index must be positive.");
+		static_assert(ASK >= 0, "Ask index must be positive.");
+
 		// TODO determine if need to pass a config file to create API
 		session->RegisterSpi(this);
 		session->Init();
@@ -34,14 +37,18 @@ namespace mm
 	void FemasMarketDataSession::stop()
 	{
 		// sanity check
-		if (!stopFlag.compare_exchange_strong(false, true))
 		{
-			return;
+			bool expected = false;
+			if (!stopFlag.compare_exchange_strong(expected, true))
+			{
+				return;
+			}
 		}
 
 		// actually stop the service
 		session->RegisterSpi(nullptr);
 		session->Release();
+		session = nullptr;
 	}
 
 	void FemasMarketDataSession::OnFrontConnected()
@@ -124,35 +131,35 @@ namespace mm
 		message.turnover = depthMarketData->Turnover;
 
 		// market data levels - silly yes but fast
-		message.levels[Side::BID][0].price = depthMarketData->BidPrice1;
-		message.levels[Side::BID][0].qty = depthMarketData->BidVolume1;
+		message.levels[BID][0].price = depthMarketData->BidPrice1;
+		message.levels[BID][0].qty = depthMarketData->BidVolume1;
 
-		message.levels[Side::BID][1].price = depthMarketData->BidPrice2;
-		message.levels[Side::BID][1].qty = depthMarketData->BidVolume2;
+		message.levels[BID][1].price = depthMarketData->BidPrice2;
+		message.levels[BID][1].qty = depthMarketData->BidVolume2;
 
-		message.levels[Side::BID][2].price = depthMarketData->BidPrice3;
-		message.levels[Side::BID][2].qty = depthMarketData->BidVolume3;
+		message.levels[BID][2].price = depthMarketData->BidPrice3;
+		message.levels[BID][2].qty = depthMarketData->BidVolume3;
 
-		message.levels[Side::BID][3].price = depthMarketData->BidPrice4;
-		message.levels[Side::BID][3].qty = depthMarketData->BidVolume4;
+		message.levels[BID][3].price = depthMarketData->BidPrice4;
+		message.levels[BID][3].qty = depthMarketData->BidVolume4;
 
-		message.levels[Side::BID][4].price = depthMarketData->BidPrice5;
-		message.levels[Side::BID][4].qty = depthMarketData->BidVolume5;
+		message.levels[BID][4].price = depthMarketData->BidPrice5;
+		message.levels[BID][4].qty = depthMarketData->BidVolume5;
 
-		message.levels[Side::ASK][0].price = depthMarketData->AskPrice1;
-		message.levels[Side::ASK][0].qty = depthMarketData->AskVolume1;
+		message.levels[ASK][0].price = depthMarketData->AskPrice1;
+		message.levels[ASK][0].qty = depthMarketData->AskVolume1;
 
-		message.levels[Side::ASK][1].price = depthMarketData->AskPrice2;
-		message.levels[Side::ASK][1].qty = depthMarketData->AskVolume2;
+		message.levels[ASK][1].price = depthMarketData->AskPrice2;
+		message.levels[ASK][1].qty = depthMarketData->AskVolume2;
 
-		message.levels[Side::ASK][2].price = depthMarketData->AskPrice3;
-		message.levels[Side::ASK][2].qty = depthMarketData->AskVolume3;
+		message.levels[ASK][2].price = depthMarketData->AskPrice3;
+		message.levels[ASK][2].qty = depthMarketData->AskVolume3;
 
-		message.levels[Side::ASK][3].price = depthMarketData->AskPrice4;
-		message.levels[Side::ASK][3].qty = depthMarketData->AskVolume4;
+		message.levels[ASK][3].price = depthMarketData->AskPrice4;
+		message.levels[ASK][3].qty = depthMarketData->AskVolume4;
 
-		message.levels[Side::ASK][4].price = depthMarketData->AskPrice5;
-		message.levels[Side::ASK][4].qty = depthMarketData->AskVolume5;
+		message.levels[ASK][4].price = depthMarketData->AskPrice5;
+		message.levels[ASK][4].qty = depthMarketData->AskVolume5;
 
 		notify(messagePointer);
 	}

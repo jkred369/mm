@@ -19,7 +19,7 @@ namespace mm
 	//
 	// The subscriber defines the interface for subscribing to a message.
 	//
-	template<typename Message> class ISubscriber
+	template<typename Message, typename Key = std::int64_t> class ISubscriber
 	{
 	public:
 
@@ -32,7 +32,7 @@ namespace mm
 		//
 		// subscription : The topic on which the message will be received.
 		//
-		virtual void subscribe(const ISubscription& subscription) = 0;
+		virtual void subscribe(const ISubscription<Key>& subscription) = 0;
 
 		//
 		// Add the consumer to the subscriber.
