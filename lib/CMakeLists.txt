@@ -15,6 +15,10 @@ set(Bus_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/bus/src")
 file(GLOB_RECURSE Bus_HEADERS "${Bus_INCLUDES}/*.hpp")
 add_subdirectory(bus)
 
+set(Service_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/service/src")
+file(GLOB_RECURSE Service_HEADERS "${Service_INCLUDES}/*.hpp")
+add_subdirectory(service)
+
 set(Femas_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/femas/src")
 file(GLOB_RECURSE Femas_HEADERS "${Femas_INCLUDES}/*.hpp") 
 add_subdirectory(femas)

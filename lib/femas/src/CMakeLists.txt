@@ -7,7 +7,10 @@ add_library(Femas SHARED
 )
 
 target_include_directories(Femas PUBLIC
+	${Bus_INCLUDES}
 	${Common_INCLUDES}
+	${Messaging_INCLUDES}
+	${Service_INCLUDES}
 )
 
 target_link_libraries(Femas 
