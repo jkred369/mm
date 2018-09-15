@@ -27,6 +27,8 @@ namespace mm
 
 	bool FemasMarketDataSession::start()
 	{
+		// TODO implement this
+		return true;
 	}
 
 	void FemasMarketDataSession::stop()

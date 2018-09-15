@@ -1,5 +1,4 @@
 # target
-file(GLOB_RECURSE Femas_HEADERS "*.hpp")
 file(GLOB_RECURSE Femas_SOURCES "*.cpp")
 
 add_library(Femas SHARED
