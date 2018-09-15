@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_MESSAGING_SRC_ISUBSCRIPTION_HPP_
-#define LIB_MESSAGING_SRC_ISUBSCRIPTION_HPP_
+#ifndef LIB_BUS_SRC_ISUBSCRIPTION_HPP_
+#define LIB_BUS_SRC_ISUBSCRIPTION_HPP_
 
 #include <cstdint>
 

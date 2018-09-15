@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_MESSAGING_SRC_ISUBSCRIBER_HPP_
-#define LIB_MESSAGING_SRC_ISUBSCRIBER_HPP_
+#ifndef LIB_BUS_SRC_ISUBSCRIBER_HPP_
+#define LIB_BUS_SRC_ISUBSCRIBER_HPP_
 
 #include <memory>
 
@@ -62,4 +62,4 @@ namespace mm
 	};
 }
 
-#endif /* LIB_MESSAGING_SRC_ISUBSCRIBER_HPP_ */
+#endif /* LIB_BUS_SRC_ISUBSCRIBER_HPP_ */

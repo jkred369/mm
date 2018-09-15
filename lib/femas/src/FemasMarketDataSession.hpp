@@ -177,6 +177,11 @@ namespace mm
 
 	private:
 
+		inline std::shared_ptr<MarketDataMessage> getMessage()
+		{
+			return std::make_shared<MarketDataMessage>();
+		}
+
 		// The actual API session.
 		std::unique_ptr<CUstpFtdcMduserApi> session;
 	};

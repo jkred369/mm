@@ -83,7 +83,8 @@ namespace mm
 
 	void FemasMarketDataSession::OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *depthMarketData)
 	{
-		MarketDataMessage message;
+		std::shared_ptr<MarketDataMessage> messagePointer = getMessage();
+		MarketDataMessage& message = *messagePointer;
 
 		// level 1 fields
 		message.instrumentId = depthMarketData->InstrumentID;
@@ -128,6 +129,8 @@ namespace mm
 
 		message.levels[Side::ASK][4].price = depthMarketData->AskPrice5;
 		message.levels[Side::ASK][4].qty = depthMarketData->AskVolume5;
+
+		notify(messagePointer);
 	}
 
 	void FemasMarketDataSession::OnRspSubMarketData(

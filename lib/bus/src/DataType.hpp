@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_MESSAGING_SRC_DATATYPE_HPP_
-#define LIB_MESSAGING_SRC_DATATYPE_HPP_
+#ifndef LIB_BUS_SRC_DATATYPE_HPP_
+#define LIB_BUS_SRC_DATATYPE_HPP_
 
 #include <cstdint>
 
