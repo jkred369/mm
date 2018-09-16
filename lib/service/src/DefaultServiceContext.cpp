@@ -5,9 +5,8 @@
  *      Author: suoalex
  */
 
-#include <Log.hpp>
-
 #include "DefaultServiceContext.hpp"
+#include "../../common/src/LogLevel.hpp"
 
 namespace mm
 {

@@ -13,6 +13,7 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
+#include <Logger.hpp>
 #include <EnumType.hpp>
 #include <IService.hpp>
 #include <MarketDataMessage.hpp>
@@ -22,8 +23,6 @@ namespace mm
 {
 	//
 	// This class defines a Femas market data session for market data updates.
-	//
-	//
 	//
 	class FemasMarketDataSession :
 			public IService,
@@ -203,6 +202,9 @@ namespace mm
 
 		// The int value for ask
 		static constexpr int ASK = toValue(Side::ASK);
+
+		// The logger for this class.
+		static Logger logger;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.

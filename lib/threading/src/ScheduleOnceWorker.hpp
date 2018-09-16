@@ -38,7 +38,12 @@ namespace mm
 				const Key& key,
 				Runnable& task,
 				const std::chrono::duration<Rep, Period>& delay,
-				Scheduler& scheduler) : ScheduleOnceWorker(key, task, durationToNanos(delay), scheduler)
+				Scheduler& scheduler) :
+			key(key),
+			task(task),
+			delayInNanos(durationToNanos(delay)),
+			scheduler(scheduler),
+			counter(0)
 		{
 		}
 

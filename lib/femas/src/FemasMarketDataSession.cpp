@@ -7,9 +7,9 @@
 
 #include <fmt/format.h>
 
-#include <Log.hpp>
-
 #include "FemasMarketDataSession.hpp"
+
+mm::Logger mm::FemasMarketDataSession::logger;
 
 namespace mm
 {
@@ -64,7 +64,7 @@ namespace mm
 
 		if (result != 0)
 		{
-			LOGERR << "Error subscribing to " << subscription.getKey() << ENDLOG;
+			LOGERR("Error subscribing to {}", subscription.getKey());
 		}
 	}
 
@@ -78,33 +78,33 @@ namespace mm
 
 		if (result != 0)
 		{
-			LOGERR << "Error unsubscribing from " << subscription.getKey() << ENDLOG;
+			LOGERR("Error unsubscribing from {}", subscription.getKey());
 		}
 	}
 
 	void FemasMarketDataSession::OnFrontConnected()
 	{
-		LOGDEBUG << "Market data session connected." << ENDLOG;
+		LOGDEBUG("Market data session connected.");
 	}
 
 	void FemasMarketDataSession::OnFrontDisconnected(int reason)
 	{
-		LOGDEBUG << "Market data session disconnected on " << reason << ", auto-reconnecting" << ENDLOG;
+		LOGDEBUG("Market data session disconnected on {}, auto-reconnecting", reason);
 	}
 
 	void FemasMarketDataSession::OnHeartBeatWarning(int timeLapse)
 	{
-		LOGWARN << "no heart beat in " << timeLapse << " seconds." << ENDLOG;
+		LOGWARN("No heart beat in {} seconds.", timeLapse);
 	}
 
-	void OnPackageStart(int topicID, int sequenceNo)
+	void FemasMarketDataSession::OnPackageStart(int topicID, int sequenceNo)
 	{
-		LOGTRACE << "Received packet " << sequenceNo << " on topic " << topicID << ENDLOG;
+		LOGTRACE("Received packet {} on topic {}", sequenceNo, topicID);
 	}
 
 	void FemasMarketDataSession::OnPackageEnd(int topicID, int sequenceNo)
 	{
-		LOGTRACE << "Finished packet " << sequenceNo << " on topic " << topicID << ENDLOG;
+		LOGTRACE("Finished packet {} on topic {}", sequenceNo, topicID);
 	}
 
 	void FemasMarketDataSession::OnRspError(CUstpFtdcRspInfoField *info, int requestID, bool isLast)

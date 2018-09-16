@@ -5,14 +5,17 @@
  *      Author: suoalex
  */
 
-#include <SpgLogger.hpp>
-
 #include "spdlog/async.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "SpdLogger.hpp"
+
+mm::LogLevel mm::SpgLoggerSingleton::level = mm::LogLevel::TRACE;
+std::string mm::SpgLoggerSingleton::path = "";
+std::string mm::SpgLoggerSingleton::loggerName = "";
 
 namespace mm
 {
-	SpgLogger::SpgLogger(const std::string& path, const std::string& loggerName)
+	SpdLogger::SpdLogger(LogLevel level, const std::string& path, const std::string& loggerName)
 	{
 	    spdlog::init_thread_pool(8192, 1);
 
@@ -23,10 +26,52 @@ namespace mm
 				spdlog::thread_pool(), spdlog::async_overflow_policy::block);
 
 		spdlog::register_logger(logger);
+		setLevel(level);
 	}
 
-	std::shared_ptr<spglog::logger> SpgLogger::getLogger()
+	void SpdLogger::setLevel(LogLevel level)
 	{
+		spdlog::level spdLevel;
+
+		switch (level)
+		{
+		case LogLevel::TRACE:
+			spdLevel = spdlog::level::trace;
+			break;
+		case LogLevel::DEBUG:
+			spdLevel = spdlog::level::debug;
+			break;
+		case LogLevel::INFO:
+			spdLevel = spdlog::level::info;
+			break;
+		case LogLevel::WARN:
+			spdLevel = spdlog::level::warn;
+			break;
+		case LogLevel::ERR:
+			spdLevel = spdlog::level::err;
+			break;
+		case LogLevel::FATAL:
+			spdLevel = spdlog::level::critical;
+			break;
+		default:
+			spdLevel = spdlog::level::trace;
+		}
+
+		logger->set_level(spdLevel);
+		logger->info("Logging level set to {}", mm::getName(level));
+	}
+
+	void SpdLoggerSingleton::init(LogLevel level, const std::string& path, const std::string& loggerName)
+	{
+		this->level = level;
+		this->path = path;
+		this->loggerName = loggerName;
+	}
+
+	std::shared_ptr<spdlog::logger> SpdLoggerSingleton::getLogger()
+	{
+		static SpdLogger logger(level, path, loggerName);
+		return logger->getLogger();
 	}
 
 }

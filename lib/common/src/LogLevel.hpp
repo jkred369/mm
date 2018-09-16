@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_COMMON_SRC_LOG_HPP_
-#define LIB_COMMON_SRC_LOG_HPP_
+#ifndef LIB_COMMON_SRC_LOGLEVEL_HPP_
+#define LIB_COMMON_SRC_LOGLEVEL_HPP_
 
 #include <iostream>
 
@@ -26,25 +26,20 @@ namespace mm
 	};
 
 	//
-	// Placeholder for quick build up.
+	// Get the log level name from the value.
 	//
-	// return : The current global log level.
+	// return : string presentation of the log level.
 	//
-	inline LogLevel getLevel()
-	{
-		return LogLevel::DEBUG;
-	}
+	const std::string& getName(LogLevel level);
 
-#define LOG_IF(level) if (getLevel() >= level) { std::cout
-#define ENDLOG std::endl; }
-
-#define LOGTRACE LOG_IF(LogLevel::TRACE)
-#define LOGDEBUG LOG_IF(LogLevel::DEBUG)
-#define LOGINFO LOG_IF(LogLevel::INFO)
-#define LOGWARN LOG_IF(LogLevel::WARN)
-#define LOGERR LOG_IF(LogLevel::ERR)
-#define LOGFATAL LOG_IF(LogLevel::FATAL)
-
+	// The log level strings.
+	static const std::string LOG_TRACE;
+	static const std::string LOG_DEBUG;
+	static const std::string LOG_INFO;
+	static const std::string LOG_WARN;
+	static const std::string LOG_ERR;
+	static const std::string LOG_FATAL;
+	static const std::string LOG_UNKNOWN;
 }
 
-#endif /* LIB_COMMON_SRC_LOG_HPP_ */
+#endif /* LIB_COMMON_SRC_LOGLEVEL_HPP_ */
