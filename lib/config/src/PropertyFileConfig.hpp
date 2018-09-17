@@ -8,10 +8,19 @@
 #ifndef LIB_CONFIG_SRC_PROPERTYFILECONFIG_HPP_
 #define LIB_CONFIG_SRC_PROPERTYFILECONFIG_HPP_
 
+#include <unordered_map>
+
 #include <IConfig.hpp>
 
 namespace mm
 {
+	//
+	// A simple property file based config.
+	//
+	// - all lines starting with '#' as first non-trivial char will be ignored
+	// - all property as {A}.{B}.{C} will be treated as sub configurations.
+	// - all ',' separated strings will be treated as list of values.
+	//
 	class PropertyFileConfig : public IConfig
 	{
 	public:
@@ -26,7 +35,7 @@ namespace mm
 		virtual ~PropertyFileConfig();
 
 		// all interface methods from IConfig
-		virtual const IConfig* getSubConfig(const std::string& name) const override;
+		virtual const std::shared_ptr<IConfig> getSubConfig(const std::string& name) const override;
 
 		virtual bool getBool(const std::string& name) const override;
 		virtual bool getBool(const std::string& name, bool defaultValue) const override;
@@ -47,6 +56,23 @@ namespace mm
 		virtual const std::string& getString(const std::string& name) const override;
 		virtual const std::string& getString(const std::string& name, const std::string& defaultValue) const override;
 		virtual const std::vector<std::string> getStringList(const std::string& name) const override;
+
+	private:
+
+		//
+		// Add a value to the config with the given key. If the key represents sub config then the corresponding
+		// structure should be established.
+		//
+		// key : The key with potentially subconfig structure as {A}.{B}.{C}
+		// value : The value.
+		//
+		void addValue(const std::string& key, const std::string& value);
+
+		// The value map where key is the value name.
+		std::unordered_map<std::string, std::string> valueMap;
+
+		// The sub config map where key is the sub config group name.
+		std::unordered_map<std::string, std::shared_ptr<IConfig> > subConfigMap;
 	};
 }
 

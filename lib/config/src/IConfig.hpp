@@ -9,6 +9,7 @@
 #define LIB_CONFIG_SRC_ICONFIG_HPP_
 
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -29,7 +30,7 @@ namespace mm
 		//
 		// return : pointer to the sub config; or nullptr if config with the give name cannot be found.
 		//
-		virtual const IConfig* getSubConfig(const std::string& name) const = 0;
+		virtual const std::shared_ptr<IConfig> getSubConfig(const std::string& name) const = 0;
 
 		//
 		// Get the config on the given name as a bool value. If the key cannot be found throw exception.
