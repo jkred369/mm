@@ -109,6 +109,7 @@ namespace mm
 
 	void FemasMarketDataSession::OnRspError(CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
+		LOGERR("Error on request {} : {}, {}", requestID, info->ErrorID, info->ErrorMsg);
 	}
 
 	void FemasMarketDataSession::OnRspUserLogin(
@@ -117,6 +118,14 @@ namespace mm
 			int requestID,
 			bool isLast)
 	{
+		if (info->ErrorID == 0)
+		{
+			LOGINFO("User {} logged in successfully", userLogin->UserID);
+		}
+		else
+		{
+			LOGERR("Login attempt failed. User: {}, error: {}, {}", userLogin->UserID, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 	void FemasMarketDataSession::OnRspUserLogout(
@@ -125,6 +134,14 @@ namespace mm
 			int requestID,
 			bool isLast)
 	{
+		if (info->ErrorID == 0)
+		{
+			LOGINFO("User {} logged out successfully", userLogin->UserID);
+		}
+		else
+		{
+			LOGERR("Logout attempt failed. User: {}, error: {}, {}", userLogin->UserID, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 	void FemasMarketDataSession::OnRspSubscribeTopic(
@@ -133,6 +150,14 @@ namespace mm
 			int requestID,
 			bool isLast)
 	{
+		if (info->ErrorID == 0)
+		{
+			LOGINFO("Subscribed to {}", dissemination->SequenceSeries);
+		}
+		else
+		{
+			LOGERR("Error subscribing to {}: {}, {}", dissemination->SequenceSeries, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 	void FemasMarketDataSession::OnRspQryTopic(
@@ -141,6 +166,14 @@ namespace mm
 			int requestID,
 			bool isLast)
 	{
+		if (info->ErrorID == 0)
+		{
+			LOGINFO("Queried topic {}", dissemination->SequenceSeries);
+		}
+		else
+		{
+			LOGERR("Error querying {}: {}, {}", dissemination->SequenceSeries, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 	void FemasMarketDataSession::OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *depthMarketData)
@@ -201,6 +234,14 @@ namespace mm
 			int requestID,
 			bool isLast)
 	{
+		if (info->ErrorID == 0)
+		{
+			LOGINFO("Subscription established for {}", specificInstrument->InstrumentID);
+		}
+		else
+		{
+			LOGERR("Error establishing subscription on {}: {}, {}", specificInstrument->InstrumentID, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 	void FemasMarketDataSession::OnRspUnSubMarketData(
@@ -209,6 +250,14 @@ namespace mm
 			int requestID,
 			bool isLast)
 	{
+		if (info->ErrorID == 0)
+		{
+			LOGINFO("Unsubscription finished for {}", specificInstrument->InstrumentID);
+		}
+		else
+		{
+			LOGERR("Error unsubscribing on {}: {}, {}", specificInstrument->InstrumentID, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 }
