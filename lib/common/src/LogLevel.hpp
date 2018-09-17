@@ -25,21 +25,25 @@ namespace mm
 		TRACE = 5,
 	};
 
-	//
-	// Get the log level name from the value.
-	//
-	// return : string presentation of the log level.
-	//
-	const std::string& getName(LogLevel level);
-
 	// The log level strings.
-	static const std::string LOG_TRACE;
-	static const std::string LOG_DEBUG;
-	static const std::string LOG_INFO;
-	static const std::string LOG_WARN;
-	static const std::string LOG_ERR;
-	static const std::string LOG_FATAL;
-	static const std::string LOG_UNKNOWN;
+	struct LogLevelConstant
+	{
+		static const std::string LOG_TRACE;
+		static const std::string LOG_DEBUG;
+		static const std::string LOG_INFO;
+		static const std::string LOG_WARN;
+		static const std::string LOG_ERR;
+		static const std::string LOG_FATAL;
+		static const std::string LOG_UNKNOWN;
+
+		//
+		// Get the log level name from the value.
+		//
+		// return : string presentation of the log level.
+		//
+		static const std::string& getName(LogLevel level);
+	};
+
 }
 
 #endif /* LIB_COMMON_SRC_LOGLEVEL_HPP_ */

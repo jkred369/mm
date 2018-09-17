@@ -54,7 +54,7 @@ namespace mm
 		std::shared_ptr<spdlog::logger> logger;
 	};
 
-	class SpdLoggerSingleton
+	class SpgLoggerSingleton
 	{
 	public:
 

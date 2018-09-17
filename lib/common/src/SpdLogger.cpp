@@ -58,14 +58,14 @@ namespace mm
 		}
 
 		logger->set_level(spdLevel);
-		logger->info("Logging level set to {}", mm::getName(level));
+		logger->info("Logging level set to {}", mm::LogLevelConstant::getName(level));
 	}
 
 	void SpdLoggerSingleton::init(LogLevel level, const std::string& path, const std::string& loggerName)
 	{
-		this->level = level;
-		this->path = path;
-		this->loggerName = loggerName;
+		SpdLoggerSingleton::level = level;
+		SpdLoggerSingleton::path = path;
+		SpdLoggerSingleton::loggerName = loggerName;
 	}
 
 	std::shared_ptr<spdlog::logger> SpdLoggerSingleton::getLogger()

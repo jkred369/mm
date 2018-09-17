@@ -5,19 +5,19 @@
  *      Author: suoalex
  */
 
-#include <LogLevel.hpp>
+#include "LogLevel.hpp"
 
-const std::string mm::LOG_TRACE = "TRACE";
-const std::string mm::LOG_DEBUG = "DEBUG";
-const std::string mm::LOG_INFO = "INFO";
-const std::string mm::LOG_WARN = "WARN";
-const std::string mm::LOG_ERR = "ERR";
-const std::string mm::LOG_FATAL = "FATAL";
-const std::string mm::LOG_UNKNOWN = "UNKNOWN";
+const std::string mm::LogLevelConstant::LOG_TRACE = "TRACE";
+const std::string mm::LogLevelConstant::LOG_DEBUG = "DEBUG";
+const std::string mm::LogLevelConstant::LOG_INFO = "INFO";
+const std::string mm::LogLevelConstant::LOG_WARN = "WARN";
+const std::string mm::LogLevelConstant::LOG_ERR = "ERR";
+const std::string mm::LogLevelConstant::LOG_FATAL = "FATAL";
+const std::string mm::LogLevelConstant::LOG_UNKNOWN = "UNKNOWN";
 
 namespace mm
 {
-	const std::string& getName(LogLevel level)
+	const std::string& LogLevelConstant::getName(LogLevel level)
 	{
 		switch (level)
 		{
@@ -34,7 +34,7 @@ namespace mm
 		case LogLevel::FATAL:
 			return LOG_FATAL;
 		default:
-			return LOG_UNKOWN;
+			return LOG_UNKNOWN;
 		}
 	}
 
