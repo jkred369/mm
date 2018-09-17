@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include <DispatchKey.hpp>
 #include <IConsumer.hpp>
 #include <ISubscription.hpp>
 #include <Message.hpp>
@@ -19,7 +20,7 @@ namespace mm
 	//
 	// The subscriber defines the interface for subscribing to a message.
 	//
-	template<typename Message, typename Key = std::int64_t> class ISubscriber
+	template<typename Message, typename Key = KeyType> class ISubscriber
 	{
 	public:
 

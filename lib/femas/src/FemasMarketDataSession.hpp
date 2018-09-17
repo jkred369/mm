@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <memory>
+#include <string>
 
 #include <femas/USTPFtdcMduserApi.h>
 
@@ -18,6 +19,8 @@
 #include <IService.hpp>
 #include <MarketDataMessage.hpp>
 #include <SubscriberAdapter.hpp>
+
+#include <FemasUserDetail.hpp>
 
 namespace mm
 {
@@ -194,7 +197,7 @@ namespace mm
 
 		inline std::shared_ptr<MarketDataMessage> getMessage()
 		{
-			return std::make_shared<MarketDataMessage>();
+			return std::make_shared<MarketDataMessage>(new MarketDataMessage());
 		}
 
 		// The int value for bid
@@ -205,6 +208,9 @@ namespace mm
 
 		// The logger for this class.
 		static Logger logger;
+
+		// The login user detail.
+		const FemasUserDetail userDetail;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.

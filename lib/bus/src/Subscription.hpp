@@ -18,7 +18,7 @@ namespace mm
 	//
 	// The subscription class provides the default implementation for the subscription interface.
 	//
-	class Subscription : public BaseSubscription, public SingletonInstance<Subscription>
+	class Subscription final : public BaseSubscription
 	{
 	public:
 
@@ -36,7 +36,7 @@ namespace mm
 			return dataType;
 		}
 
-		virtual const std::int64_t& getKey() const override
+		virtual const KeyType& getKey() const override
 		{
 			return key;
 		}
@@ -57,6 +57,18 @@ namespace mm
 
 	private:
 
+		//
+		// Protected constructor for singleton.
+		//
+		// sourceType : The source type.
+		// dataType : The data type.
+		// key : The key.
+		//
+		Subscription(SourceType sourceType, DataType dataType, KeyType key) :
+			sourceType(sourceType), dataType(dataType), key(key)
+		{
+		}
+
 		// Source type
 		SourceType sourceType;
 
@@ -64,7 +76,7 @@ namespace mm
 		DataType dataType;
 
 		// Key of the subscription
-		std::int64_t key;
+		KeyType key;
 	};
 }
 
@@ -76,7 +88,7 @@ namespace std
 		{
 			return std::hash<std::int16_t> (value.sourceType) ^
 					std::hash<std::int16_t> (value.dataType) ^
-					std::hash<std::int64_t> (value.key);
+					std::hash<KeyType> (value.key);
 		}
 	};
 }

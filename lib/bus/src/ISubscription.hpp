@@ -11,14 +11,16 @@
 #include <cstdint>
 
 #include <DataType.hpp>
+#include <DispatchKey.hpp>
 #include <SourceType.hpp>
+
 
 namespace mm
 {
 	//
 	// This class defines the interface for the subscription used in pub/sub structure.
 	//
-	template<typename Key = std::int64_t> class ISubscription
+	template<typename Key = KeyType> class ISubscription
 	{
 	public:
 
@@ -48,7 +50,7 @@ namespace mm
 		virtual const Key& getKey() const = 0;
 	};
 
-	typedef ISubscription<std::int64_t> BaseSubscription;
+	typedef ISubscription<KeyType> BaseSubscription;
 }
 
 #endif /* LIB_BUS_SRC_ISUBSCRIPTION_HPP_ */

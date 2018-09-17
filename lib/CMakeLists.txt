@@ -3,6 +3,10 @@ set(Common_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/common/src")
 file(GLOB_RECURSE Common_HEADERS "${Common_INCLUDES}/*.hpp")
 add_subdirectory(common)
 
+set(Config_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/config/src")
+file(GLOB_RECURSE Config_HEADERS "${Config_INCLUDES}/*.hpp")
+add_subdirectory(config)
+
 set(Messaging_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/messaging/src")
 file(GLOB_RECURSE Threading_HEADERS "${Messaging_INCLUDES}/*.hpp")
 add_subdirectory(messaging)
