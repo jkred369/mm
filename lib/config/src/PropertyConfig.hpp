@@ -5,11 +5,13 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_CONFIG_SRC_PROPERTYFILECONFIG_HPP_
-#define LIB_CONFIG_SRC_PROPERTYFILECONFIG_HPP_
+#ifndef LIB_CONFIG_SRC_PROPERTYCONFIG_HPP_
+#define LIB_CONFIG_SRC_PROPERTYCONFIG_HPP_
 
+#include <istream>
 #include <unordered_map>
 
+#include <Logger.hpp>
 #include <IConfig.hpp>
 
 namespace mm
@@ -21,18 +23,23 @@ namespace mm
 	// - all property as {A}.{B}.{C} will be treated as sub configurations.
 	// - all ',' separated strings will be treated as list of values.
 	//
-	class PropertyFileConfig : public IConfig
+	class PropertyConfig : public IConfig
 	{
 	public:
 
 		//
+		// Default constructor.
+		//
+		PropertyConfig();
+
+		//
 		// Constructor.
 		//
-		// path : The path to the configuration file.
+		// is : The input stream.
 		//
-		PropertyFileConfig(const std::string path);
+		PropertyConfig(std::istream is);
 
-		virtual ~PropertyFileConfig();
+		virtual ~PropertyConfig();
 
 		// all interface methods from IConfig
 		virtual const std::shared_ptr<IConfig> getSubConfig(const std::string& name) const override;
@@ -68,12 +75,15 @@ namespace mm
 		//
 		void addValue(const std::string& key, const std::string& value);
 
+		// The logger for this class.
+		static Logger logger;
+
 		// The value map where key is the value name.
 		std::unordered_map<std::string, std::string> valueMap;
 
 		// The sub config map where key is the sub config group name.
-		std::unordered_map<std::string, std::shared_ptr<IConfig> > subConfigMap;
+		std::unordered_map<std::string, std::shared_ptr<PropertyConfig> > subConfigMap;
 	};
 }
 
-#endif /* LIB_CONFIG_SRC_PROPERTYFILECONFIG_HPP_ */
+#endif /* LIB_CONFIG_SRC_PROPERTYCONFIG_HPP_ */
