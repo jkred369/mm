@@ -80,12 +80,12 @@ namespace mm
 		{
 			const std::string subKey = key.substr(0, index);
 			const std::string restKey = key.substr(index + 1);
-			std::shared_ptr<PropertyConfig> subConfig = configMap[subKey];
+			std::shared_ptr<PropertyConfig> subConfig = subConfigMap[subKey];
 
 			if (!subConfig.get())
 			{
 				subConfig.reset(new PropertyConfig());
-				configMap[subKey] = subConfig;
+				subConfigMap[subKey] = subConfig;
 			}
 
 			subConfig->addValue(restKey, value);

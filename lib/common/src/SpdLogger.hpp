@@ -10,7 +10,7 @@
 
 #include <memory>
 
-#include "spdlog/logger.h"
+#include "spdlog/spdlog.h"
 #include "LogLevel.hpp"
 
 namespace mm
@@ -54,7 +54,7 @@ namespace mm
 		std::shared_ptr<spdlog::logger> logger;
 	};
 
-	class SpgLoggerSingleton
+	class SpdLoggerSingleton
 	{
 	public:
 

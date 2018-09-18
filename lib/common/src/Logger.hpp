@@ -10,8 +10,8 @@
 
 #include <memory>
 
-#include <LogLevel.hpp>
-#include <SpdLogger.hpp>
+#include "LogLevel.hpp"
+#include "SpdLogger.hpp"
 
 namespace mm
 {

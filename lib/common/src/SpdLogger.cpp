@@ -31,7 +31,7 @@ namespace mm
 
 	void SpdLogger::setLevel(LogLevel level)
 	{
-		spdlog::level spdLevel;
+		spdlog::level::level_enum spdLevel;
 
 		switch (level)
 		{
@@ -71,7 +71,7 @@ namespace mm
 	std::shared_ptr<spdlog::logger> SpdLoggerSingleton::getLogger()
 	{
 		static SpdLogger logger(level, path, loggerName);
-		return logger->getLogger();
+		return logger.getLogger();
 	}
 
 }
