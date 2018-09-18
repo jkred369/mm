@@ -19,7 +19,7 @@ namespace mm
 	//
 	// The order class for order status management and actions.
 	//
-	template<typename Publisher, typename ExchangeInterface> class Order
+	template<typename Publisher, typename ExchangeInterface, typename Pool> class Order
 	{
 	public:
 
@@ -43,45 +43,110 @@ namespace mm
 		}
 
 		//
-		// Apply the given order message to the order.
+		// consume the given order message to the order.
 		//
-		void consume(const std::shared_ptr<const OrderMessage>& orderMessage)
+		// message : The order message.
+		//
+		void consume(const std::shared_ptr<const OrderMessage>& message)
 		{
 			bool processed = false;
 
-			// status management
-			switch (status)
+			// sanity check
+			if (status != OrderStatus::NEW && orderId != message->orderId)
 			{
-				case OrderStatus::NEW:
-				{
-					if (orderMessage->status == OrderStatus::NEW)
-					{
-						processed = true;
-
-						orderId = orderMessage->orderId;
-						instrumentId = orderMessage->instrumentId;
-						totalQty = orderMessage->totalQty;
-						price = orderMessage->price;
-					}
-					else if (orderMessage->status == OrderStatus::LIVE)
-					{
-						processed = true;
-
-						exchange->sendOrder()
-					}
-
-					break;
-				}
-				case OrderStatus::LIVE:
-					break;
-				default:
-					break;
+				LOGERR("Invalid order messgae {} on order {}", message->orderId, orderId);
+				return;
 			}
 
+			// status management
+			if (status == OrderStatus::NEW)
+			{
+				if (message->status == OrderStatus::NEW)
+				{
+					orderId = message->orderId;
+					instrumentId = message->instrumentId;
+					totalQty = message->totalQty;
+					price = message->price;
+
+					processed = true;
+				}
+				else if (message->status == OrderStatus::LIVE)
+				{
+					exchange->sendOrder(message);
+					status = OrderStatus::PENDING_ACK;
+					processed = true;
+				}
+			}
+			else if (status == OrderStatus::LIVE)
+			{
+				if (message->status == OrderStatus::CANCELLED)
+				{
+					exchange->cancel(message);
+					status = OrderStatus::PENDING_CANCEL;
+					processed = true;
+				}
+			}
+
+			// status update
 			if (!processed)
 			{
 				LOGWARN("Ignoring order message for status {} on order status {}", orderMessage->status, status);
+				return;
 			}
+			else if (status != OrderStatus::NEW)
+			{
+				sendSummary();
+			}
+		}
+
+		//
+		// consume the given execution message for the order.
+		//
+		// executionMessage : The execution.
+		//
+		void consume(const std::shared_ptr<const ExecutionMessage>& message)
+		{
+			bool processed = false;
+
+			// sanity check
+			if (orderId != message->orderId)
+			{
+				LOGERR("Invalid order messgae {} on order {}", message->orderId, orderId);
+				return;
+			}
+
+			// process the message if there is a trade
+			if (message->isTrade() && status != OrderStatus::FULL_FILLED && status != OrderStatus::CANCELLED)
+			{
+				if (tradedQty == 0 && message->qty == 0)
+				{
+					LOGERR("Execution message has a trade but qty is 0 on instrument {}, order {}, execution {}",
+							instrumentId, orderId, message->executionId);
+				}
+				else
+				{
+					avgTradedPrice = (price * tradedQty + message->price * message->qty) / (tradedQty + message->qty);
+					tradedQty += message->qty;
+
+					processed = true;
+				}
+			}
+
+			// for status update - process regardlessly.
+			if (status != OrderStatus::FULL_FILLED && status != OrderStatus::CANCELLED && status != message->status)
+			{
+				status = message->status;
+				processed = true;
+			}
+
+			// status update
+			if (!processed)
+			{
+				LOGERR("Ignoring order message for status {} on order status {}", orderMessage->status, status);
+				return;
+			}
+
+			sendSummary();
 		}
 
 		//
@@ -89,10 +154,28 @@ namespace mm
 		//
 		void sendSummary()
 		{
+			// sanity check
+			if (orderId == 0)
+			{
+				return;
+			}
 
+			std::shared_ptr<OrderSummaryMessage> message = pool.get();
+
+			message->orderId = orderId;
+			message->instrumentId = instrumentId;
+			messge->totalQty = totalQty;
+			message->tradedQty = tradedQty;
+			message->price = price;
+			message->avgTradedPrice = avgTradedPrice;
+
+			publisher->publish(message);
 		}
 
 	private:
+
+		// The message pool.
+		static Pool<OrderSummaryMessage, 1000> pool;
 
 		// The publisher.
 		const std::shared_ptr<Publisher> publisher;
