@@ -19,7 +19,7 @@ namespace mm
 	//
 	// This class represents an order cache for all live orders in the market.
 	//
-	template<typename Order> class OrderCache
+	template<typename Order, typename Pool> class OrderCache
 	{
 	public:
 
@@ -50,10 +50,11 @@ namespace mm
 		//
 		// instrumentId : The instrument ID.
 		// orderId : The order ID.
+		// create : if the order should be created in case not found.
 		//
 		// return : the pointer for the order.
 		//
-		inline const std::shared_ptr<Order>& getOrder(std::int64_t instrumentId, std::int64_t orderId)
+		inline const std::shared_ptr<Order>& getOrder(std::int64_t instrumentId, std::int64_t orderId, bool create = false)
 		{
 			OrderCollection& collection = orderByInstrumentMap[instrumentId];
 
@@ -61,7 +62,19 @@ namespace mm
 				return order->getOrderId() == orderId;
 			});
 
-			return it == collection.end() ? std::shared_ptr<Order> () : *it;
+			if (it != collection.end())
+			{
+				return *it;
+			}
+			else if (create)
+			{
+				collection.emplace_back(pool.get());
+				return collection.back();
+			}
+			else
+			{
+				return std::shared_ptr<Order> ();
+			}
 		}
 
 		//
@@ -84,6 +97,9 @@ namespace mm
 		}
 
 	private:
+
+		// The object pool for orders.
+		static Pool<Order, 1000> pool;
 
 		// the order map by instrument.
 		std::unordered_map<std::int64_t, OrderCollection> orderByInstrumentMap;
