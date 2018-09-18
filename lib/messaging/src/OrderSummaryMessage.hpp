@@ -11,6 +11,7 @@
 #include <cstdint>
 
 #include "Message.hpp"
+#include "OrderStatus.hpp"
 
 namespace mm
 {
@@ -19,7 +20,38 @@ namespace mm
 	//
 	class OrderSummaryMessage : public Message
 	{
+	public:
 
+		// The order ID.
+		std::int64_t orderId;
+
+		// The instrument ID.
+		std::int64_t instrumentId;
+
+		// Total qty of the order.
+		std::int64_t totalQty;
+
+		// Traded qty of the order.
+		std::int64_t tradedQty;
+
+		// Market price.
+		double price;
+
+		// Average traded price.
+		double avgTradedPrice;
+
+		// current order status.
+		OrderStatus status;
+
+		//
+		// Get the remain qty of the order.
+		//
+		// return : remain qty as total qty - traded qty.
+		//
+		inline std::int64_t remainQty() const
+		{
+			return totalQty - tradedQty;
+		}
 	};
 }
 
