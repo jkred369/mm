@@ -71,6 +71,10 @@ namespace mm
 		// create services
 		{
 			const std::vector<std::string> serviceList = config->getStringList(ServiceContext::SERVICE_LIST);
+			if (serviceList.empty())
+			{
+				throw std::runtime_error("No service specified in {}", ServiceContext::SERVICE_LIST);
+			}
 
 			for (const std::string& serviceName : serviceList)
 			{
