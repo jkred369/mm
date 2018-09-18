@@ -38,10 +38,7 @@ namespace mm
 				const std::string& interfaceProductInfo,
 				const std::string& userProductInfo,
 				const std::string& password,
-				const std::string& protocolInfo,
-				const std::int64_t maxOrderLocalId,
-				const std::int64_t privteFlowSize,
-				const std::int64_t userFlowSize) :
+				const std::string& protocolInfo) :
 			frontAddress(frontAddress),
 			nameServer(nameServer),
 			certFileName(certFileName),
@@ -57,10 +54,7 @@ namespace mm
 			interfaceProductInfo(interfaceProductInfo),
 			userProductInfo(userProductInfo),
 			password(password),
-			protocolInfo(protocolInfo),
-			maxOrderLocalId(maxOrderLocalId),
-			privateFlowSize(privateFlowSize),
-			userFlowSize(userFlowSize)
+			protocolInfo(protocolInfo)
 		{
 		}
 
@@ -111,15 +105,6 @@ namespace mm
 
 		// Protocol info.
 		std::string protocolInfo;
-
-		// Max order local ID.
-		std::int64_t maxOrderLocalId;
-
-		// Private flow size.
-		std::int64_t privateFlowSize;
-
-		// User flow size.
-		std::int64_t userFlowSize;
 	};
 }
 

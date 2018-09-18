@@ -84,6 +84,19 @@ namespace mm
 			}
 		}
 
+		// attempt to logout but stop even if failed
+		{
+			CUstpFtdcReqUserLogoutField field;
+			StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+			StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
+
+			const int result = session->ReqUserLogout(&field, ++requestId);
+			if (result != 0)
+			{
+				LOGERR("Error logout user: {} with code: {}", userDetail.userId, result);
+			}
+		}
+
 		// actually stop the service
 		// it's commented that session->join() isn't stable?
 		session->RegisterSpi(nullptr);
