@@ -37,9 +37,9 @@ namespace mm
 		//
 		// Constructor.
 		//
+		// userDetail : The configuration details.
 		//
-		//
-		FemasMarketDataSession();
+		FemasMarketDataSession(const FemasUserDetail& detail);
 
 		//
 		// Destructor.
@@ -218,6 +218,9 @@ namespace mm
 
 		// Flag if stop is called or in process.
 		std::atomic<bool> stopFlag;
+
+		// The request ID value keeper.
+		std::atomic<int> requestId;
 	};
 }
 

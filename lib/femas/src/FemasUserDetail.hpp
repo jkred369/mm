@@ -30,9 +30,15 @@ namespace mm
 				const std::string& caFileName,
 				const std::string& keyFilePassword,
 				const std::string& userId,
-				const std::string& dataCenterId,
+				const std::int64_t dataCenterId,
 				const std::string& brokerId,
 				const std::string& tradingSystemName,
+				const std::string& macAddress,
+				const std::string& ipAddress,
+				const std::string& interfaceProductInfo,
+				const std::string& userProductInfo,
+				const std::string& password,
+				const std::string& protocolInfo,
 				const std::int64_t maxOrderLocalId,
 				const std::int64_t privteFlowSize,
 				const std::int64_t userFlowSize) :
@@ -46,6 +52,12 @@ namespace mm
 			dataCenterId(dataCenterId),
 			brokerId(brokerId),
 			tradingSystemName(tradingSystemName),
+			macAddress(macAddress),
+			ipAddress(ipAddress),
+			interfaceProductInfo(interfaceProductInfo),
+			userProductInfo(userProductInfo),
+			password(password),
+			protocolInfo(protocolInfo),
 			maxOrderLocalId(maxOrderLocalId),
 			privateFlowSize(privateFlowSize),
 			userFlowSize(userFlowSize)
@@ -74,13 +86,31 @@ namespace mm
 		std::string userId;
 
 		// Data center ID.
-		std::string dataCenterId;
+		std::int64_t dataCenterId;
 
 		// Broker ID.
 		std::string brokerId;
 
 		// Trading system name.
 		std::string tradingSystemName;
+
+		// MAC address
+		std::string macAddress;
+
+		// IP address
+		std::string ipAddress;
+
+		// interface product info.
+		std::string interfaceProductInfo;
+
+		// user product info.
+		std::string userProductInfo;
+
+		// Password.
+		std::string password;
+
+		// Protocol info.
+		std::string protocolInfo;
 
 		// Max order local ID.
 		std::int64_t maxOrderLocalId;

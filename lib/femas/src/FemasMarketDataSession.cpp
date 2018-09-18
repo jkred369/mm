@@ -5,23 +5,36 @@
  *      Author: suoalex
  */
 
+
 #include <fmt/format.h>
 
+#include <StringUtil.hpp>
 #include "FemasMarketDataSession.hpp"
 
 mm::Logger mm::FemasMarketDataSession::logger;
 
 namespace mm
 {
-	FemasMarketDataSession::FemasMarketDataSession() :
+	FemasMarketDataSession::FemasMarketDataSession(const FemasUserDetail& detail) :
+		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
-		stopFlag(false)
+		stopFlag(false),
+		requestId(0)
 	{
 		static_assert(BID >= 0, "Bid index must be positive.");
 		static_assert(ASK >= 0, "Ask index must be positive.");
 
-		// TODO determine if need to pass a config file to create API
+		// basic wiring up - the API interface forced const_cast usage
 		session->RegisterSpi(this);
+		session->RegisterFront(const_cast<char*> (userDetail.frontAddress.c_str()));
+		session->RegisterNameServer(const_cast<char*> (userDetail.nameServer.c_str()));
+
+		session->RegisterCertificateFile(
+				userDetail.certFileName.c_str(),
+				userDetail.keyFileName.c_str(),
+				userDetail.caFileName.c_str(),
+				userDetail.keyFilePassword.c_str());
+
 		session->Init();
 	}
 
@@ -32,8 +45,32 @@ namespace mm
 
 	bool FemasMarketDataSession::start()
 	{
-		// TODO implement this
-		return true;
+		// login attempt
+		CUstpFtdcReqUserLoginField field;
+		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+		field.DataCenterID = userDetail.dataCenterId;
+
+		StringUtil::copy(field.IPAddress, userDetail.ipAddress, sizeof(field.IPAddress));
+		StringUtil::copy(field.InterfaceProductInfo, userDetail.interfaceProductInfo, sizeof(field.InterfaceProductInfo));
+		StringUtil::copy(field.MacAddress, userDetail.macAddress, sizeof(field.MacAddress));
+		StringUtil::copy(field.Password, userDetail.password, sizeof(field.Password));
+		StringUtil::copy(field.ProtocolInfo, userDetail.protocolInfo, sizeof(field.ProtocolInfo));
+		StringUtil::copy(field.TradingDay, session->GetTradingDay(), sizeof(field.TradingDay));
+		StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
+		StringUtil::copy(field.UserProductInfo, userDetail.userProductInfo, sizeof(field.UserProductInfo));
+
+		const int result = session->ReqUserLogin(&field, ++requestId);
+
+		if (result == 0)
+		{
+			LOGINFO("Market data session logged in as {}", userDetail.userId);
+			return true;
+		}
+		else
+		{
+			LOGERR("Error loging as user {} with code: {}", userDetail.userId, result);
+			return false;
+		}
 	}
 
 	void FemasMarketDataSession::stop()

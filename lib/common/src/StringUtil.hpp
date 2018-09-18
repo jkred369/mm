@@ -10,7 +10,9 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <locale>
+#include <string>
 
 namespace mm
 {
@@ -52,6 +54,19 @@ namespace mm
 		{
 		    ltrim(s);
 		    rtrim(s);
+		}
+
+		//
+		// Copy at most count characters from src to dest. Append '\0' to end of dest regardlessly.
+		//
+		// dest : The destination.
+		// src : The source string.
+		// count : max count of chars to copy.
+		//
+		static inline void copy(char* dest, const std::string& src, std::size_t count)
+		{
+			std::strncpy(dest, src.c_str(), count);
+			dest[count - 1] = '\0';
 		}
 	};
 }
