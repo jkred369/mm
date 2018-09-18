@@ -36,6 +36,22 @@ namespace mm
 			public IConsumer<OrderMessage>,
 			public SubscriberAdapter<OrderSummaryMessage>
 	{
+	public:
+
+		//
+		// Send new order to exchange.
+		//
+		// message : The message representing new order.
+		//
+		void sendOrder(const std::shared_ptr<OrderMessage>& message);
+
+		//
+		// Cancel order.
+		//
+		// message : The message representing order to cancel.
+		//
+		void cancel(const std::shared_ptr<OrderMessage>& message);
+
 	};
 }
 
