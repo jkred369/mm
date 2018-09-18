@@ -9,9 +9,9 @@
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "SpdLogger.hpp"
 
-mm::LogLevel mm::SpgLoggerSingleton::level = mm::LogLevel::TRACE;
-std::string mm::SpgLoggerSingleton::path = "";
-std::string mm::SpgLoggerSingleton::loggerName = "";
+mm::LogLevel mm::SpdLoggerSingleton::level = mm::LogLevel::TRACE;
+std::string mm::SpdLoggerSingleton::path = "";
+std::string mm::SpdLoggerSingleton::loggerName = "";
 
 namespace mm
 {

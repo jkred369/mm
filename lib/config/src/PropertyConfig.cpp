@@ -8,6 +8,7 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <StringUtil.hpp>
@@ -57,8 +58,201 @@ namespace mm
 	{
 	}
 
-	bool PropertyConfig::getBool(const std::string& name) const
+	const std::shared_ptr<IConfig> PropertyConfig::getSubConfig(const std::string& name) const
 	{
+		auto it = subConfigMap.find(name);
+		return it == subConfigMap.end() ? std::shared_ptr<IConfig>() : std::static_pointer_cast<IConfig>(it->second);
+	}
+
+	bool getBool(const std::string& name) const
+	{
+		const std::string& value = getString(name);
+
+		try
+		{
+			return boost::lexical_cast<bool> (value);
+		}
+		catch (const boost::bad_lexical_cast& e)
+		{
+			LOGERR("Error casting value {} to bool on key {}", value, name);
+			throw e;
+		}
+	}
+
+	bool getBool(const std::string& name, bool defaultValue) const
+	{
+		return valueMap.find(name) == valueMap.end() ? defaultValue : getBool(name);
+	}
+
+	const std::vector<bool> getBoolList(const std::string& name) const
+	{
+		std::vector<bool> result;
+		const std::vector<std::string> items = getStringList(name);
+
+		for (const std::string& item : items)
+		{
+			try
+			{
+				return boost::lexical_cast<bool> (item);
+			}
+			catch (const boost::bad_lexical_cast& e)
+			{
+				LOGERR("Error casting item {} to bool on key {}", item, name);
+			}
+		}
+
+		return result;
+	}
+
+	std::int32_t getInt32(const std::string& name) const
+	{
+		const std::string& value = getString(name);
+
+		try
+		{
+			return boost::lexical_cast<std::int32_t> (value);
+		}
+		catch (const boost::bad_lexical_cast& e)
+		{
+			LOGERR("Error casting valye {} to int32 on key {}", value, name);
+		}
+	}
+
+	std::int32_t getInt32(const std::string& name, std::int32_t defaultValue) const
+	{
+		return valueMap.find(name) == valueMap.end() ? defaultValue : getInt32(name);
+	}
+
+	const std::vector<std::int32_t> getInt32List(const std::string& name) const
+	{
+		std::vector<std::int32_t> result;
+		const std::vector<std::string> items = getStringList(name);
+
+		for (const std::string& item : items)
+		{
+			try
+			{
+				return boost::lexical_cast<std::int32_t> (item);
+			}
+			catch (const boost::bad_lexical_cast& e)
+			{
+				LOGERR("Error casting item {} to int32 on key {}", item, name);
+			}
+		}
+
+		return result;
+	}
+
+	std::int64_t getInt64(const std::string& name) const
+	{
+		const std::string& value = getString(name);
+
+		try
+		{
+			return boost::lexical_cast<std::int64_t> (value);
+		}
+		catch (const boost::bad_lexical_cast& e)
+		{
+			LOGERR("Error casting valye {} to int64 on key {}", value, name);
+		}
+	}
+
+	std::int64_t getInt64(const std::string& name, std::int64_t defaultValue) const
+	{
+		return valueMap.find(name) == valueMap.end() ? defaultValue : getInt64(name);
+	}
+
+	const std::vector<std::int64_t> getInt64List(const std::string& name) const
+	{
+		std::vector<std::int64_t> result;
+		const std::vector<std::string> items = getStringList(name);
+
+		for (const std::string& item : items)
+		{
+			try
+			{
+				return boost::lexical_cast<std::int64_t> (item);
+			}
+			catch (const boost::bad_lexical_cast& e)
+			{
+				LOGERR("Error casting item {} to int64 on key {}", item, name);
+			}
+		}
+
+		return result;
+	}
+
+	double getDouble(const std::string& name) const
+	{
+		const std::string& value = getString(name);
+
+		try
+		{
+			return boost::lexical_cast<double> (value);
+		}
+		catch (const boost::bad_lexical_cast& e)
+		{
+			LOGERR("Error casting valye {} to double on key {}", value, name);
+		}
+	}
+
+	double getDouble(const std::string& name, double defaultValue) const
+	{
+		return valueMap.find(name) == valueMap.end() ? defaultValue : getDouble(name);
+	}
+
+	const std::vector<double> getDoubleList(const std::string& name) const
+	{
+		std::vector<double> result;
+		const std::vector<std::string> items = getStringList(name);
+
+		for (const std::string& item : items)
+		{
+			try
+			{
+				return boost::lexical_cast<double> (item);
+			}
+			catch (const boost::bad_lexical_cast& e)
+			{
+				LOGERR("Error casting item {} to double on key {}", item, name);
+			}
+		}
+
+		return result;
+	}
+
+	const std::string& getString(const std::string& name) const
+	{
+		auto it = valueMap.find(name);
+		if (it == valueMap.end())
+		{
+			throw std::runtime_error("Cannot find config with key: " + name);
+		}
+
+		return it->second;
+	}
+
+	const std::string& getString(const std::string& name, const std::string& defaultValue) const
+	{
+		auto it = valueMap.find(name);
+		return it == valueMap.end() ? defaultValue : it->second;
+	}
+
+	const std::vector<std::string> getStringList(const std::string& name) const
+	{
+		std::vector<std::string> result;
+
+		const std::string& value = getStringWithDefault(name, "");
+		if (value != "")
+		{
+			boost::split(result, value, boost::is_any_of(","));
+			for (std::string& value : result)
+			{
+				StringUtil::trim(value);
+			}
+		}
+
+		return result;
 	}
 
 	void PropertyConfig::addValue(const std::string& key, const std::string& value)
