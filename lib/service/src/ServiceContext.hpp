@@ -91,7 +91,7 @@ namespace mm
 		//
 		template<typename Message> bool subscribe(const BaseSubscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
 		{
-			for (std::pair<std::string, std::shared_ptr<IService> >& pair : serviceMap)
+			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 			{
 				if (ISubscriber<Message>* subscriber = dynamic_cast<ISubscriber<Message>*> (pair.second.get()))
 				{
