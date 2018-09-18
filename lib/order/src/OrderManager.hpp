@@ -43,7 +43,13 @@ namespace mm
 		//
 		void consume(const std::shared_ptr<const OrderMessage>& message)
 		{
+			if (message->status == OrderStatus::NEW)
+			{
+				liveCache.addOrder(pool.get(publisher, exchange));
+			}
 
+			// the above add make sure there is no nullptr concern
+			liveCache.getOrder(message->instrumentId, message->orderId)->consume(message);
 		}
 
 		//
@@ -53,9 +59,21 @@ namespace mm
 		//
 		void consume(const std::shared_ptr<const ExecutionMessage>& message)
 		{
+			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
+
+			if (order.get() == nullptr)
+			{
+				LOGERR("Error getting order with ID: {}, instrument ID: {}", message->orderId, message->instrumentId);
+				return;
+			}
+
+			order->consume(message);
 		}
 
 	private:
+
+		// The object pool for orders.
+		static Pool<ExchangeOrder, 1000> pool;
 
 		// The order summary publisher.
 		const std::shared_ptr<Publisher> publisher;

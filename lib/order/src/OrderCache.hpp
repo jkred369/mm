@@ -19,7 +19,7 @@ namespace mm
 	//
 	// This class represents an order cache for all live orders in the market.
 	//
-	template<typename Order, typename Pool> class OrderCache
+	template<typename Order> class OrderCache
 	{
 	public:
 
@@ -46,15 +46,36 @@ namespace mm
 		}
 
 		//
+		// Add order to the cache.
+		//
+		// order : The order to add.
+		//
+		inline void addOrder(const shared_ptr<Order>& newOrder)
+		{
+			OrderCollection& collection = orderByInstrumentMap[newOrder->getInstrumentId()];
+
+			auto it = std::find_if(collection.begin(), collection.end(), [] (const std::shared_ptr<Order>& order) {
+				return order->getOrderId() == newOrder->getOrderId();
+			});
+
+			if (it != collection.end())
+			{
+				LOGERR("Error adding order: order with same key already exists: {}", newOrder->getOrderId());
+				return;
+			}
+
+			collection.push_back(newOrder);
+		}
+
+		//
 		// Get an order from the order cache.
 		//
 		// instrumentId : The instrument ID.
 		// orderId : The order ID.
-		// create : if the order should be created in case not found.
 		//
-		// return : the pointer for the order.
+		// return : the pointer for the order; or empty pointer if order cannot be found.
 		//
-		inline const std::shared_ptr<Order>& getOrder(std::int64_t instrumentId, std::int64_t orderId, bool create = false)
+		inline const std::shared_ptr<Order>& getOrder(std::int64_t instrumentId, std::int64_t orderId)
 		{
 			OrderCollection& collection = orderByInstrumentMap[instrumentId];
 
@@ -62,19 +83,7 @@ namespace mm
 				return order->getOrderId() == orderId;
 			});
 
-			if (it != collection.end())
-			{
-				return *it;
-			}
-			else if (create)
-			{
-				collection.emplace_back(pool.get());
-				return collection.back();
-			}
-			else
-			{
-				return std::shared_ptr<Order> ();
-			}
+			return it == collection.end() ? std::shared_ptr<Order> () : *it;
 		}
 
 		//
@@ -97,9 +106,6 @@ namespace mm
 		}
 
 	private:
-
-		// The object pool for orders.
-		static Pool<Order, 1000> pool;
 
 		// the order map by instrument.
 		std::unordered_map<std::int64_t, OrderCollection> orderByInstrumentMap;

@@ -34,6 +34,7 @@ namespace mm
 			exchange(exchange),
 			orderId(0),
 			instrumentId(0),
+			side(Side::BID),
 			totalQty(0),
 			tradedQty(0),
 			price(0.0),
