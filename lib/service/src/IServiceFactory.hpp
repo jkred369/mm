@@ -16,6 +16,8 @@
 
 namespace mm
 {
+	class ServiceContext;
+
 	//
 	// Define service factory interface.
 	//
@@ -30,9 +32,9 @@ namespace mm
 		// config : The config for the service.
 		// context : The service context for sourcing other services.
 		//
-		// return : The service.
+		// return : The service as a shared pointer.
 		//
-		virtual IService* createService(const std::string serviceName, const std::shared_ptr<IConfig> config, ServiceContext& context) = 0;
+		virtual std::shared_ptr<IService> createService(const std::string serviceName, const std::shared_ptr<IConfig> config, ServiceContext& context) = 0;
 	};
 }
 

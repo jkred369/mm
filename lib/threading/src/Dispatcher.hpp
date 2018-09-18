@@ -175,11 +175,11 @@ namespace mm
 		// Constructor.
 		//
 		// threadCount : number of threads in the dispatcher.
-		// start : Flag if to start at creation.
+		// startOnCreate : Flag if to start at creation.
 		//
-		HashDispatcher(size_t threadCount = 4, bool start = true) : runners(threadCount), runningFlag(false)
+		HashDispatcher(size_t threadCount = 4, bool startOnCreate = true) : runners(threadCount), runningFlag(false)
 		{
-			if (start)
+			if (startOnCreate)
 			{
 				start();
 			}

@@ -12,7 +12,7 @@ target_include_directories(Order PUBLIC
 	${Messaging_INCLUDES}
 )
 
-target_link_libraries(Femas 
+target_link_libraries(Order 
 	${Boost_LIBRARIES}
 	${TBB_LIBS}
 	${POCO_LIBS}

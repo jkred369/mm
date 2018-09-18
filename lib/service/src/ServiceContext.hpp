@@ -16,6 +16,7 @@
 #include <Dispatcher.hpp>
 #include <IConfig.hpp>
 #include <IConsumer.hpp>
+#include <ISubscriber.hpp>
 #include <ISubscription.hpp>
 #include <Logger.hpp>
 
@@ -73,10 +74,10 @@ namespace mm
 				return false;
 			}
 
-			ServiceType* result = dynamic_cast<ServiceType*> (it->get());
+			ServiceType* result = dynamic_cast<ServiceType*> (it->second.get());
 			if (result != nullptr)
 			{
-				service = std::static_pointer_cast<ServiceType> (*it);
+				service = std::static_pointer_cast<ServiceType> (*it->second);
 			}
 
 			return result != nullptr;
@@ -88,7 +89,7 @@ namespace mm
 		// subscription : The subscription.
 		// consumer : The consumer subscribing to it.
 		//
-		template<typename Message> bool subscribe(BaseSubscription subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
+		template<typename Message> bool subscribe(const BaseSubscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
 		{
 			for (std::pair<std::string, std::shared_ptr<IService> >& pair : serviceMap)
 			{

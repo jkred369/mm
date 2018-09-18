@@ -26,7 +26,7 @@ namespace mm
 		}
 		catch (const std::exception& e)
 		{
-			throw std::exception("Error loading configuration file: {}", e.what());
+			throw std::runtime_error("Error loading configuration file: " + std::string(e.what()));
 		}
 
 		// logger
@@ -73,7 +73,7 @@ namespace mm
 			const std::vector<std::string> serviceList = config->getStringList(ServiceContext::SERVICE_LIST);
 			if (serviceList.empty())
 			{
-				throw std::runtime_error("No service specified in {}", ServiceContext::SERVICE_LIST);
+				throw std::runtime_error("No service specified in " + ServiceContext::SERVICE_LIST);
 			}
 
 			for (const std::string& serviceName : serviceList)
@@ -82,7 +82,7 @@ namespace mm
 
 				if (!serviceConfig.get())
 				{
-					throw std::runtime_error("No config for service {}", serviceName);
+					throw std::runtime_error("No config for service " + serviceName);
 				}
 
 				serviceMap[serviceName] = factory.createService(serviceName, serviceConfig, *this);
@@ -98,13 +98,19 @@ namespace mm
 		dispatcher->start();
 		LOGINFO("Dispatcher started.");
 
-		for (std::pair<std::string, std::shared_ptr<IService> >& pair : serviceMap)
+		for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 		{
-			pair.second->start();
+			if (!pair.second->start())
+			{
+				LOGERR("Error starting service {}", pair.first);
+				return false;
+			}
+
 			LOGINFO("Service {} started.", pair.first);
 		}
 
 		LOGINFO("Service context started.");
+		return true;
 	}
 
 	void ServiceContext::stop()
@@ -112,7 +118,7 @@ namespace mm
 		dispatcher->stop();
 		LOGINFO("Dispatcher stopped.");
 
-		for (std::pair<std::string, std::shared_ptr<IService> >& pair : serviceMap)
+		for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 		{
 			pair.second->stop();
 			LOGINFO("Service {} stopped.", pair.first);
