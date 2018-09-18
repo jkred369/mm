@@ -28,10 +28,11 @@ namespace mm
 		//
 		// serviceName : The service name.
 		// config : The config for the service.
+		// context : The service context for sourcing other services.
 		//
 		// return : The service.
 		//
-		virtual IService* createService(const std::string serviceName, const std::shared_ptr<IConfig> config) = 0;
+		virtual IService* createService(const std::string serviceName, const std::shared_ptr<IConfig> config, ServiceContext& context) = 0;
 	};
 }
 

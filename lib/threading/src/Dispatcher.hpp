@@ -13,6 +13,7 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -21,9 +22,22 @@
 #include <Poco/Hash.h>
 
 #include "Runnable.hpp"
+#include "DispatchKey.hpp"
 
 namespace mm
 {
+	//
+	// The dispatcher config items.
+	//
+	struct DispatcherConfig
+	{
+		// The dispatcher config
+		static const std::string DISPATCHER_CONFIG;
+
+		// The thread count.
+		static const std::string THREAD_COUNT;
+	};
+
 	//
 	// The basic execution unit of a hash dispatcher, this class is simply
 	// a thread taking all tasks from a given queue.
@@ -150,7 +164,7 @@ namespace mm
 	// The tasks are separated into queues based on the hash value of the key submitted.
 	//
 	template<
-		typename Key = std::int32_t,
+		typename Key = KeyType,
 		typename Mutex = std::mutex,
 		typename Hash = std::hash<Key>
 	> class HashDispatcher
@@ -161,12 +175,13 @@ namespace mm
 		// Constructor.
 		//
 		// threadCount : number of threads in the dispatcher.
+		// start : Flag if to start at creation.
 		//
-		HashDispatcher(size_t threadCount = 4) : runners(threadCount)
+		HashDispatcher(size_t threadCount = 4, bool start = true) : runners(threadCount), runningFlag(false)
 		{
-			for (TaskRunner<Mutex>& runner : runners)
+			if (start)
 			{
-				runner.start();
+				start();
 			}
 		}
 
@@ -175,9 +190,38 @@ namespace mm
 		//
 		~HashDispatcher()
 		{
-			for (TaskRunner<Mutex>& runner : runners)
+			stop();
+		}
+
+		//
+		// Start the dispatcher.
+		//
+		void start()
+		{
+			bool expected = false;
+
+			if (runningFlag.compare_exchange_strong(expected, true))
 			{
-				runner.stop();
+				for (TaskRunner<Mutex>& runner : runners)
+				{
+					runner.start();
+				}
+			}
+		}
+
+		//
+		// Stop the dispatcher.
+		//
+		void stop()
+		{
+			bool expected = true;
+
+			if (runningFlag.compare_exchange_strong(expected, false))
+			{
+				for (TaskRunner<Mutex>& runner : runners)
+				{
+					runner.stop();
+				}
 			}
 		}
 
@@ -199,7 +243,13 @@ namespace mm
 
 		// The task runners.
 		std::vector<TaskRunner<Mutex> > runners;
+
+		// Flag if the dispatcher is running.
+		std::atomic<bool> runningFlag;
 	};
+
+	// Define the globally used dispatcher type.
+	typedef HashDispatcher<> Dispatcher;
 }
 
 #endif /* LIB_THREADING_DISPATCHER_HPP_ */
