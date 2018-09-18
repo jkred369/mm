@@ -65,6 +65,7 @@ namespace mm
 				{
 					orderId = message->orderId;
 					instrumentId = message->instrumentId;
+					side = message->side;
 					totalQty = message->totalQty;
 					price = message->price;
 
@@ -164,12 +165,93 @@ namespace mm
 
 			message->orderId = orderId;
 			message->instrumentId = instrumentId;
+			message->side = side;
 			messge->totalQty = totalQty;
 			message->tradedQty = tradedQty;
 			message->price = price;
 			message->avgTradedPrice = avgTradedPrice;
 
 			publisher->publish(message);
+		}
+
+		//
+		// Get the order ID.
+		//
+		// return : order ID.
+		//
+		inline std::int64_t getOrderId() const
+		{
+			return orderId;
+		}
+
+		//
+		// Get the instrument ID.
+		//
+		// return : instrument ID.
+		//
+		inline std::int64_t getInstrumentId() const
+		{
+			return instrumentId;
+		}
+
+		//
+		// Get the order side.
+		//
+		// return : The order side.
+		//
+		inline Side getSide() const
+		{
+			return side;
+		}
+
+		//
+		// Get the order total qty.
+		//
+		// return : total qty.
+		//
+		inline std::int64_t getTotalQty() const
+		{
+			return totalQty;
+		}
+
+		//
+		// Get the order traded qty.
+		//
+		// return : traded qty.
+		//
+		inline std::int64_t getTradedQty() const
+		{
+			return tradedQty;
+		}
+
+		//
+		// Get the order price.
+		//
+		// return : order price.
+		//
+		inline double getPrice() const
+		{
+			return price;
+		}
+
+		//
+		// Get the order average traded price.
+		//
+		// return : averaged traded price.
+		//
+		inline double getAvgTradedPrice() const
+		{
+			return avgTradedPrice;
+		}
+
+		//
+		// Get the order status.
+		//
+		// return : order status.
+		//
+		inline OrderStatus getStatus() const
+		{
+			return status;
 		}
 
 	private:
@@ -188,6 +270,9 @@ namespace mm
 
 		// The instrument ID.
 		std::int64_t instrumentId;
+
+		// The order side.
+		Side side;
 
 		// Total qty of the order.
 		std::int64_t totalQty;
