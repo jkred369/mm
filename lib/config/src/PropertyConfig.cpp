@@ -20,7 +20,7 @@ namespace mm
 	{
 	}
 
-	PropertyConfig::PropertyConfig(std::istream is)
+	PropertyConfig::PropertyConfig(std::istream& is)
 	{
 		try
 		{

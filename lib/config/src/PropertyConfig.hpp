@@ -37,7 +37,7 @@ namespace mm
 		//
 		// is : The input stream.
 		//
-		PropertyConfig(std::istream is);
+		PropertyConfig(std::istream& is);
 
 		virtual ~PropertyConfig();
 

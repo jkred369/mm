@@ -8,6 +8,8 @@
 #ifndef LIB_SERVICE_SRC_ISERVICE_HPP_
 #define LIB_SERVICE_SRC_ISERVICE_HPP_
 
+#include <DispatchKey.hpp>
+
 namespace mm
 {
 	//

@@ -10,12 +10,14 @@
 
 #include <memory>
 
+#include <IDispatchable.hpp>
+
 namespace mm
 {
 	//
 	// This class defines interface for the message consumer.
 	//
-	template<typename Message> class IConsumer
+	template<typename Message> class IConsumer : public IDispatchable
 	{
 	public:
 
