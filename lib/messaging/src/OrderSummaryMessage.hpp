@@ -12,6 +12,7 @@
 
 #include "Message.hpp"
 #include "OrderStatus.hpp"
+#include "Side.hpp"
 
 namespace mm
 {
@@ -27,6 +28,9 @@ namespace mm
 
 		// The instrument ID.
 		std::int64_t instrumentId;
+
+		// The ordr side.
+		Side side;
 
 		// Total qty of the order.
 		std::int64_t totalQty;

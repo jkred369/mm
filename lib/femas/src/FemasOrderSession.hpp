@@ -18,16 +18,23 @@
 #include <EnumType.hpp>
 #include <IService.hpp>
 #include <OrderMessage.hpp>
+#include <OrderSummaryMessage.hpp>
 #include <SubscriberAdapter.hpp>
 
 #include <FemasUserDetail.hpp>
 
 namespace mm
 {
+	//
+	// This class defines an order session.
+	//
+	// An order session subcribes to order message for order status manipulation and publishes order summary.
+	//
 	class FemasOrderSession :
 			public IService,
 			public CUstpFtdcTraderSpi,
-			public SubscriberAdapter<OrderMessage>
+			public IConsumer<OrderMessage>,
+			public SubscriberAdapter<OrderSummaryMessage>
 	{
 	};
 }

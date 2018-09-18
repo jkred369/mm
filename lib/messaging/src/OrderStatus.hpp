@@ -24,9 +24,6 @@ namespace mm
 		// order live in market
 		LIVE = 2,
 
-		// order amend sent pending ack from exchange
-		PENDING_AMEND = 3,
-
 		// order cancel sent pending ack from exchange
 		PENDING_CANCEL = 4,
 
