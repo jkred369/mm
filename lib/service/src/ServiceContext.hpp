@@ -105,6 +105,32 @@ namespace mm
 			return false;
 		}
 
+		//
+		// Make the consumer subscribe to the given subscription from all possible publishers.
+		//
+		// subscription : The subscription.
+		// consumer : The consumer subscribing to it.
+		//
+		// return : The count of subscription made.
+		//
+		template<typename Message> std::int64_t subscribeAll(const BaseSubscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
+		{
+			int count = 0;
+
+			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
+			{
+				if (ISubscriber<Message>* subscriber = dynamic_cast<ISubscriber<Message>*> (pair.second.get()))
+				{
+					if (subscriber->subscribe(subscription, consumer))
+					{
+						++count;
+					}
+				}
+			}
+
+			return count;
+		}
+
 	private:
 
 		// The logger for this class.
