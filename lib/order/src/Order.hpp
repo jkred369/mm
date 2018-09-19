@@ -118,7 +118,7 @@ namespace mm
 			}
 
 			// process the message if there is a trade
-			if (message->isTrade() && status != OrderStatus::FULL_FILLED && status != OrderStatus::CANCELLED)
+			if (message->isTrade() && !OrderStatusUtil::completed(status))
 			{
 				if (tradedQty == 0 && message->qty == 0)
 				{
@@ -135,7 +135,7 @@ namespace mm
 			}
 
 			// for status update - process regardlessly.
-			if (status != OrderStatus::FULL_FILLED && status != OrderStatus::CANCELLED && status != message->status)
+			if (!OrderStatusUtil::completed(status) && status != message->status)
 			{
 				status = message->status;
 				processed = true;

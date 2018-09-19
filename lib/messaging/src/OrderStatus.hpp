@@ -33,6 +33,23 @@ namespace mm
 		// order fully filled and completed
 		FULL_FILLED = 6,
 	};
+
+	//
+	// The helper class for order status.
+	//
+	struct OrderStatusUtil
+	{
+		//
+		// Determine if an order status is completed - that is, no more action allowed.
+		//
+		// return : true if the order is completed.
+		//
+		static inline bool completed(const OrderStatus status) const
+		{
+			return status == OrderStatus::CANCELLED || status == OrderStatus::FULL_FILLED;
+		}
+	};
+
 }
 
 

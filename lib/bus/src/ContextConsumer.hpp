@@ -22,10 +22,10 @@ namespace mm
 	{
 	public:
 
-		ContextConsumer(const Key& key,
+		ContextConsumer(
 				std::shared_ptr<Dispatcher>& dispatcher,
 				std::shared_ptr<IConsumer<Message> >& consumer) :
-			key(key),
+			key(consumer->getKey()),
 			dispatcher(dispatcher),
 			consumer(consumer)
 		{

@@ -24,7 +24,7 @@ namespace mm
 		//
 		// return : The dispatch key for this object.
 		//
-		virtual KeyType getKey() const = 0;
+		virtual const KeyType getKey() const = 0;
 	};
 }
 

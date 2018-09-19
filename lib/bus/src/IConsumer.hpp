@@ -17,7 +17,7 @@ namespace mm
 	//
 	// This class defines interface for the message consumer.
 	//
-	template<typename Message> class IConsumer : public IDispatchable
+	template<typename Message> class IConsumer : public virtual IDispatchable
 	{
 	public:
 

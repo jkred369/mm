@@ -21,7 +21,9 @@ namespace mm
 
 	bool DispatchableService::start()
 	{
-		return true;
+		// sanity check the service to make sure its included in context
+		std::shared_ptr<IService> selfService;
+		return serviceContext->getService(serviceName, selfService) && this == selfService.get();
 	}
 
 	void DispatchableService::stop()

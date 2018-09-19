@@ -17,7 +17,14 @@ namespace mm
 	//
 	enum class SourceType : std::int16_t
 	{
+		// femas market data source
+		FEMAS_MARKET_DATA = 0,
 
+		// femas order feedback
+		FEMAS_ORDER = 1,
+
+		// arb algos
+		ARB = 2,
 	};
 }
 

@@ -22,6 +22,18 @@ namespace mm
 	{
 	public:
 
+		//
+		// constructor for singleton.
+		//
+		// sourceType : The source type.
+		// dataType : The data type.
+		// key : The key.
+		//
+		Subscription(SourceType sourceType, DataType dataType, KeyType key) :
+			sourceType(sourceType), dataType(dataType), key(key)
+		{
+		}
+
 		virtual ~Subscription()
 		{
 		}
@@ -56,18 +68,6 @@ namespace mm
 		}
 
 	private:
-
-		//
-		// Protected constructor for singleton.
-		//
-		// sourceType : The source type.
-		// dataType : The data type.
-		// key : The key.
-		//
-		Subscription(SourceType sourceType, DataType dataType, KeyType key) :
-			sourceType(sourceType), dataType(dataType), key(key)
-		{
-		}
 
 		// Source type
 		SourceType sourceType;
