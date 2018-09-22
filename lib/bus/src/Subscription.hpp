@@ -10,18 +10,17 @@
 
 #include <functional>
 
-#include <ISubscription.hpp>
-#include <SingletonInstance.hpp>
+#include <DataType.hpp>
+#include <DispatchKey.hpp>
+#include <SourceType.hpp>
 
 namespace mm
 {
 	//
 	// The subscription class provides the default implementation for the subscription interface.
 	//
-	class Subscription final : public BaseSubscription
+	template<typename Key = KeyType> struct SubscriptionT
 	{
-	public:
-
 		//
 		// constructor for singleton.
 		//
@@ -29,28 +28,9 @@ namespace mm
 		// dataType : The data type.
 		// key : The key.
 		//
-		Subscription(SourceType sourceType, DataType dataType, KeyType key) :
+		SubscriptionT(SourceType sourceType, DataType dataType, KeyType key) :
 			sourceType(sourceType), dataType(dataType), key(key)
 		{
-		}
-
-		virtual ~Subscription()
-		{
-		}
-
-		virtual SourceType getSourceType() const override
-		{
-			return sourceType;
-		}
-
-		virtual DataType getDataType() const override
-		{
-			return dataType;
-		}
-
-		virtual const KeyType& getKey() const override
-		{
-			return key;
 		}
 
 		//
@@ -67,8 +47,6 @@ namespace mm
 					key == rhs.key;
 		}
 
-	private:
-
 		// Source type
 		SourceType sourceType;
 
@@ -76,15 +54,17 @@ namespace mm
 		DataType dataType;
 
 		// Key of the subscription
-		KeyType key;
+		Key key;
 	};
+
+	typedef SubscriptionT<KeyType> Subscription;
 }
 
 namespace std
 {
-	template<> struct hash<mm::Subscription>
+	template<> struct hash<mm::SubscriptionT>
 	{
-		std::size_t operator()(const mm::Subscription& value) const
+		std::size_t operator()(const mm::SubscriptionT& value) const
 		{
 			return std::hash<std::int16_t> (value.sourceType) ^
 					std::hash<std::int16_t> (value.dataType) ^
