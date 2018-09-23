@@ -128,7 +128,7 @@ namespace mm
 
 		// femas requires char* without writing to it
 		char* request[1] = {const_cast<char*> (format.c_str())};
-		int result = session->UnSubMarketData(request, 1);
+		const int result = session->UnSubMarketData(request, 1);
 
 		if (result != 0)
 		{

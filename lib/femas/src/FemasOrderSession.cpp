@@ -72,6 +72,8 @@ namespace mm
 			LOGERR("Error loging as user {} with code: {}", userDetail.userId, result);
 			return false;
 		}
+
+		session->SubscribeUserTopic(USTP_TERT_RESUME);
 	}
 
 	void FemasOrderSession::stop()
@@ -107,34 +109,13 @@ namespace mm
 
 	void FemasOrderSession::subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
 	{
-		PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer);
-
-		fmt::format_int format(subscription.getKey());
-
-		// femas requires char* without writing to it
-		char* request[1] = {const_cast<char*> (format.c_str())};
-		const int result = session->SubMarketData(request, 1);
-
-		if (result != 0)
-		{
-			LOGERR("Error subscribing to {}", subscription.getKey());
-		}
+		// TODO: determine if resume is proper here.
+		PublisherAdapter<OrderSummaryMessage>::subscribe(subscription, consumer);
 	}
 
 	void FemasOrderSession::unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
 	{
-		PublisherAdapter<MarketDataMessage>::unsubscribe(subscription, consumer);
-
-		fmt::format_int format(subscription.getKey());
-
-		// femas requires char* without writing to it
-		char* request[1] = {const_cast<char*> (format.c_str())};
-		int result = session->UnSubMarketData(request, 1);
-
-		if (result != 0)
-		{
-			LOGERR("Error unsubscribing from {}", subscription.getKey());
-		}
+		PublisherAdapter<OrderSummaryMessage>::unsubscribe(subscription, consumer);
 	}
 
 	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
@@ -268,11 +249,11 @@ namespace mm
 	{
 		if (info->ErrorID == 0)
 		{
-			LOGINFO("User {} logged out successfully", userLogin->UserID);
+			LOGINFO("User {} logged out successfully", userLogout->UserID);
 		}
 		else
 		{
-			LOGERR("Logout attempt failed. User: {}, error: {}, {}", userLogin->UserID, info->ErrorID, info->ErrorMsg);
+			LOGERR("Logout attempt failed. User: {}, error: {}, {}", userLogout->UserID, info->ErrorID, info->ErrorMsg);
 		}
 	}
 

@@ -22,7 +22,7 @@
 #include <OrderSummaryMessage.hpp>
 #include <PublisherAdapter.hpp>
 
-#include <FemasUserDetail.hpp>
+#include "FemasUserDetail.hpp"
 
 namespace mm
 {
@@ -58,8 +58,8 @@ namespace mm
 		//
 		// publisher functionality.
 		//
-		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer) override;
-		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer) override;
+		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer) override;
+		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer) override;
 
 		//
 		// Send new order to exchange.
@@ -369,7 +369,7 @@ namespace mm
 			auto it = orderIdMap.find(clientOrderId);
 			if (LIKELY(it != orderIdMap.end()))
 			{
-				std::memcpy(exchangeOrderId, it->second, sizeof(exchangeOrderId));
+				std::memcpy(exchangeOrderId, it->second, sizeof(TUstpFtdcOrderSysIDType));
 				return true;
 			}
 			else

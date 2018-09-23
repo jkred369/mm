@@ -11,6 +11,7 @@ target_include_directories(Femas PUBLIC
 	${Common_INCLUDES}
 	${Messaging_INCLUDES}
 	${Service_INCLUDES}
+	${Threading_INCLUDES}
 )
 
 target_link_libraries(Femas 
@@ -19,4 +20,5 @@ target_link_libraries(Femas
 	${POCO_LIBS}
 	${GTEST_LIBS}
 	${Messaging}
+	${Threading}
 )

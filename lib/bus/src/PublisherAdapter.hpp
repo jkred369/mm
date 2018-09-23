@@ -16,6 +16,7 @@
 
 #include <Dispatcher.hpp>
 #include <IPublisher.hpp>
+#include <Logger.hpp>
 #include <SpinLockGuard.hpp>
 
 namespace mm
@@ -23,7 +24,7 @@ namespace mm
 	//
 	// This class provides basic implementation for publisher.
 	//
-	template<typename Message, typename Key = KeyType, typename Mutex = std::mutex> class PublisherAdapter : public IPublisher<Message, Key>
+	template<typename Message, typename Mutex = std::mutex> class PublisherAdapter : public IPublisher<Message>
 	{
 	public:
 
@@ -40,7 +41,7 @@ namespace mm
 
 		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
 		{
-			SpinLockGuard guard(mutex);
+			SpinLockGuard<Mutex> guard(mutex);
 
 			auto it = consumerMap.find(subscription);
 			if (it == consumerMap.end())
@@ -54,15 +55,15 @@ namespace mm
 				// TODO: this piece of code needs to be reviewed for performance.
 				const std::shared_ptr<IConsumer<Message> > consumer = detail.consumer;
 
-				dispatcher->submit(detail.dispatchKey, [] (consumer, message) {
-					consumer->consumer(message);
+				dispatcher->submit(detail.dispatchKey, [consumer, message] () {
+					consumer->consume(message);
 				});
 			}
 		}
 
 		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer) override
 		{
-			SpinLockGuard guard(mutex);
+			SpinLockGuard<Mutex> guard(mutex);
 
 			consumerMap[subscription].push_back(ConsumerDetail(consumer));
 			++count;
@@ -70,24 +71,24 @@ namespace mm
 
 		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer) override
 		{
-			SpinLockGuard guard(mutex);
+			SpinLockGuard<Mutex> guard(mutex);
 
 			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 
-			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [] (ConsumerDetail& detail) {
+			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (ConsumerDetail& detail) {
 				detail.consumer == consumer;
 			}));
 		}
 
 		virtual size_t getConsumerCount() const override
 		{
-			SpinLockGuard guard(mutex);
+			SpinLockGuard<Mutex> guard(mutex);
 			return count;
 		}
 
 		virtual void removeAll() override
 		{
-			SpinLockGuard guard(mutex);
+			SpinLockGuard<Mutex> guard(mutex);
 			consumerMap.clear();
 		}
 
@@ -104,16 +105,19 @@ namespace mm
 			// consuemr : The consumer detail captured.
 			//
 			ConsumerDetail(const std::shared_ptr<IConsumer<Message> >& consumer) :
-				dispatchKey(consumer->getDispatchKey()), consumer(consumer)
+				dispatchKey(consumer->getKey()), consumer(consumer)
 			{
 			}
 
 			// The cached dispatch key.
-			const Key dispatchKey;
+			KeyType dispatchKey;
 
 			// The consumer.
-			const std::shared_ptr<IConsumer<Message> > consumer;
+			std::shared_ptr<IConsumer<Message> > consumer;
 		};
+
+		// The logger for this class.
+		static Logger logger;
 
 		// The dispatcher.
 		const std::shared_ptr<Dispatcher> dispatcher;

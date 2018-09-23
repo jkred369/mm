@@ -46,7 +46,7 @@ namespace mm
 		//
 		// return : true if the order is completed.
 		//
-		static inline bool completed(const OrderStatus status) const
+		static inline bool completed(const OrderStatus status)
 		{
 			return status == OrderStatus::CANCELLED || status == OrderStatus::FULL_FILLED;
 		}

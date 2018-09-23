@@ -10,6 +10,7 @@
 
 #include <functional>
 
+#include <EnumType.hpp>
 #include <DataType.hpp>
 #include <DispatchKey.hpp>
 #include <SourceType.hpp>
@@ -40,7 +41,7 @@ namespace mm
 		//
 		// return : true if the 2 subscription objects are identical.
 		//
-		bool operator == (const Subscription& rhs) const
+		bool operator == (const SubscriptionT& rhs) const
 		{
 			return sourceType == rhs.sourceType &&
 					dataType == rhs.dataType &&
@@ -62,13 +63,13 @@ namespace mm
 
 namespace std
 {
-	template<> struct hash<mm::SubscriptionT>
+	template<> struct hash<mm::Subscription>
 	{
-		std::size_t operator()(const mm::SubscriptionT& value) const
+		std::size_t operator()(const mm::Subscription& value) const
 		{
-			return std::hash<std::int16_t> (value.sourceType) ^
-					std::hash<std::int16_t> (value.dataType) ^
-					std::hash<KeyType> (value.key);
+			return std::hash<std::int16_t>{} (static_cast<std::int16_t>(value.sourceType)) ^
+					std::hash<std::int16_t>{} (static_cast<std::int16_t>(value.dataType)) ^
+					std::hash<mm::KeyType>{} (value.key);
 		}
 	};
 }

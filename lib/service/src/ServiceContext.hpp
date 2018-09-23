@@ -16,9 +16,9 @@
 #include <Dispatcher.hpp>
 #include <IConfig.hpp>
 #include <IConsumer.hpp>
-#include <ISubscriber.hpp>
-#include <ISubscription.hpp>
+#include <IPublisher.hpp>
 #include <Logger.hpp>
+#include <Subscription.hpp>
 
 #include "IService.hpp"
 #include "IServiceFactory.hpp"
@@ -77,7 +77,7 @@ namespace mm
 			ServiceType* result = dynamic_cast<ServiceType*> (it->second.get());
 			if (result != nullptr)
 			{
-				service = std::static_pointer_cast<ServiceType> (*it->second);
+				service = std::static_pointer_cast<ServiceType> (it->second);
 			}
 
 			return result != nullptr;
@@ -89,11 +89,11 @@ namespace mm
 		// subscription : The subscription.
 		// consumer : The consumer subscribing to it.
 		//
-		template<typename Message> bool subscribe(const BaseSubscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
+		template<typename Message> bool subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
 		{
 			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 			{
-				if (ISubscriber<Message>* subscriber = dynamic_cast<ISubscriber<Message>*> (pair.second.get()))
+				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
 				{
 					if (subscriber->subscribe(subscription, consumer))
 					{
@@ -113,13 +113,13 @@ namespace mm
 		//
 		// return : The count of subscription made.
 		//
-		template<typename Message> std::int64_t subscribeAll(const BaseSubscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
+		template<typename Message> std::int64_t subscribeAll(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
 		{
 			int count = 0;
 
 			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 			{
-				if (ISubscriber<Message>* subscriber = dynamic_cast<ISubscriber<Message>*> (pair.second.get()))
+				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
 				{
 					if (subscriber->subscribe(subscription, consumer))
 					{

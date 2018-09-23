@@ -11,6 +11,7 @@ namespace mm
 {
 	DispatchableService::DispatchableService(
 			const KeyType dispatchKey,
+			const std::string contextName,
 			const std::shared_ptr<Dispatcher> dispatcher,
 			const std::shared_ptr<ServiceContext> serviceContext) :
 		dispatchKey(dispatchKey),
