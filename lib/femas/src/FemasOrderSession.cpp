@@ -7,6 +7,8 @@
 
 #include <fmt/format.h>
 
+#include <EnumType.hpp>
+#include <NativeDefinition.hpp>
 #include <StringUtil.hpp>
 #include "FemasOrderSession.hpp"
 
@@ -137,7 +139,32 @@ namespace mm
 
 	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
 	{
+		// fixed values to prevent if blocks
+		constexpr char timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
+		constexpr char direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
 
+		CUstpFtdcInputOrderField order;
+
+		// TODO: clarify what to do for BusinessUnit
+
+		// hardcoded values
+		order.VolumeCondition =
+
+		// session specific
+		StringUtil::copy(order.BrokerID, userDetail.ipAddress, sizeof(order.BrokerID));
+		StringUtil::copy(order.ExchangeID, exchangeId, sizeof(order.ExchangeID));
+		StringUtil::copy(order.UserID, userDetail.userId, sizeof(order.UserID));
+
+		// order specific
+		order.Direction = direction[toValue(message->side)];
+		order.LimitPrice = message->price;
+		order.TimeCondition = timeCondition[toValue(message->type)];
+		order.Volume = message->qty;
+
+		StringUtil::fromInt(order.InstrumentID, message->instrumentId, sizeof(order.InstrumentID));
+		StringUtil::fromInt(order.UserOrderLocalID, message->orderId, sizeof(order.UserOrderLocalID));
+
+		session->ReqOrderInsert(&order, ++requestId);
 	}
 
 	void FemasOrderSession::cancel(const std::shared_ptr<OrderMessage>& message)
@@ -223,7 +250,7 @@ namespace mm
 		}
 	}
 
-	void OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *userPasswordUpdate, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *userPasswordUpdate, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -231,106 +258,113 @@ namespace mm
 		}
 		else
 		{
-			LOGERR("User {} password update failed", userPasswordUpdate->UserID);
+			LOGERR("User {} password update failed: {}, {}", userPasswordUpdate->UserID, info->ErrorID, info->ErrorMsg);
 		}
 	}
 
-	void OnRspOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRtnFlowMessageCancel(CUstpFtdcFlowMessageCancelField *flowMessageCancel)
+	void FemasOrderSession::OnRtnFlowMessageCancel(CUstpFtdcFlowMessageCancelField *flowMessageCancel)
 	{
 
 	}
 
-	void OnRtnTrade(CUstpFtdcTradeField *trade)
+	void FemasOrderSession::OnRtnTrade(CUstpFtdcTradeField *trade)
 	{
 
 	}
 
-	void OnRtnOrder(CUstpFtdcOrderField *order)
+	void FemasOrderSession::OnRtnOrder(CUstpFtdcOrderField *order)
 	{
 
 	}
 
-	void OnErrRtnOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *rspInfo)
+	void FemasOrderSession::OnErrRtnOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *info)
 	{
 
 	}
 
-	void OnErrRtnOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *rspInfo)
+	void FemasOrderSession::OnErrRtnOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *info)
 	{
 
 	}
 
-	void OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *instrumentStatus)
+	void FemasOrderSession::OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *instrumentStatus)
 	{
 
 	}
 
-	void OnRtnInvestorAccountDeposit(CUstpFtdcInvestorAccountDepositResField *investorAccountDepositRes)
+	void FemasOrderSession::OnRtnInvestorAccountDeposit(CUstpFtdcInvestorAccountDepositResField *investorAccountDepositRes)
 	{
 
 	}
 
-	void OnRspQryOrder(CUstpFtdcOrderField *order, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryOrder(CUstpFtdcOrderField *order, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryTrade(CUstpFtdcTradeField *trade, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryTrade(CUstpFtdcTradeField *trade, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *userInvestor, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *userInvestor, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *tradingCode, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *tradingCode, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *investorAccount, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *investorAccount, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
+	{
+		if (info->ErrorID == 0)
+		{
+			exchangeId = exchange->ExchangeID;
+		}
+		else
+		{
+			LOGERR("Error getting exchange ID with error: {}, {}", info->ErrorID, info->ErrorMsg);
+		}
+	}
+
+	void FemasOrderSession::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *investorPosition, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *investorPosition, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *complianceParam, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *complianceParam, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *investorFee, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}
 
-	void OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *investorFee, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
-	{
-
-	}
-
-	void OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	void FemasOrderSession::OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
 	}

@@ -378,6 +378,8 @@ namespace mm
 		// The request ID value keeper.
 		std::atomic<int> requestId;
 
+		// The exchange ID used to fill in the order.
+		std::string exchangeId;
 	};
 }
 
