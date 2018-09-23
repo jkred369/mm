@@ -6,7 +6,7 @@
  */
 
 
-#include <fmt/format.h>
+#include <stdexcept>
 
 #include <StringUtil.hpp>
 #include "FemasMarketDataSession.hpp"
@@ -26,14 +26,27 @@ namespace mm
 
 		// basic wiring up - the API interface forced const_cast usage
 		session->RegisterSpi(this);
-		session->RegisterFront(const_cast<char*> (userDetail.frontAddress.c_str()));
-		session->RegisterNameServer(const_cast<char*> (userDetail.nameServer.c_str()));
+		if (!userDetail.frontAddress.empty())
+		{
+			session->RegisterFront(const_cast<char*> (userDetail.frontAddress.c_str()));
+		}
+		else if (!userDetail.nameServer.empty())
+		{
+			session->RegisterNameServer(const_cast<char*> (userDetail.nameServer.c_str()));
+		}
+		else
+		{
+			throw std::invalid_argument("No front address and name server.");
+		}
 
-		session->RegisterCertificateFile(
-				userDetail.certFileName.c_str(),
-				userDetail.keyFileName.c_str(),
-				userDetail.caFileName.c_str(),
-				userDetail.keyFilePassword.c_str());
+		if (!userDetail.certFileName.empty())
+		{
+			session->RegisterCertificateFile(
+					userDetail.certFileName.c_str(),
+					userDetail.keyFileName.c_str(),
+					userDetail.caFileName.c_str(),
+					userDetail.keyFilePassword.c_str());
+		}
 
 		session->Init();
 	}
