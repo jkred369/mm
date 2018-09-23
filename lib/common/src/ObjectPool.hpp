@@ -187,7 +187,7 @@ namespace mm
 		// Lock for blocking if needed
 		Mutex mutex;
 
-		// Conditoin for empty
+		// Condition for empty
 		std::condition_variable_any condition;
 	};
 

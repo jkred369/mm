@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <NativeDefintion.hpp>
 #include <Order.hpp>
 
 namespace mm
@@ -58,7 +59,7 @@ namespace mm
 				return order->getOrderId() == newOrder->getOrderId();
 			});
 
-			if (it != collection.end())
+			if (UNLIKELY(it != collection.end()))
 			{
 				LOGERR("Error adding order: order with same key already exists: {}", newOrder->getOrderId());
 				return;

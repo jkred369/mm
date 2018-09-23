@@ -53,7 +53,10 @@ namespace mm
 				--count;
 			}
 
-			cv.notify_all();
+			if (count == 0)
+			{
+				cv.notify_all();
+			}
 		}
 
 	private:

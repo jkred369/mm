@@ -27,14 +27,28 @@ namespace mm
 
 		// basic wiring up - the API interface forced const_cast usage
 		session->RegisterSpi(this);
-		session->RegisterFront(const_cast<char*> (userDetail.frontAddress.c_str()));
-		session->RegisterNameServer(const_cast<char*> (userDetail.nameServer.c_str()));
 
-		session->RegisterCertificateFile(
-				userDetail.certFileName.c_str(),
-				userDetail.keyFileName.c_str(),
-				userDetail.caFileName.c_str(),
-				userDetail.keyFilePassword.c_str());
+		if (!userDetail.frontAddress.empty())
+		{
+			session->RegisterFront(const_cast<char*> (userDetail.frontAddress.c_str()));
+		}
+		else if (!userDetail.nameServer.empty())
+		{
+			session->RegisterNameServer(const_cast<char*> (userDetail.nameServer.c_str()));
+		}
+		else
+		{
+			throw std::invalid_argument("No front address and name server.");
+		}
+
+		if (!userDetail.certFileName.empty())
+		{
+			session->RegisterCertificateFile(
+					userDetail.certFileName.c_str(),
+					userDetail.keyFileName.c_str(),
+					userDetail.caFileName.c_str(),
+					userDetail.keyFilePassword.c_str());
+		}
 
 		session->Init();
 	}
@@ -73,6 +87,7 @@ namespace mm
 			return false;
 		}
 
+		// TODO: determine if resume is proper here.
 		session->SubscribeUserTopic(USTP_TERT_RESUME);
 	}
 
@@ -109,7 +124,6 @@ namespace mm
 
 	void FemasOrderSession::subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
 	{
-		// TODO: determine if resume is proper here.
 		PublisherAdapter<OrderSummaryMessage>::subscribe(subscription, consumer);
 	}
 
