@@ -10,20 +10,29 @@
 
 #include <memory>
 
+#include <Dispatcher.hpp>
+#include <IConsumer.hpp>
+#include <IService.hpp>
+#include <PublisherAdapter.hpp>
+#include <OrderMessage.hpp>
+
 #include "Order.hpp"
 #include "OrderCache.hpp"
 
 namespace mm
 {
 	//
-	// This class is the generic order manager.
+	// This class is the generic order manager implementing OrderListener concept.
 	//
-	template<typename Publisher, typename ExchangeInterface, typename Pool> class OrderManager
+	template<typename ExchangeInterface, typename Pool> class OrderManager :
+			public IService,
+			public IConsumer<OrderMessage>,
+			public PublisherAdapter<OrderSummaryMessage>
 	{
 	public:
 
 		// The exchange order type.
-		typedef Order<Publisher, ExchangeInterface, Pool> ExchangeOrder;
+		typedef Order<OrderManager, ExchangeInterface, Pool> ExchangeOrder;
 
 		//
 		// Constructor.
@@ -31,8 +40,9 @@ namespace mm
 		// publisher : The publisher.
 		// exchange : The exchange interface.
 		//
-		OrderManager(const std::shared_ptr<Publisher> publisher, const std::shared_ptr<ExchangeInterface> exchange) :
-			publisher(publisher), exchange(exchange)
+		OrderManager(const std::shared_ptr<Dispatcher> dispatcher, const std::shared_ptr<ExchangeInterface> exchange) :
+			PublisherAdapter<OrderSummaryMessage> (dispatcher),
+			exchange(exchange)
 		{
 		}
 
@@ -43,8 +53,10 @@ namespace mm
 		//
 		void consume(const std::shared_ptr<const OrderMessage>& message)
 		{
-			if (message->status == OrderStatus::NEW)
+			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
+				const std::shared_Ptr<ExchangeOrder>
+
 				liveCache.addOrder(pool.get(publisher, exchange));
 			}
 
@@ -74,9 +86,6 @@ namespace mm
 
 		// The object pool for orders.
 		static Pool<ExchangeOrder, 1000> pool;
-
-		// The order summary publisher.
-		const std::shared_ptr<Publisher> publisher;
 
 		// The exchange interface.
 		const std::shared_ptr<ExchangeInterface> exchange;
