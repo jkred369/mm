@@ -140,9 +140,9 @@ namespace mm
 	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
 	{
 		// fixed values to prevent if blocks
-		constexpr char direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
-		constexpr char timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
-		constexpr char volumeCondition[] = {USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_CV};
+		constexpr TUstpFtdcDirectionType direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
+		constexpr TUstpFtdcTimeConditionType timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
+		constexpr TUstpFtdcVolumeConditionType volumeCondition[] = {USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_CV};
 
 		CUstpFtdcInputOrderField order;
 		std::memset(&order, 0, sizeof(order));
@@ -160,7 +160,7 @@ namespace mm
 		order.UserCustom[0] = '\0';
 
 		// session specific
-		StringUtil::copy(order.BrokerID, userDetail.ipAddress, sizeof(order.BrokerID));
+		StringUtil::copy(order.BrokerID, userDetail.brokerId, sizeof(order.BrokerID));
 		StringUtil::copy(order.ExchangeID, exchangeId, sizeof(order.ExchangeID));
 		StringUtil::copy(order.GTDDate, tradingDate, sizeof(order.GTDDate));
 		StringUtil::copy(order.InvestorID, investorId, sizeof(order.InvestorID));
@@ -179,6 +179,7 @@ namespace mm
 		StringUtil::fromInt(order.InstrumentID, message->instrumentId, sizeof(order.InstrumentID));
 		StringUtil::fromInt(order.UserOrderLocalID, message->orderId, sizeof(order.UserOrderLocalID));
 
+		// request
 		const int result = session->ReqOrderInsert(&order, ++requestId);
 		if (UNLIKELY(result != 0))
 		{
@@ -188,7 +189,36 @@ namespace mm
 
 	void FemasOrderSession::cancel(const std::shared_ptr<OrderMessage>& message)
 	{
+		CUstpFtdcOrderActionField action;
+		std::memset(&action, 0, sizeof(action));
 
+		// hardcoded
+		action.ActionFlag = USTP_FTDC_AF_Delete;
+		action.LimitPrice = 0.0;
+		action.UserOrderActionLocalID[0] = '0';
+		action.VolumeChange = 0;
+
+		// sesson specific
+		StringUtil::copy(action.BrokerID, userDetail.brokerId, sizeof(action.BrokerID));
+		StringUtil::copy(action.ExchangeID, exchangeId, sizeof(action.ExchangeID));
+		StringUtil::copy(action.InvestorID, investorId, sizeof(action.InvestorID));
+		StringUtil::copy(action.UserID, userDetail.userId, sizeof(action.UserID));
+
+		// order specific
+		action.UserOrderLocalID = message->orderId;
+
+		if (UNLIKELY(!getExchangeOrderId(message->orderId, action.OrderSysID)))
+		{
+			LOGERR("Cannot send cancel with exchange ID look up failure for order: {}", message->orderId);
+			return;
+		}
+
+		// request
+		const int result = session->ReqOrderAction(&action, ++requestId);
+		if (UNLIKELY(result != 0))
+		{
+			LOGERR("Error sending cancel on order {}, instrument {}: {}", message->orderId, message->instrumentId, result);
+		}
 	}
 
 	void FemasOrderSession::OnFrontConnected()

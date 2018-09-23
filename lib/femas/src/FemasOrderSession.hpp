@@ -11,6 +11,7 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <femas/USTPFtdcTraderApi.h>
 
@@ -355,6 +356,29 @@ namespace mm
 		{
 			return std::make_shared<OrderSummaryMessage>(new OrderSummaryMessage());
 		}
+
+		//
+		// Get the exchange order ID from the client order ID.
+		//
+		// clientOrderId : The client order ID.
+		//
+		// return : The exchange order ID type.
+		//
+		inline bool getExchangeOrderId(const std::int64_t clientOrderId, TUstpFtdcOrderSysIDType exchangeOrderId)
+		{
+			auto it = orderIdMap.find(clientOrderId);
+			if (LIKELY(it != orderIdMap.end()))
+			{
+				std::memcpy(exchangeOrderId, it->second, sizeof(exchangeOrderId));
+				return true;
+			}
+			else
+			{
+				LOGERR("Failed to get exchange order ID for order ID: {}", clientOrderId);
+				return false;
+			}
+		}
+
 		// The int value for bid
 		static constexpr int BID = toValue(Side::BID);
 
@@ -375,7 +399,7 @@ namespace mm
 		std::atomic<bool> stopFlag;
 
 		// The request ID value keeper.
-		std::atomic<int> requestId;
+		int requestId;
 
 		// The exchange ID used to fill in the order.
 		std::string exchangeId;
@@ -385,6 +409,9 @@ namespace mm
 
 		// The trading date as from the session.
 		std::string tradingDate;
+
+		// The map from client order ID to exchange order ID.
+		std::unordered_map<std::int64_t, TUstpFtdcOrderSysIDType> orderIdMap;
 	};
 }
 
