@@ -12,6 +12,7 @@
 
 #include "Message.hpp"
 #include "OrderStatus.hpp"
+#include "OrderType.hpp"
 #include "Side.hpp"
 
 namespace mm
@@ -40,6 +41,9 @@ namespace mm
 
 		// The desired status for the order.
 		OrderStatus status;
+
+		// The order type.
+		OrderType type;
 	};
 }
 

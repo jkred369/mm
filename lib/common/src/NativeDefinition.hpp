@@ -28,4 +28,13 @@
 #endif
 #endif
 
+// branch prediction
+#if __GNUC__
+#define LIKELY(x) __builtin_expect(!!(x), 1)
+#define UNLIKELY(x) __builtin_expect(!!(x), 0)
+#else
+#define LIKELY(x) (x)
+#define UNLIKELY(x) (x)
+#endif
+
 #endif /* LIB_COMMON_SRC_NATIVEDEFINITION_HPP_ */

@@ -8,12 +8,14 @@
 #ifndef LIB_MESSAGING_SRC_SIDE_HPP_
 #define LIB_MESSAGING_SRC_SIDE_HPP_
 
+#include <cstdint>
+
 namespace mm
 {
 	//
 	// The enum for market data side.
 	//
-	enum class Side : int
+	enum class Side : std::int64_t
 	{
 		BID = 0,
 		ASK = 1

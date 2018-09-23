@@ -8,12 +8,14 @@
 #ifndef LIB_MESSAGING_SRC_ORDERSTATUS_HPP_
 #define LIB_MESSAGING_SRC_ORDERSTATUS_HPP_
 
+#include <cstdint>
+
 namespace mm
 {
 	//
 	// The order status enum.
 	//
-	enum class OrderStatus : int
+	enum class OrderStatus : std::int64_t
 	{
 		// new order
 		NEW = 0,

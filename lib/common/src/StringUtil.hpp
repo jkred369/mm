@@ -14,6 +14,10 @@
 #include <locale>
 #include <string>
 
+#include <fmt/format.h>
+
+#include <NativeDefinition.hpp>
+
 namespace mm
 {
 	//
@@ -63,10 +67,34 @@ namespace mm
 		// src : The source string.
 		// count : max count of chars to copy.
 		//
-		static inline void copy(char* dest, const std::string& src, std::size_t count)
+		static inline void copy(char* dest, const std::string& src, const std::size_t count)
 		{
 			std::strncpy(dest, src.c_str(), count);
 			dest[count - 1] = '\0';
+		}
+
+		//
+		// Fill the dest buffer with the string representation of the integer.
+		//
+		// dest : The destination.
+		// value : The integer value.
+		// count : Max count of chars to copy.
+		//
+		// return : Flag if the conversion is done successfully.
+		//
+		static inline bool fromInt(char* dest, const std::int64_t value, const std::size_t count)
+		{
+			fmt::format_int format(value);
+
+			if (LIKELY(format.size() < count))
+			{
+				std::strcpy(dest, format.c_str());
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 	};
 }
