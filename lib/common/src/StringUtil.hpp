@@ -69,8 +69,13 @@ namespace mm
 		//
 		static inline void copy(char* dest, const std::string& src, const std::size_t count)
 		{
-			std::strncpy(dest, src.c_str(), count);
-			dest[count - 1] = '\0';
+			const size_t size = std::min(src.size() + 1, count);
+			std::memcpy(dest, src.c_str(), size);
+
+			if (UNLIKELY(size == count))
+			{
+				dest[count - 1] = '\0';
+			}
 		}
 
 		//
