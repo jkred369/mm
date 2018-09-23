@@ -12,4 +12,5 @@ target_link_libraries(Config
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
+	${Common}
 )

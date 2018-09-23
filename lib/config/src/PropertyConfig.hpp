@@ -12,6 +12,7 @@
 #include <unordered_map>
 
 #include <Logger.hpp>
+
 #include "IConfig.hpp"
 
 namespace mm

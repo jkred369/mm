@@ -8,6 +8,7 @@ add_executable(ConfigTest
 )
 
 target_include_directories(ConfigTest PUBLIC
+	${Common_INCLUDES}
 	${Config_INCLUDES}
 )
 
@@ -16,6 +17,8 @@ target_link_libraries(ConfigTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
+	${Common}
+	${Config}
 )
 
 add_test(ConfigTest, ConfigTest)
