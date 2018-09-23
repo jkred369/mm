@@ -20,6 +20,7 @@ namespace mm
 		BID = 0,
 		ASK = 1
 	};
+
 }
 
 #endif /* LIB_MESSAGING_SRC_SIDE_HPP_ */

@@ -29,8 +29,7 @@ namespace mm
 		// FOK order (fill or kill)
 		FOK = 3
 	};
+
 }
-
-
 
 #endif /* LIB_ORDER_SRC_ORDERTYPE_HPP_ */
