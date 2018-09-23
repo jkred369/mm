@@ -18,7 +18,7 @@
 #include <EnumType.hpp>
 #include <IService.hpp>
 #include <MarketDataMessage.hpp>
-#include <SubscriberAdapter.hpp>
+#include <PublisherAdapter.hpp>
 
 #include <FemasUserDetail.hpp>
 
@@ -30,7 +30,7 @@ namespace mm
 	class FemasMarketDataSession :
 			public IService,
 			public CUstpFtdcMduserSpi,
-			public SubscriberAdapter<MarketDataMessage>
+			public PublisherAdapter<MarketDataMessage>
 	{
 	public:
 
@@ -53,10 +53,10 @@ namespace mm
 		virtual void stop() override;
 
 		//
-		// subscriber functionality.
+		// publisher functionality.
 		//
-		virtual void subscribe(const ISubscription<std::int64_t>& subscription) override;
-		virtual void unsubscribe(const ISubscription<std::int64_t>& subscription) override;
+		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer) override;
+		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer) override;
 
 		//
 		// Fired when the session is connected.
@@ -110,11 +110,7 @@ namespace mm
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspUserLogin(
-				CUstpFtdcRspUserLoginField *userLogin,
-				CUstpFtdcRspInfoField *info,
-				int requestID,
-				bool isLast) override;
+		virtual void OnRspUserLogin(CUstpFtdcRspUserLoginField *userLogin, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for the logout response.
@@ -124,11 +120,7 @@ namespace mm
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspUserLogout(
-				CUstpFtdcRspUserLogoutField *userLogout,
-				CUstpFtdcRspInfoField *info,
-				int requestID,
-				bool isLast) override;
+		virtual void OnRspUserLogout(CUstpFtdcRspUserLogoutField *userLogout, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for the subscription response.
@@ -138,11 +130,7 @@ namespace mm
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspSubscribeTopic(
-				CUstpFtdcDisseminationField *dissemination,
-				CUstpFtdcRspInfoField *info,
-				int requestID,
-				bool isLast) override;
+		virtual void OnRspSubscribeTopic(CUstpFtdcDisseminationField *dissemination, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for the topic query response.
@@ -152,11 +140,7 @@ namespace mm
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryTopic(
-				CUstpFtdcDisseminationField *dissemination,
-				CUstpFtdcRspInfoField *info,
-				int requestID,
-				bool isLast) override;
+		virtual void OnRspQryTopic(CUstpFtdcDisseminationField *dissemination, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for the market data depth update.
@@ -168,30 +152,22 @@ namespace mm
 		//
 		// Fired for the market data subscription response.
 		//
-		// specificInstrument : instrument subscribed.
+		// instrument : instrument subscribed.
 		// info : information details.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspSubMarketData(
-				CUstpFtdcSpecificInstrumentField *specificInstrument,
-				CUstpFtdcRspInfoField *info,
-				int requestID,
-				bool isLast) override;
+		virtual void OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for the market data unsubscription response.
 		//
-		// specificInstrument : instrument unsubscribed.
+		// instrument : instrument unsubscribed.
 		// info : information details.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspUnSubMarketData(
-				CUstpFtdcSpecificInstrumentField *specificInstrument,
-				CUstpFtdcRspInfoField *info,
-				int requestID,
-				bool isLast) override;
+		virtual void OnRspUnSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 	private:
 

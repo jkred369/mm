@@ -1,21 +1,20 @@
 /*
- * FemasMarketDataSession.cpp
+ * FemasOrderSession.cpp
  *
- *  Created on: Sep 13, 2018
+ *  Created on: Sep 23, 2018
  *      Author: suoalex
  */
-
 
 #include <fmt/format.h>
 
 #include <StringUtil.hpp>
-#include "FemasMarketDataSession.hpp"
+#include "FemasOrderSession.hpp"
 
-mm::Logger mm::FemasMarketDataSession::logger;
+mm::Logger mm::FemasOrderSession::logger;
 
 namespace mm
 {
-	FemasMarketDataSession::FemasMarketDataSession(const FemasUserDetail& detail) :
+	FemasOrderSession::FemasOrderSession(const FemasUserDetail& detail) :
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),
@@ -315,3 +314,6 @@ namespace mm
 	}
 
 }
+
+
+
