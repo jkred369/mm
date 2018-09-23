@@ -14,9 +14,9 @@
 
 #include <femas/USTPFtdcTraderApi.h>
 
-#include <Logger.hpp>
 #include <EnumType.hpp>
 #include <IService.hpp>
+#include <Logger.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>
 #include <PublisherAdapter.hpp>
@@ -162,31 +162,31 @@ namespace mm
 		// Fired for user password updated.
 		//
 		// userPasswordUpdate : The password change detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *userPasswordUpdate, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *userPasswordUpdate, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for order insertion.
 		//
 		// inputOrder : The order insertion detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for order action.
 		//
 		// orderAction : The order action detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for flow message canceled.
@@ -213,17 +213,17 @@ namespace mm
 		// Fired for order insertion.
 		//
 		// inputOrder : The input order detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		//
-		virtual void OnErrRtnOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *rspInfo) override;
+		virtual void OnErrRtnOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *info) override;
 
 		//
 		// Fired for order action.
 		//
 		// orderAction : The order action detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		//
-		virtual void OnErrRtnOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *rspInfo) override;
+		virtual void OnErrRtnOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *info) override;
 
 		//
 		// Fired for instrument status update.
@@ -243,111 +243,111 @@ namespace mm
 		// Fired for order query.
 		//
 		// orderAction : The order action detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryOrder(CUstpFtdcOrderField *order, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryOrder(CUstpFtdcOrderField *order, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for trade query.
 		//
 		// trade : The trade detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryTrade(CUstpFtdcTradeField *trade, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryTrade(CUstpFtdcTradeField *trade, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for user query
 		//
 		// userInvestor : The user detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *userInvestor, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *userInvestor, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for trading code query
 		//
 		// tradingCode : The trading code detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *tradingCode, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *tradingCode, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for investor account detail.
 		//
 		// investorAccount : The account detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *investorAccount, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *investorAccount, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for instrument detail.
 		//
 		// instrument : The instrument detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for exchange detail.
 		//
 		// exchange : The exchange detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for position detail.
 		//
 		// investorPosition : The position detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *investorPosition, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *investorPosition, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for compliance detail.
 		//
 		// complianceParam : The compliance detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *complianceParam, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *complianceParam, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for investor fee detail.
 		//
 		// investorFee : The fee detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *investorFee, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *investorFee, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 		//
 		// Fired for investor margin detail.
 		//
 		// investorMargin : The margin detail.
-		// rspInfo : The returned info object.
+		// info : The returned info object.
 		// requestID : The request ID.
 		// isLast : Flag if this is the last response.
 		//
-		virtual void OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast) override;
+		virtual void OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
 	private:
 

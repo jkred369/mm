@@ -166,11 +166,7 @@ namespace mm
 		LOGERR("Error on request {} : {}, {}", requestID, info->ErrorID, info->ErrorMsg);
 	}
 
-	void FemasMarketDataSession::OnRspUserLogin(
-			CUstpFtdcRspUserLoginField *userLogin,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasMarketDataSession::OnRspUserLogin(CUstpFtdcRspUserLoginField *userLogin, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -182,11 +178,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRspUserLogout(
-			CUstpFtdcRspUserLogoutField *userLogout,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasMarketDataSession::OnRspUserLogout(CUstpFtdcRspUserLogoutField *userLogout, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -198,11 +190,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRspSubscribeTopic(
-			CUstpFtdcDisseminationField *dissemination,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasMarketDataSession::OnRspSubscribeTopic(CUstpFtdcDisseminationField *dissemination, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -214,11 +202,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRspQryTopic(
-			CUstpFtdcDisseminationField *dissemination,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasMarketDataSession::OnRspQryTopic(CUstpFtdcDisseminationField *dissemination, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -282,35 +266,27 @@ namespace mm
 		notify(messagePointer);
 	}
 
-	void FemasMarketDataSession::OnRspSubMarketData(
-			CUstpFtdcSpecificInstrumentField *specificInstrument,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasMarketDataSession::OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
-			LOGINFO("Subscription established for {}", specificInstrument->InstrumentID);
+			LOGINFO("Subscription established for {}", instrument->InstrumentID);
 		}
 		else
 		{
-			LOGERR("Error establishing subscription on {}: {}, {}", specificInstrument->InstrumentID, info->ErrorID, info->ErrorMsg);
+			LOGERR("Error establishing subscription on {}: {}, {}", instrument->InstrumentID, info->ErrorID, info->ErrorMsg);
 		}
 	}
 
-	void FemasMarketDataSession::OnRspUnSubMarketData(
-			CUstpFtdcSpecificInstrumentField *specificInstrument,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasMarketDataSession::OnRspUnSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
-			LOGINFO("Unsubscription finished for {}", specificInstrument->InstrumentID);
+			LOGINFO("Unsubscription finished for {}", instrument->InstrumentID);
 		}
 		else
 		{
-			LOGERR("Error unsubscribing on {}: {}, {}", specificInstrument->InstrumentID, info->ErrorID, info->ErrorMsg);
+			LOGERR("Error unsubscribing on {}: {}, {}", instrument->InstrumentID, info->ErrorID, info->ErrorMsg);
 		}
 	}
 

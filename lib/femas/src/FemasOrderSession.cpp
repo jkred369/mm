@@ -16,7 +16,7 @@ namespace mm
 {
 	FemasOrderSession::FemasOrderSession(const FemasUserDetail& detail) :
 		userDetail(detail),
-		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
+		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
 		stopFlag(false),
 		requestId(0)
 	{
@@ -37,12 +37,12 @@ namespace mm
 		session->Init();
 	}
 
-	FemasMarketDataSession::~FemasMarketDataSession()
+	FemasOrderSession::~FemasOrderSession()
 	{
 		stop();
 	}
 
-	bool FemasMarketDataSession::start()
+	bool FemasOrderSession::start()
 	{
 		// login attempt
 		CUstpFtdcReqUserLoginField field;
@@ -72,7 +72,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::stop()
+	void FemasOrderSession::stop()
 	{
 		// sanity check
 		{
@@ -103,7 +103,7 @@ namespace mm
 		session = nullptr;
 	}
 
-	void FemasMarketDataSession::subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer)
+	void FemasOrderSession::subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
 	{
 		PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer);
 
@@ -119,7 +119,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer)
+	void FemasOrderSession::unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
 	{
 		PublisherAdapter<MarketDataMessage>::unsubscribe(subscription, consumer);
 
@@ -135,41 +135,47 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnFrontConnected()
+	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
+	{
+
+	}
+
+	void FemasOrderSession::cancel(const std::shared_ptr<OrderMessage>& message)
+	{
+
+	}
+
+	void FemasOrderSession::OnFrontConnected()
 	{
 		LOGDEBUG("Market data session connected.");
 	}
 
-	void FemasMarketDataSession::OnFrontDisconnected(int reason)
+	void FemasOrderSession::OnFrontDisconnected(int reason)
 	{
 		LOGDEBUG("Market data session disconnected on {}, auto-reconnecting", reason);
 	}
 
-	void FemasMarketDataSession::OnHeartBeatWarning(int timeLapse)
+	void FemasOrderSession::OnHeartBeatWarning(int timeLapse)
 	{
 		LOGWARN("No heart beat in {} seconds.", timeLapse);
 	}
 
-	void FemasMarketDataSession::OnPackageStart(int topicID, int sequenceNo)
+	void FemasOrderSession::OnPackageStart(int topicID, int sequenceNo)
 	{
 		LOGTRACE("Received packet {} on topic {}", sequenceNo, topicID);
 	}
 
-	void FemasMarketDataSession::OnPackageEnd(int topicID, int sequenceNo)
+	void FemasOrderSession::OnPackageEnd(int topicID, int sequenceNo)
 	{
 		LOGTRACE("Finished packet {} on topic {}", sequenceNo, topicID);
 	}
 
-	void FemasMarketDataSession::OnRspError(CUstpFtdcRspInfoField *info, int requestID, bool isLast)
+	void FemasOrderSession::OnRspError(CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		LOGERR("Error on request {} : {}, {}", requestID, info->ErrorID, info->ErrorMsg);
 	}
 
-	void FemasMarketDataSession::OnRspUserLogin(
-			CUstpFtdcRspUserLoginField *userLogin,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasOrderSession::OnRspUserLogin(CUstpFtdcRspUserLoginField *userLogin, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -181,11 +187,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRspUserLogout(
-			CUstpFtdcRspUserLogoutField *userLogout,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasOrderSession::OnRspUserLogout(CUstpFtdcRspUserLogoutField *userLogout, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -197,11 +199,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRspSubscribeTopic(
-			CUstpFtdcDisseminationField *dissemination,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasOrderSession::OnRspSubscribeTopic(CUstpFtdcDisseminationField *dissemination, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -213,11 +211,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRspQryTopic(
-			CUstpFtdcDisseminationField *dissemination,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void FemasOrderSession::OnRspQryTopic(CUstpFtdcDisseminationField *dissemination, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
@@ -229,88 +223,116 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *depthMarketData)
-	{
-		std::shared_ptr<MarketDataMessage> messagePointer = getMessage();
-		MarketDataMessage& message = *messagePointer;
-
-		// level 1 fields
-		message.instrumentId = depthMarketData->InstrumentID;
-
-		message.open = depthMarketData->OpenPrice;
-		message.close = depthMarketData->ClosePrice;
-		message.high = depthMarketData->HighestPrice;
-		message.low = depthMarketData->LowestPrice;
-		message.last = depthMarketData->LastPrice;
-		message.highLimit = depthMarketData->UpperLimitPrice;
-		message.lowLimit = depthMarketData->LowerLimitPrice;
-		message.volume = depthMarketData->Volume;
-		message.turnover = depthMarketData->Turnover;
-
-		// market data levels - silly yes but fast
-		message.levels[BID][0].price = depthMarketData->BidPrice1;
-		message.levels[BID][0].qty = depthMarketData->BidVolume1;
-
-		message.levels[BID][1].price = depthMarketData->BidPrice2;
-		message.levels[BID][1].qty = depthMarketData->BidVolume2;
-
-		message.levels[BID][2].price = depthMarketData->BidPrice3;
-		message.levels[BID][2].qty = depthMarketData->BidVolume3;
-
-		message.levels[BID][3].price = depthMarketData->BidPrice4;
-		message.levels[BID][3].qty = depthMarketData->BidVolume4;
-
-		message.levels[BID][4].price = depthMarketData->BidPrice5;
-		message.levels[BID][4].qty = depthMarketData->BidVolume5;
-
-		message.levels[ASK][0].price = depthMarketData->AskPrice1;
-		message.levels[ASK][0].qty = depthMarketData->AskVolume1;
-
-		message.levels[ASK][1].price = depthMarketData->AskPrice2;
-		message.levels[ASK][1].qty = depthMarketData->AskVolume2;
-
-		message.levels[ASK][2].price = depthMarketData->AskPrice3;
-		message.levels[ASK][2].qty = depthMarketData->AskVolume3;
-
-		message.levels[ASK][3].price = depthMarketData->AskPrice4;
-		message.levels[ASK][3].qty = depthMarketData->AskVolume4;
-
-		message.levels[ASK][4].price = depthMarketData->AskPrice5;
-		message.levels[ASK][4].qty = depthMarketData->AskVolume5;
-
-		notify(messagePointer);
-	}
-
-	void FemasMarketDataSession::OnRspSubMarketData(
-			CUstpFtdcSpecificInstrumentField *specificInstrument,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void OnRspUserPasswordUpdate(CUstpFtdcUserPasswordUpdateField *userPasswordUpdate, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
 	{
 		if (info->ErrorID == 0)
 		{
-			LOGINFO("Subscription established for {}", specificInstrument->InstrumentID);
+			LOGINFO("User {} password updated from {} to {}", userPasswordUpdate->UserID, userPasswordUpdate->OldPassword, userPasswordUpdate->NewPassword);
 		}
 		else
 		{
-			LOGERR("Error establishing subscription on {}: {}, {}", specificInstrument->InstrumentID, info->ErrorID, info->ErrorMsg);
+			LOGERR("User {} password update failed", userPasswordUpdate->UserID);
 		}
 	}
 
-	void FemasMarketDataSession::OnRspUnSubMarketData(
-			CUstpFtdcSpecificInstrumentField *specificInstrument,
-			CUstpFtdcRspInfoField *info,
-			int requestID,
-			bool isLast)
+	void OnRspOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
 	{
-		if (info->ErrorID == 0)
-		{
-			LOGINFO("Unsubscription finished for {}", specificInstrument->InstrumentID);
-		}
-		else
-		{
-			LOGERR("Error unsubscribing on {}: {}, {}", specificInstrument->InstrumentID, info->ErrorID, info->ErrorMsg);
-		}
+
+	}
+
+	void OnRspOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRtnFlowMessageCancel(CUstpFtdcFlowMessageCancelField *flowMessageCancel)
+	{
+
+	}
+
+	void OnRtnTrade(CUstpFtdcTradeField *trade)
+	{
+
+	}
+
+	void OnRtnOrder(CUstpFtdcOrderField *order)
+	{
+
+	}
+
+	void OnErrRtnOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *rspInfo)
+	{
+
+	}
+
+	void OnErrRtnOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *rspInfo)
+	{
+
+	}
+
+	void OnRtnInstrumentStatus(CUstpFtdcInstrumentStatusField *instrumentStatus)
+	{
+
+	}
+
+	void OnRtnInvestorAccountDeposit(CUstpFtdcInvestorAccountDepositResField *investorAccountDepositRes)
+	{
+
+	}
+
+	void OnRspQryOrder(CUstpFtdcOrderField *order, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryTrade(CUstpFtdcTradeField *trade, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *userInvestor, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *tradingCode, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *investorAccount, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *investorPosition, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *complianceParam, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryInvestorFee(CUstpFtdcInvestorFeeField *investorFee, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
+	}
+
+	void OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *rspInfo, int requestID, bool isLast)
+	{
+
 	}
 
 }

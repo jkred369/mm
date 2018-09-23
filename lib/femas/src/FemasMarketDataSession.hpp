@@ -14,9 +14,9 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
-#include <Logger.hpp>
 #include <EnumType.hpp>
 #include <IService.hpp>
+#include <Logger.hpp>
 #include <MarketDataMessage.hpp>
 #include <PublisherAdapter.hpp>
 
