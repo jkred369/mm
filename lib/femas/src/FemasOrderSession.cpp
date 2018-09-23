@@ -140,31 +140,50 @@ namespace mm
 	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
 	{
 		// fixed values to prevent if blocks
-		constexpr char timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
 		constexpr char direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
+		constexpr char timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
+		constexpr char volumeCondition[] = {USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_CV};
 
 		CUstpFtdcInputOrderField order;
+		std::memset(&order, 0, sizeof(order));
 
-		// TODO: clarify what to do for BusinessUnit
+		// TODO: clarify if we need BusinessUnit
+		// TODO: clarify on off set flag
+		// TODO: determine hedge flag.
 
-		// hardcoded values
-		order.VolumeCondition =
+		// hard code values
+		order.HedgeFlag = USTP_FTDC_CHF_Arbitrage;
+		order.IsAutoSuspend = 0;
+		order.OffsetFlag = USTP_FTDC_OF_Open;
+		order.OrderPriceType = USTP_FTDC_OPT_LimitPrice;
+		order.OrderSysID = '\0';
+		order.UserCustom[0] = '\0';
 
 		// session specific
 		StringUtil::copy(order.BrokerID, userDetail.ipAddress, sizeof(order.BrokerID));
 		StringUtil::copy(order.ExchangeID, exchangeId, sizeof(order.ExchangeID));
+		StringUtil::copy(order.GTDDate, tradingDate, sizeof(order.GTDDate));
+		StringUtil::copy(order.InvestorID, investorId, sizeof(order.InvestorID));
 		StringUtil::copy(order.UserID, userDetail.userId, sizeof(order.UserID));
 
 		// order specific
-		order.Direction = direction[toValue(message->side)];
 		order.LimitPrice = message->price;
-		order.TimeCondition = timeCondition[toValue(message->type)];
+		order.MinVolume = 0;
+		order.StopPrice = message->price;
 		order.Volume = message->qty;
+
+		order.Direction = direction[toValue(message->side)];
+		order.TimeCondition = timeCondition[toValue(message->type)];
+		order.VolumeCondition = volumeCondition[toValue(message->type)];
 
 		StringUtil::fromInt(order.InstrumentID, message->instrumentId, sizeof(order.InstrumentID));
 		StringUtil::fromInt(order.UserOrderLocalID, message->orderId, sizeof(order.UserOrderLocalID));
 
-		session->ReqOrderInsert(&order, ++requestId);
+		const int result = session->ReqOrderInsert(&order, ++requestId);
+		if (UNLIKELY(result != 0))
+		{
+			LOGERR("Error sending order {} on instrument {}: {}", message->orderId, message->instrumentId, result);
+		}
 	}
 
 	void FemasOrderSession::cancel(const std::shared_ptr<OrderMessage>& message)
@@ -206,7 +225,8 @@ namespace mm
 	{
 		if (info->ErrorID == 0)
 		{
-			LOGINFO("User {} logged in successfully", userLogin->UserID);
+			tradingDate = userLogin->TradingDay;
+			LOGINFO("User {} logged in successfully on date {}", userLogin->UserID, tradingDate);
 		}
 		else
 		{
@@ -319,12 +339,19 @@ namespace mm
 
 	void FemasOrderSession::OnRspQryUserInvestor(CUstpFtdcRspUserInvestorField *userInvestor, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
-
+		if (info->ErrorID == 0)
+		{
+			investorId = userInvestor->InvestorID;
+			LOGINFO("Investor ID set to {}", investorId);
+		}
+		else
+		{
+			LOGERR("Error querying investor ID for user {}: {}, {}", userInvestor->UserID, info->ErrorID, info->ErrorMsg);
+		}
 	}
 
 	void FemasOrderSession::OnRspQryTradingCode(CUstpFtdcRspTradingCodeField *tradingCode, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
-
 	}
 
 	void FemasOrderSession::OnRspQryInvestorAccount(CUstpFtdcRspInvestorAccountField *investorAccount, CUstpFtdcRspInfoField *info, int requestID, bool isLast)

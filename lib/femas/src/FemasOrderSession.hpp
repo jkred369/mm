@@ -355,7 +355,6 @@ namespace mm
 		{
 			return std::make_shared<OrderSummaryMessage>(new OrderSummaryMessage());
 		}
-
 		// The int value for bid
 		static constexpr int BID = toValue(Side::BID);
 
@@ -380,6 +379,12 @@ namespace mm
 
 		// The exchange ID used to fill in the order.
 		std::string exchangeId;
+
+		// The investor ID to insert into order field.
+		std::string investorId;
+
+		// The trading date as from the session.
+		std::string tradingDate;
 	};
 }
 
