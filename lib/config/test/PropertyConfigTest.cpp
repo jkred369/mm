@@ -95,6 +95,17 @@ namespace mm
 
 			ASSERT_TRUE(caught);
 		}
+
+		ASSERT_TRUE(config.getBool("ABC", true));
+		ASSERT_TRUE(config.getDouble("ABC", 12.5) == 12.5);
+		ASSERT_TRUE(config.getInt32("ABC", 1234) == 1234);
+		ASSERT_TRUE(config.getInt64("ABC", 123456) == 123456);
+		ASSERT_TRUE(config.getString("ABC", "DEF") == "DEF");
+
+		ASSERT_TRUE(config.getBoolList("ABC").size() == 0);
+		ASSERT_TRUE(config.getDoubleList("ABC").size() == 0);
+		ASSERT_TRUE(config.getInt32List("ABC").size() == 0);
+		ASSERT_TRUE(config.getInt64List("ABC").size() == 0);
 	}
 
 }
