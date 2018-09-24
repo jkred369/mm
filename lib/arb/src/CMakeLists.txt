@@ -16,9 +16,9 @@ target_link_libraries(Service
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Bus}
-	${Common}
-	${Config}
-	${Messaging}
-	${Threading}
+	Bus
+	Common
+	Config
+	Messaging
+	Threading
 )

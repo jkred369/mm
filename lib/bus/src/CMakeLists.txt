@@ -13,6 +13,6 @@ file(GLOB_RECURSE Bus_SOURCES "*.cpp")
 #	${TBB_LIBS}
 #	${POCO_LIBS}
 #	${GTEST_LIBS}
-#	${Common}
-#	${Threading}
+#	Common
+#	Threading
 #)

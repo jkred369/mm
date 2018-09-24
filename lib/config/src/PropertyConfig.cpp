@@ -14,6 +14,8 @@
 #include <StringUtil.hpp>
 #include "PropertyConfig.hpp"
 
+mm::Logger mm::PropertyConfig::logger;
+
 namespace mm
 {
 	PropertyConfig::PropertyConfig()

@@ -17,7 +17,7 @@ target_link_libraries(ThreadingTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Common}
+	Common
 )
 
 add_test(ThreadingTest, ThreadingTest)

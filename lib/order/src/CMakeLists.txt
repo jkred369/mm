@@ -17,6 +17,6 @@ target_link_libraries(Order
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Common}
-	${Messaging}
+	Common
+	Messaging
 )

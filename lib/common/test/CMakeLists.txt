@@ -16,7 +16,7 @@ target_link_libraries(CommonTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Common}
+	Common
 )
 
 add_test(CommonTest, CommonTest)

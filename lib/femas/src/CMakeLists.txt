@@ -19,6 +19,6 @@ target_link_libraries(Femas
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Messaging}
-	${Threading}
+	Messaging
+	Threading
 )
