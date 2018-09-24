@@ -4,6 +4,7 @@ file(GLOB_RECURSE Config_Test_HEADERS "*.hpp")
 
 add_executable(ConfigTest 
 	${Config_Test_SOURCES} 
+	${Common_HEADERS}
 	${Config_HEADERS}
 )
 
