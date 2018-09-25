@@ -9,6 +9,8 @@
 #include <chrono>
 #include <functional>
 #include <iostream>
+#include <memory>
+#include <sstream>
 #include <thread>
 
 #include <gtest/gtest.h>
@@ -106,6 +108,43 @@ namespace mm
 		ASSERT_TRUE(config.getDoubleList("ABC").size() == 0);
 		ASSERT_TRUE(config.getInt32List("ABC").size() == 0);
 		ASSERT_TRUE(config.getInt64List("ABC").size() == 0);
+
+		ASSERT_TRUE(config.getSubConfig("ABC").get() == nullptr);
+	}
+
+	TEST(PropertyConfigTest, BasicCase)
+	{
+		std::stringstream ss;
+		ss << "# A testing property config" << std::endl;
+		ss << "" << std::endl;
+		ss << "Services = Order,FemasMarketData, Dispatcher" << std::endl;
+		ss << "Order.Count = 0" << std::endl;
+		ss << " Order . Bootstrap = 1" << std::endl;
+		ss << " Order.Exchange = 2" << std::endl;
+		ss << "Order.Exchange.Venue = Femas" << std::endl;
+		ss << "FemasMarketData.Instruments=1,2,3,4" << std::endl;
+		ss << "FemasMarketData.Limits=1.2,2.1,3.3,4.0" << std::endl;
+		ss << "FemasMarketData.Names=Femas,CTP,Bottom" << std::endl;
+		ss << "Dispatcher.Thread=2" << std::endl;
+
+		PropertyConfig config(ss);
+
+		{
+			std::vector<std::string> values = config.getStringList("Services");
+			ASSERT_TRUE(values.size() == 3);
+			ASSERT_TRUE(values[0] == "Order");
+			ASSERT_TRUE(values[1] == "FemasMarketData");
+			ASSERT_TRUE(values[2] == "Dispatcher");
+		}
+
+		{
+			std::shared_ptr<IConfig> orderConfig = config.getSubConfig("Order");
+			ASSERT_TRUE(orderConfig->getBool("Bootstrap"));
+			ASSERT_TRUE(orderConfig->getInt64("Exchange") == 2);
+
+			std::shared_ptr<IConfig> exchangeConfig = config.getSubConfig("Exchange");
+			ASSERT_TRUE(exchangeConfig->getString("Venue", "") == "Femas");
+		}
 	}
 
 }

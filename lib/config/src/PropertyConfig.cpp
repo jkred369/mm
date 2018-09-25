@@ -41,8 +41,11 @@ namespace mm
 					continue;
 				}
 
-				const std::string key = line.substr(0, index);
-				const std::string value = line.substr(index + 1);
+				std::string key = line.substr(0, index);
+				std::string value = line.substr(index + 1);
+
+				StringUtil::trim(key);
+				StringUtil::trim(value);
 				addValue(key, value);
 			}
 		}
@@ -277,8 +280,12 @@ namespace mm
 		}
 		else
 		{
-			const std::string subKey = key.substr(0, index);
-			const std::string restKey = key.substr(index + 1);
+			std::string subKey = key.substr(0, index);
+			std::string restKey = key.substr(index + 1);
+
+			StringUtil::trim(subKey);
+			StringUtil::trim(restKey);
+
 			std::shared_ptr<PropertyConfig> subConfig = subConfigMap[subKey];
 
 			if (!subConfig.get())
