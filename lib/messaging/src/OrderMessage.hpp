@@ -11,6 +11,7 @@
 #include <cstdint>
 
 #include "Message.hpp"
+#include "OffsetType.hpp"
 #include "OrderStatus.hpp"
 #include "OrderType.hpp"
 #include "Side.hpp"
@@ -44,6 +45,9 @@ namespace mm
 
 		// The order type.
 		OrderType type;
+
+		// The offset type
+		OffsetType offsetType;
 	};
 }
 

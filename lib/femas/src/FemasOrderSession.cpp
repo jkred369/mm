@@ -5,8 +5,6 @@
  *      Author: suoalex
  */
 
-#include <fmt/format.h>
-
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
 #include <StringUtil.hpp>
@@ -138,23 +136,20 @@ namespace mm
 		constexpr TUstpFtdcDirectionType direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
 		constexpr TUstpFtdcTimeConditionType timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
 		constexpr TUstpFtdcVolumeConditionType volumeCondition[] = {USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_CV};
+		constexpr TUstpFtdcOffsetFlagType offsetType[] = {USTP_FTDC_OF_Open, USTP_FTDC_OF_Close, USTP_FTDC_OF_ForceClose, USTP_FTDC_OF_CloseToday, USTP_FTDC_OF_CloseYesterday};
 
 		CUstpFtdcInputOrderField order;
 		std::memset(&order, 0, sizeof(order));
 
-		// TODO: clarify if we need BusinessUnit
-		// TODO: clarify on off set flag
-		// TODO: determine hedge flag.
-
 		// hard code values
-		order.HedgeFlag = USTP_FTDC_CHF_Arbitrage;
-		order.IsAutoSuspend = 0;
-		order.OffsetFlag = USTP_FTDC_OF_Open;
 		order.OrderPriceType = USTP_FTDC_OPT_LimitPrice;
 		order.OrderSysID = '\0';
 		order.UserCustom[0] = '\0';
 
 		// session specific
+		order.HedgeFlag = orderDetail.hedgeFlag;
+		order.IsAutoSuspend = orderDetail.isAutoSuspend;
+
 		StringUtil::copy(order.BrokerID, userDetail.brokerId, sizeof(order.BrokerID));
 		StringUtil::copy(order.ExchangeID, exchangeId, sizeof(order.ExchangeID));
 		StringUtil::copy(order.GTDDate, tradingDate, sizeof(order.GTDDate));
@@ -168,6 +163,7 @@ namespace mm
 		order.Volume = message->qty;
 
 		order.Direction = direction[toValue(message->side)];
+		order.OffsetFlag = offsetType[toValue(message->offsetType)];
 		order.TimeCondition = timeCondition[toValue(message->type)];
 		order.VolumeCondition = volumeCondition[toValue(message->type)];
 

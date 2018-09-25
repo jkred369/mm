@@ -22,6 +22,7 @@
 #include <OrderSummaryMessage.hpp>
 #include <PublisherAdapter.hpp>
 
+#include "FemasOrderDetail.hpp"
 #include "FemasUserDetail.hpp"
 
 namespace mm
@@ -390,6 +391,9 @@ namespace mm
 
 		// The login user detail.
 		const FemasUserDetail userDetail;
+
+		// The order session detail.
+		const FemasOrderDetail orderDetail;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.
