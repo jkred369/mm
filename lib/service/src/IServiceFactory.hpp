@@ -28,13 +28,13 @@ namespace mm
 		//
 		// Create service with given name.
 		//
-		// serviceName : The service name.
+		// serviceClass : The service class.
 		// config : The config for the service.
 		// context : The service context for sourcing other services.
 		//
 		// return : The service as a shared pointer.
 		//
-		virtual std::shared_ptr<IService> createService(const std::string serviceName, const std::shared_ptr<IConfig> config, ServiceContext& context) = 0;
+		virtual std::shared_ptr<IService> createService(const std::string serviceClass, const std::shared_ptr<IConfig> config, ServiceContext& context) = 0;
 	};
 }
 

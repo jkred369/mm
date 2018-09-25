@@ -8,6 +8,7 @@
 #ifndef LIB_SERVICE_SRC_SERVICECONTEXT_HPP_
 #define LIB_SERVICE_SRC_SERVICECONTEXT_HPP_
 
+#include <istream>
 #include <memory>
 #include <unordered_map>
 #include <string>
@@ -35,12 +36,40 @@ namespace mm
 		// The service list config name.
 		static const std::string SERVICE_LIST;
 
+		// The class of a service.
+		static const std::string SERVICE_CLASS;
+
 		//
 		// Constructor. Initialize all the services available. Essentially factory method for a context.
 		//
 		// configFilePath : The configuration file path.
+		// factory : The service factory instance.
 		//
 		ServiceContext(const std::string configFilePath, IServiceFactory& factory);
+
+		//
+		// Constructor. Initialize all the services available. Essentially factory method for a context.
+		//
+		// is : The input stream for the config file.
+		// factory : The service factory instance.
+		//
+		ServiceContext(std::istream& is, IServiceFactory& factory);
+
+		//
+		// Constructor. Initialize all the services available. Essentially factory method for a context.
+		//
+		// is : The input stream for the config file.
+		// factory : The service factory instance.
+		//
+		ServiceContext(std::istream&& is, IServiceFactory& factory);
+
+		//
+		// Constructor. Initialize all the services available. Essentially factory method for a context.
+		//
+		// config : The config instance.
+		// factory : The service factory instance.
+		//
+		ServiceContext(const std::shared_ptr<IConfig>& config, IServiceFactory& factory);
 
 		//
 		// IService implementation

@@ -13,40 +13,46 @@
 #include "ServiceContext.hpp"
 
 const std::string mm::ServiceContext::SERVICE_LIST = "ServiceList";
+const std::string mm::ServiceContext::SERVICE_CLASS = "Class";
+
+mm::Logger mm::ServiceContext::logger;
 
 namespace mm
 {
-	ServiceContext::ServiceContext(const std::string configFilePath, IServiceFactory& factory)
+	ServiceContext::ServiceContext(const std::string configFilePath, IServiceFactory& factory) :
+			ServiceContext(std::fstream(configFilePath), factory)
 	{
-		// initialize the config
-		try
-		{
-			std::ifstream ifs(configFilePath);
-			config.reset(new PropertyConfig(ifs));
-		}
-		catch (const std::exception& e)
-		{
-			throw std::runtime_error("Error loading configuration file: " + std::string(e.what()));
-		}
+	}
 
+	ServiceContext::ServiceContext(std::istream& is, IServiceFactory& factory) :
+			ServiceContext(std::shared_ptr<IConfig> (new PropertyConfig(is)), factory)
+	{
+	}
+
+	ServiceContext::ServiceContext(std::istream&& is, IServiceFactory& factory) :
+			ServiceContext(std::shared_ptr<IConfig> (new PropertyConfig(is)), factory)
+	{
+	}
+
+	ServiceContext::ServiceContext(const std::shared_ptr<IConfig>& config, IServiceFactory& factory) : config(config)
+	{
 		// logger
 		{
 			std::shared_ptr<IConfig> loggerConfig = config->getSubConfig(LoggerConfig::LOG_CONFIG);
 
 			if (!loggerConfig.get())
 			{
-				throw std::runtime_error("No logger in config file: " + configFilePath);
+				LOGWARN("No logger defined in configuration. Using default logger to stdout.");
 			}
+			else
+			{
+				const LogLevel level = LogLevelConstant::getLevel(loggerConfig->getString(LoggerConfig::LOG_LEVEL, LogLevelConstant::LOG_TRACE));
+				const std::string& path = loggerConfig->getString(LoggerConfig::LOG_PATH);
+				const std::string& name = loggerConfig->getString(LoggerConfig::LOG_NAME);
 
-			const LogLevel level = LogLevelConstant::getLevel(loggerConfig->getString(LoggerConfig::LOG_LEVEL, LogLevelConstant::LOG_TRACE));
-			const std::string& path = loggerConfig->getString(LoggerConfig::LOG_PATH);
-			const std::string& name = loggerConfig->getString(LoggerConfig::LOG_NAME);
-
-			LoggerSingleton::init(level, path, name);
-
-			// first chance to log here after logger creation
-			LOGINFO("Config loaded from {}", configFilePath);
-			LOGINFO("Logger {} created with level {}, log file {}", name, LogLevelConstant::getName(level), path);
+				LoggerSingleton::init(level, path, name);
+				LOGINFO("Logger {} created with level {}, log file {}", name, LogLevelConstant::getName(level), path);
+			}
 		}
 
 		// dispatcher threading model
@@ -55,7 +61,7 @@ namespace mm
 
 			if (!dispatcherConfig.get())
 			{
-				throw std::runtime_error("No dispatcher section in config file: " + configFilePath);
+				throw std::runtime_error("No dispatcher section in config file");
 			}
 
 			const int threadCount = dispatcherConfig->getInt64(DispatcherConfig::THREAD_COUNT);
@@ -85,7 +91,9 @@ namespace mm
 					throw std::runtime_error("No config for service " + serviceName);
 				}
 
-				serviceMap[serviceName] = factory.createService(serviceName, serviceConfig, *this);
+				const std::string serviceClass = serviceConfig->getString(ServiceContext::SERVICE_CLASS);
+				serviceMap[serviceName] = factory.createService(serviceClass, serviceConfig, *this);
+
 				LOGINFO("Service {} created successfully.", serviceName);
 			}
 		}

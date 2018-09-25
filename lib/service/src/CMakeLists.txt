@@ -19,4 +19,5 @@ target_link_libraries(Service
 	Common
 	Config
 	Messaging
+	Threading
 )
