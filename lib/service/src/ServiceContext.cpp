@@ -59,12 +59,12 @@ namespace mm
 		{
 			std::shared_ptr<IConfig> dispatcherConfig = config->getSubConfig(DispatcherConfig::DISPATCHER_CONFIG);
 
+			const int threadCount = dispatcherConfig.get() ? dispatcherConfig->getInt64(DispatcherConfig::THREAD_COUNT) : 1;
 			if (!dispatcherConfig.get())
 			{
-				throw std::runtime_error("No dispatcher section in config file");
+				LOGWARN("No dispatcher defined in config. Using default dispatch count = {}", threadCount);
 			}
 
-			const int threadCount = dispatcherConfig->getInt64(DispatcherConfig::THREAD_COUNT);
 			if (threadCount <= 0)
 			{
 				LOGERR("Invalid thread count for dispatcher: {}", threadCount);
@@ -79,7 +79,7 @@ namespace mm
 			const std::vector<std::string> serviceList = config->getStringList(ServiceContext::SERVICE_LIST);
 			if (serviceList.empty())
 			{
-				throw std::runtime_error("No service specified in " + ServiceContext::SERVICE_LIST);
+				LOGERR("No service specified in {}", ServiceContext::SERVICE_LIST);
 			}
 
 			for (const std::string& serviceName : serviceList)
