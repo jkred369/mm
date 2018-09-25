@@ -7,20 +7,30 @@
 
 #include "spdlog/async.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "SpdLogger.hpp"
 
 mm::LogLevel mm::SpdLoggerSingleton::level = mm::LogLevel::TRACE;
 std::string mm::SpdLoggerSingleton::path = "";
-std::string mm::SpdLoggerSingleton::loggerName = "";
+std::string mm::SpdLoggerSingleton::loggerName = "DefaultLogger";
 
 namespace mm
 {
 	SpdLogger::SpdLogger(LogLevel level, const std::string& path, const std::string& loggerName)
 	{
 	    spdlog::init_thread_pool(8192, 1);
+	    std::vector<spdlog::sink_ptr> sinks;
 
-	    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(path, 1024 * 1024 * 10, 10);
-	    std::vector<spdlog::sink_ptr> sinks {rotating_sink};
+	    if (!path.empty())
+	    {
+		    auto rotating_sink = std::make_shared<spdlog::sinks::rotating_file_sink_mt>(path, 1024 * 1024 * 10, 10);
+		    sinks.push_back(rotating_sink);
+	    }
+	    else
+	    {
+	    	auto console_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
+	    	sinks.push_back(console_sink);
+	    }
 
 		logger = std::make_shared<spdlog::async_logger>(loggerName, sinks.begin(), sinks.end(),
 				spdlog::thread_pool(), spdlog::async_overflow_policy::block);

@@ -176,6 +176,33 @@ namespace mm
 		}
 	}
 
+	TEST(PropertyConfigTest, ErrorCase)
+	{
+		// white space
+		{
+			std::stringstream ss;
+			ss << "A testing property config" << std::endl;
+
+			PropertyConfig config(ss);
+		}
+
+		// incomplete line
+		{
+			std::stringstream ss;
+			ss << "A =    " << std::endl;
+
+			PropertyConfig config(ss);
+		}
+
+		// invalid key
+		{
+			std::stringstream ss;
+			ss << "A B =1" << std::endl;
+
+			PropertyConfig config(ss);
+		}
+	}
+
 }
 
 
