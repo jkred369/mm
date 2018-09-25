@@ -6,9 +6,11 @@
  */
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <thread>
 
 #include <gtest/gtest.h>
 
@@ -62,7 +64,7 @@ namespace mm
 			return counter.load();
 		}
 
-	private:
+	protected:
 
 		const std::string className;
 
@@ -81,6 +83,57 @@ namespace mm
 				ServiceContext& context) override
 		{
 			return std::shared_ptr<IService> (new SimpleService(serviceClass));
+		}
+	};
+
+	struct RunningService : SimpleService
+	{
+		RunningService(const std::string className, Dispatcher& dispatcher) : SimpleService(className), dispatcher(dispatcher)
+		{
+		}
+
+		virtual ~RunningService()
+		{
+		}
+
+		virtual bool start() override
+		{
+			if (!SimpleService::start())
+			{
+				return false;
+			}
+
+			const KeyType key = className == "A" ? 1 : 2;
+			dispatcher.submit(key, [&] () {
+				std::this_thread::sleep_for(std::chrono::milliseconds(4));
+				++this->counter;
+			});
+
+			return true;
+		}
+
+		virtual void stop() override
+		{
+			--counter;
+		}
+
+	private:
+
+		Dispatcher& dispatcher;
+	};
+
+	struct RunningFactory : IServiceFactory
+	{
+		virtual ~RunningFactory()
+		{
+		}
+
+		virtual std::shared_ptr<IService> createService(
+				const std::string serviceClass,
+				const std::shared_ptr<IConfig> config,
+				ServiceContext& context) override
+		{
+			return std::shared_ptr<IService> (new RunningService(serviceClass, *context.getDispatcher()));
 		}
 	};
 
@@ -133,6 +186,43 @@ namespace mm
 		context.stop();
 		ASSERT_TRUE(service1->getCount() == 0);
 		ASSERT_TRUE(service2->getCount() == 0);
+	}
+
+	TEST(ServiceContextTest, RunningServiceCase)
+	{
+		SimpleFactory factory;
+
+		std::stringstream ss("");
+		ss << "Dispatcher.ThreadCount=2" << std::endl;
+		ss << "ServiceList=Service1,Service2" << std::endl;
+		ss << "Service1.Class=A" << std::endl;
+		ss << "Service2.Class=B" << std::endl;
+
+		// service creation
+		ServiceContext context(ss, factory);
+
+		std::shared_ptr<SimpleService> service1;
+		ASSERT_TRUE(context.getService("Service1", service1));
+		ASSERT_TRUE(service1.get());
+		ASSERT_TRUE(service1->getClass() == "A");
+
+		std::shared_ptr<SimpleService> service2;
+		ASSERT_TRUE(context.getService("Service2", service2));
+		ASSERT_TRUE(service2.get());
+		ASSERT_TRUE(service2->getClass() == "B");
+
+		// service start
+		ASSERT_TRUE(context.start());
+		ASSERT_TRUE(service1->getCount() == 1);
+		ASSERT_TRUE(service2->getCount() == 1);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(6));
+		ASSERT_TRUE(service1->getCount() == 2);
+		ASSERT_TRUE(service2->getCount() == 2);
+
+		context.stop();
+		ASSERT_TRUE(service1->getCount() == 1);
+		ASSERT_TRUE(service2->getCount() == 1);
 	}
 
 }
