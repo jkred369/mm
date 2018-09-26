@@ -9,6 +9,7 @@
 #include <chrono>
 #include <cstdint>
 #include <functional>
+#include <iostream>
 #include <memory>
 #include <thread>
 
@@ -105,9 +106,12 @@ namespace mm
 
 			const KeyType key = className == "A" ? 1 : 2;
 			dispatcher.submit(key, [&] () {
-				std::this_thread::sleep_for(std::chrono::milliseconds(4));
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				std::cout << "running" << std::endl;
 				++this->counter;
 			});
+
+			std::cout << "inserted" << std::endl;
 
 			return true;
 		}
@@ -190,7 +194,7 @@ namespace mm
 
 	TEST(ServiceContextTest, RunningServiceCase)
 	{
-		SimpleFactory factory;
+		RunningFactory factory;
 
 		std::stringstream ss("");
 		ss << "Dispatcher.ThreadCount=2" << std::endl;
@@ -201,12 +205,12 @@ namespace mm
 		// service creation
 		ServiceContext context(ss, factory);
 
-		std::shared_ptr<SimpleService> service1;
+		std::shared_ptr<RunningService> service1;
 		ASSERT_TRUE(context.getService("Service1", service1));
 		ASSERT_TRUE(service1.get());
 		ASSERT_TRUE(service1->getClass() == "A");
 
-		std::shared_ptr<SimpleService> service2;
+		std::shared_ptr<RunningService> service2;
 		ASSERT_TRUE(context.getService("Service2", service2));
 		ASSERT_TRUE(service2.get());
 		ASSERT_TRUE(service2->getClass() == "B");
@@ -216,7 +220,7 @@ namespace mm
 		ASSERT_TRUE(service1->getCount() == 1);
 		ASSERT_TRUE(service2->getCount() == 1);
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(6));
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
 		ASSERT_TRUE(service1->getCount() == 2);
 		ASSERT_TRUE(service2->getCount() == 2);
 
