@@ -34,9 +34,7 @@ namespace mm
 	//
 	class FemasOrderSession :
 			public IService,
-			public CUstpFtdcTraderSpi,
-			public IConsumer<OrderMessage>,
-			public PublisherAdapter<OrderSummaryMessage>
+			public CUstpFtdcTraderSpi
 	{
 	public:
 
@@ -55,12 +53,6 @@ namespace mm
 		//
 		virtual bool start() override;
 		virtual void stop() override;
-
-		//
-		// publisher functionality.
-		//
-		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer) override;
-		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer) override;
 
 		//
 		// Send new order to exchange.

@@ -27,6 +27,7 @@ namespace mm
 	template<typename ExchangeInterface, typename Pool> class OrderManager :
 			public IService,
 			public IConsumer<OrderMessage>,
+			public IConsumer<ExecutionMessage>,
 			public PublisherAdapter<OrderSummaryMessage>
 	{
 	public:
@@ -51,7 +52,7 @@ namespace mm
 		//
 		// message : The order message.
 		//
-		void consume(const std::shared_ptr<const OrderMessage>& message)
+		virtual void consume(const std::shared_ptr<const OrderMessage>& message) override
 		{
 			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
@@ -69,7 +70,7 @@ namespace mm
 		//
 		// message : The execution message.
 		//
-		void consume(const std::shared_ptr<const ExecutionMessage>& message)
+		virtual void consume(const std::shared_ptr<const ExecutionMessage>& message) override
 		{
 			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
 
