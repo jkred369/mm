@@ -12,7 +12,6 @@
 
 #include <DispatchKey.hpp>
 #include <IConsumer.hpp>
-#include <Message.hpp>
 #include <Subscription.hpp>
 
 namespace mm

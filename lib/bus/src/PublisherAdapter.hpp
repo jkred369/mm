@@ -38,7 +38,9 @@ namespace mm
 		{
 		}
 
-		virtual ~PublisherAdapter();
+		virtual ~PublisherAdapter()
+		{
+		}
 
 		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
 		{
@@ -134,6 +136,7 @@ namespace mm
 	};
 }
 
+template<typename Message, typename Mutex> mm::Logger mm::PublisherAdapter<Message, Mutex>::logger;
 
 
 #endif /* LIB_BUS_SRC_PUBLISHERADAPTER_HPP_ */

@@ -7,8 +7,10 @@ add_executable(BusTest
 )
 
 target_include_directories(BusTest PUBLIC
-	${Common_INCLUDES}
 	${Bus_INCLUDES}
+	${Common_INCLUDES}
+	${Message_INCLUDES}
+	${Threading_INCLUDES}
 )
 
 target_link_libraries(BusTest 
@@ -16,6 +18,8 @@ target_link_libraries(BusTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
+	Common
+	Threading
 )
 
 add_test(BusTest, BusTest)

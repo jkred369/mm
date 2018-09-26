@@ -5,6 +5,7 @@ file(GLOB_RECURSE Bus_SOURCES "*.cpp")
 
 #target_include_directories(Bus PUBLIC
 #	${Common_INCLUDES}
+#	${Message_INCLUDES}
 #	${Threading_INCLUDES}
 #)
 
