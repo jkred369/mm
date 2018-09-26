@@ -18,6 +18,7 @@
 #include <IPublisher.hpp>
 #include <Logger.hpp>
 #include <SpinLockGuard.hpp>
+#include <Subscription.hpp>
 
 namespace mm
 {
@@ -46,7 +47,7 @@ namespace mm
 			auto it = consumerMap.find(subscription);
 			if (it == consumerMap.end())
 			{
-				LOGWARN("Cannot find consumers for subscription {}", subscription);
+				LOGWARN("Cannot find consumers for subscription {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
 				return;
 			}
 

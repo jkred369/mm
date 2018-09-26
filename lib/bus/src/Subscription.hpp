@@ -9,6 +9,7 @@
 #define LIB_BUS_SRC_SUBSCRIPTION_HPP_
 
 #include <functional>
+#include <ostream>
 
 #include <EnumType.hpp>
 #include <DataType.hpp>
@@ -59,6 +60,7 @@ namespace mm
 	};
 
 	typedef SubscriptionT<KeyType> Subscription;
+
 }
 
 namespace std
