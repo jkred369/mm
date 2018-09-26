@@ -76,7 +76,7 @@ namespace mm
 			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 
 			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (ConsumerDetail& detail) {
-				detail.consumer == consumer;
+				return detail.consumer == consumer;
 			}));
 		}
 
@@ -129,7 +129,7 @@ namespace mm
 		std::size_t count;
 
 		// The mutex used to access the consumer map.
-		Mutex mutex;
+		mutable Mutex mutex;
 	};
 }
 

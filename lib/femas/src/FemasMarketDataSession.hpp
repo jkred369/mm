@@ -37,9 +37,10 @@ namespace mm
 		//
 		// Constructor.
 		//
+		// dispatcher : The dispatcher used.
 		// userDetail : The configuration details.
 		//
-		FemasMarketDataSession(const FemasUserDetail& detail);
+		FemasMarketDataSession(const std::shared_ptr<Dispatcher>& dispatcher, const FemasUserDetail& detail);
 
 		//
 		// Destructor.
@@ -173,7 +174,7 @@ namespace mm
 
 		inline std::shared_ptr<MarketDataMessage> getMessage()
 		{
-			return std::make_shared<MarketDataMessage>(new MarketDataMessage());
+			return std::make_shared<MarketDataMessage>();
 		}
 
 		// The int value for bid

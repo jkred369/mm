@@ -120,16 +120,6 @@ namespace mm
 		session = nullptr;
 	}
 
-	void FemasOrderSession::subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
-	{
-		PublisherAdapter<OrderSummaryMessage>::subscribe(subscription, consumer);
-	}
-
-	void FemasOrderSession::unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<OrderSummaryMessage> >& consumer)
-	{
-		PublisherAdapter<OrderSummaryMessage>::unsubscribe(subscription, consumer);
-	}
-
 	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
 	{
 		// fixed values to prevent if blocks
@@ -143,7 +133,7 @@ namespace mm
 
 		// hard code values
 		order.OrderPriceType = USTP_FTDC_OPT_LimitPrice;
-		order.OrderSysID = '\0';
+		order.OrderSysID[0] = '\0';
 		order.UserCustom[0] = '\0';
 
 		// session specific
@@ -160,7 +150,7 @@ namespace mm
 		order.LimitPrice = message->price;
 		order.MinVolume = 0;
 		order.StopPrice = message->price;
-		order.Volume = message->qty;
+		order.Volume = message->totalQty;
 
 		order.Direction = direction[toValue(message->side)];
 		order.OffsetFlag = offsetType[toValue(message->offsetType)];
@@ -196,7 +186,7 @@ namespace mm
 		StringUtil::copy(action.UserID, userDetail.userId, sizeof(action.UserID));
 
 		// order specific
-		action.UserOrderLocalID = message->orderId;
+		StringUtil::fromInt(action.UserOrderLocalID, message->orderId, sizeof(action.UserOrderLocalID));
 
 		if (UNLIKELY(!getExchangeOrderId(message->orderId, action.OrderSysID)))
 		{

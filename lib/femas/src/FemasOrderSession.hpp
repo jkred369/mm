@@ -347,7 +347,7 @@ namespace mm
 
 		inline std::shared_ptr<OrderSummaryMessage> getMessage()
 		{
-			return std::make_shared<OrderSummaryMessage>(new OrderSummaryMessage());
+			return std::make_shared<OrderSummaryMessage>();
 		}
 
 		//

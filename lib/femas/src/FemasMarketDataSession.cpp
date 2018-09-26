@@ -8,6 +8,8 @@
 
 #include <stdexcept>
 
+#include <fmt/format.h>
+
 #include <StringUtil.hpp>
 #include "FemasMarketDataSession.hpp"
 
@@ -15,7 +17,8 @@ mm::Logger mm::FemasMarketDataSession::logger;
 
 namespace mm
 {
-	FemasMarketDataSession::FemasMarketDataSession(const FemasUserDetail& detail) :
+	FemasMarketDataSession::FemasMarketDataSession(const std::shared_ptr<Dispatcher>& dispatcher, const FemasUserDetail& detail) :
+		PublisherAdapter<MarketDataMessage>(dispatcher),
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),
@@ -121,7 +124,7 @@ namespace mm
 	{
 		PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer);
 
-		fmt::format_int format(subscription.getKey());
+		fmt::format_int format(subscription.key);
 
 		// femas requires char* without writing to it
 		char* request[1] = {const_cast<char*> (format.c_str())};
@@ -129,7 +132,7 @@ namespace mm
 
 		if (result != 0)
 		{
-			LOGERR("Error subscribing to {}", subscription.getKey());
+			LOGERR("Error subscribing to {}", subscription.key);
 		}
 	}
 
@@ -137,7 +140,7 @@ namespace mm
 	{
 		PublisherAdapter<MarketDataMessage>::unsubscribe(subscription, consumer);
 
-		fmt::format_int format(subscription.getKey());
+		fmt::format_int format(subscription.key);
 
 		// femas requires char* without writing to it
 		char* request[1] = {const_cast<char*> (format.c_str())};
@@ -145,7 +148,7 @@ namespace mm
 
 		if (result != 0)
 		{
-			LOGERR("Error unsubscribing from {}", subscription.getKey());
+			LOGERR("Error unsubscribing from {}", subscription.key);
 		}
 	}
 
@@ -195,11 +198,11 @@ namespace mm
 	{
 		if (info->ErrorID == 0)
 		{
-			LOGINFO("User {} logged out successfully", userLogin->UserID);
+			LOGINFO("User {} logged out successfully", userLogout->UserID);
 		}
 		else
 		{
-			LOGERR("Logout attempt failed. User: {}, error: {}, {}", userLogin->UserID, info->ErrorID, info->ErrorMsg);
+			LOGERR("Logout attempt failed. User: {}, error: {}, {}", userLogout->UserID, info->ErrorID, info->ErrorMsg);
 		}
 	}
 
@@ -276,7 +279,10 @@ namespace mm
 		message.levels[ASK][4].price = depthMarketData->AskPrice5;
 		message.levels[ASK][4].qty = depthMarketData->AskVolume5;
 
-		notify(messagePointer);
+		// TODO: make the char based intrument ID to int mapping.
+		// const Subscription sub = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, message.instrumentId};
+		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, 1};
+		publish(subscription, messagePointer);
 	}
 
 	void FemasMarketDataSession::OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
