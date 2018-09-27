@@ -89,7 +89,7 @@ namespace mm
 		static Pool<ExchangeOrder, 1000> pool;
 
 		// The exchange interface.
-		const std::shared_ptr<ExchangeInterface> exchange;
+		ExchangeInterface* exchange;
 
 		// The live orders.
 		OrderCache<ExchangeOrder> liveCache;

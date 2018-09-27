@@ -29,15 +29,15 @@ namespace mm
 		// Constructor.
 		//
 		// dispatchKey : The dispatch key.
+		// serviceName : The name of the service in context.
 		// dispatcher : The dispatcher used.
 		// serviceContext : The service context for subscription and source other service.
-		// serviceName : The name of the service in context.
 		//
 		DispatchableService(
 				const KeyType dispatchKey,
-				const std::string contextName,
-				const std::shared_ptr<Dispatcher> dispatcher,
-				const std::shared_ptr<ServiceContext> serviceContext);
+				const std::string serviceName,
+				Dispatcher& dispatcher,
+				ServiceContext& serviceContext);
 
 		//
 		// service interface.
@@ -66,10 +66,10 @@ namespace mm
 		const KeyType dispatchKey;
 
 		// The dispatcher used.
-		const std::shared_ptr<Dispatcher> dispatcher;
+		Dispatcher& dispatcher;
 
 		// The service context.
-		const std::shared_ptr<ServiceContext> serviceContext;
+		ServiceContext& serviceContext;
 
 		// The name of the service in context.
 		const std::string serviceName;

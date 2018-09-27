@@ -14,11 +14,12 @@ namespace mm
 {
 	SingleInstrumentArb::SingleInstrumentArb(
 			const KeyType dispatchKey,
-			const std::shared_ptr<Dispatcher> dispatcher,
-			const std::shared_ptr<ServiceContext> serviceContext,
+			const std::string serviceName,
+			Dispatcher& dispatcher,
+			ServiceContext& serviceContext,
 			const std::int64_t instrumentId,
 			const std::size_t sampleCount) :
-		DispatchableService(dispatchKey, dispatcher, serviceContext),
+		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
 		instrumentId(instrumentId),
 		messages(sampleCount),
 		liveOrderId(0)
@@ -28,19 +29,19 @@ namespace mm
 	bool SingleInstrumentArb::start()
 	{
 		// call parent to do sanity check
-		DispatchableService::start();
+		if (!DispatchableService::start())
+		{
+			return false;
+		}
 
 		// wire up all the subscriptions
-		const std::shared_ptr<IService> selfService;
-		serviceContext->getService(serviceName, selfService);
-
 		serviceContext->subscribe(
 				Subscription(SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId),
-				std::dynamic_pointer_cast<IConsumer<MarketDataMessage> > (selfService));
+				dynamic_cast<IConsumer<MarketDataMessage>*> (this));
 
 		serviceContext->subscribe(
 				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, instrumentId),
-				std::dynamic_pointer_cast<IConsumer<OrderSummaryMessage> > (selfService));
+				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this));
 
 		return true;
 	}
@@ -48,16 +49,13 @@ namespace mm
 	void SingleInstrumentArb::stop()
 	{
 		// stop all the subscriptions
-		const std::shared_ptr<IService> selfService;
-		serviceContext->getService(serviceName, selfService);
+		serviceContext->unsubscribe(
+				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, instrumentId),
+				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this));
 
 		serviceContext->unsubscribe(
 				Subscription(SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId),
-				std::dynamic_pointer_cast<IConsumer<MarketDataMessage> > (selfService));
-
-		serviceContext->unsubscribe(
-				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, instrumentId),
-				std::dynamic_pointer_cast<IConsumer<OrderSummaryMessage> > (selfService));
+				dynamic_cast<IConsumer<MarketDataMessage>*> (this));
 
 		// delegate super class
 		DispatchableService::stop();
@@ -100,7 +98,8 @@ namespace mm
 		order->price = messages.back()->levels[toValue(Side::ASK)][0];
 		order->status = OrderStatus::LIVE;
 
-		publish(order);
+		const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, instrumentId};
+		publish(subscription, order);
 	}
 
 }

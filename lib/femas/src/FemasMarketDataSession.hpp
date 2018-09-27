@@ -40,7 +40,7 @@ namespace mm
 		// dispatcher : The dispatcher used.
 		// userDetail : The configuration details.
 		//
-		FemasMarketDataSession(const std::shared_ptr<Dispatcher>& dispatcher, const FemasUserDetail& detail);
+		FemasMarketDataSession(Dispatcher& dispatcher, const FemasUserDetail& detail);
 
 		//
 		// Destructor.
@@ -56,8 +56,8 @@ namespace mm
 		//
 		// publisher functionality.
 		//
-		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer) override;
-		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer) override;
+		virtual void subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
+		virtual void unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 
 		//
 		// Fired when the session is connected.

@@ -43,8 +43,9 @@ namespace mm
 		//
 		SingleInstrumentArb(
 				const KeyType dispatchKey,
-				const std::shared_ptr<Dispatcher> dispatcher,
-				const std::shared_ptr<ServiceContext> serviceContext,
+				const std::string serviceName,
+				Dispatcher& dispatcher,
+				ServiceContext& serviceContext,
 				const std::int64_t instrumentId,
 				const std::size_t sampleCount);
 

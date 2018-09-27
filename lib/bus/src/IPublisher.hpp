@@ -41,7 +41,7 @@ namespace mm
 		// subscription : The topic on which the message will be received.
 		// consumer : The consumer subscribing.
 		//
-		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer) = 0;
+		virtual void subscribe(const Subscription& subscription, IConsumer<Message>* consumer) = 0;
 
 		//
 		// Unsubscribe to a message.
@@ -49,7 +49,7 @@ namespace mm
 		// subscription : The topic to unsubscribe.
 		// consumer : The consumer unsubscribing from the topic.
 		//
-		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer) = 0;
+		virtual void unsubscribe(const Subscription& subscription, IConsumer<Message>* consumer) = 0;
 
 		//
 		// Get the count of consumer.

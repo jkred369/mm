@@ -12,8 +12,8 @@ namespace mm
 	DispatchableService::DispatchableService(
 			const KeyType dispatchKey,
 			const std::string contextName,
-			const std::shared_ptr<Dispatcher> dispatcher,
-			const std::shared_ptr<ServiceContext> serviceContext) :
+			Dispatcher& dispatcher,
+			ServiceContext& serviceContext) :
 		dispatchKey(dispatchKey),
 		dispatcher(dispatcher),
 		serviceContext(serviceContext)
@@ -23,8 +23,8 @@ namespace mm
 	bool DispatchableService::start()
 	{
 		// sanity check the service to make sure its included in context
-		std::shared_ptr<IService> selfService;
-		return serviceContext->getService(serviceName, selfService) && this == selfService.get();
+		IService* selfService = nullptr;
+		return serviceContext.getService(serviceName, selfService) && this == selfService;
 	}
 
 	void DispatchableService::stop()

@@ -17,7 +17,7 @@ mm::Logger mm::FemasMarketDataSession::logger;
 
 namespace mm
 {
-	FemasMarketDataSession::FemasMarketDataSession(const std::shared_ptr<Dispatcher>& dispatcher, const FemasUserDetail& detail) :
+	FemasMarketDataSession::FemasMarketDataSession(Dispatcher& dispatcher, const FemasUserDetail& detail) :
 		PublisherAdapter<MarketDataMessage>(dispatcher),
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
@@ -120,7 +120,7 @@ namespace mm
 		session = nullptr;
 	}
 
-	void FemasMarketDataSession::subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer)
+	void FemasMarketDataSession::subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
 		PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer);
 
@@ -136,7 +136,7 @@ namespace mm
 		}
 	}
 
-	void FemasMarketDataSession::unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<MarketDataMessage> >& consumer)
+	void FemasMarketDataSession::unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
 		PublisherAdapter<MarketDataMessage>::unsubscribe(subscription, consumer);
 

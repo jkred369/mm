@@ -137,7 +137,7 @@ namespace mm
 				const std::shared_ptr<IConfig> config,
 				ServiceContext& context) override
 		{
-			return std::shared_ptr<IService> (new RunningService(serviceClass, *context.getDispatcher()));
+			return std::shared_ptr<IService> (new RunningService(serviceClass, context.getDispatcher()));
 		}
 	};
 
@@ -172,14 +172,14 @@ namespace mm
 		// service creation
 		ServiceContext context(ss, factory);
 
-		std::shared_ptr<SimpleService> service1;
+		SimpleService* service1 = nullptr;
 		ASSERT_TRUE(context.getService("Service1", service1));
-		ASSERT_TRUE(service1.get());
+		ASSERT_TRUE(service1);
 		ASSERT_TRUE(service1->getClass() == "A");
 
-		std::shared_ptr<SimpleService> service2;
+		SimpleService* service2 = nullptr;
 		ASSERT_TRUE(context.getService("Service2", service2));
-		ASSERT_TRUE(service2.get());
+		ASSERT_TRUE(service2);
 		ASSERT_TRUE(service2->getClass() == "B");
 
 		// service start
@@ -205,14 +205,14 @@ namespace mm
 		// service creation
 		ServiceContext context(ss, factory);
 
-		std::shared_ptr<RunningService> service1;
+		RunningService* service1 = nullptr;
 		ASSERT_TRUE(context.getService("Service1", service1));
-		ASSERT_TRUE(service1.get());
+		ASSERT_TRUE(service1);
 		ASSERT_TRUE(service1->getClass() == "A");
 
-		std::shared_ptr<RunningService> service2;
+		RunningService* service2 = nullptr;
 		ASSERT_TRUE(context.getService("Service2", service2));
-		ASSERT_TRUE(service2.get());
+		ASSERT_TRUE(service2);
 		ASSERT_TRUE(service2->getClass() == "B");
 
 		// service start

@@ -82,9 +82,9 @@ namespace mm
 		//
 		// return : the global dispatcher.
 		//
-		inline std::shared_ptr<Dispatcher> getDispatcher() const
+		inline Dispatcher& getDispatcher() const
 		{
-			return dispatcher;
+			return *dispatcher;
 		}
 
 		//
@@ -95,7 +95,7 @@ namespace mm
 		//
 		// return : true if the service can be found.
 		//
-		template<typename ServiceType> bool getService(const std::string& serviceName, std::shared_ptr<ServiceType>& service)
+		template<typename ServiceType> bool getService(const std::string& serviceName, ServiceType*& service)
 		{
 			auto it = serviceMap.find(serviceName);
 			if (it == serviceMap.end())
@@ -106,7 +106,7 @@ namespace mm
 			ServiceType* result = dynamic_cast<ServiceType*> (it->second.get());
 			if (result != nullptr)
 			{
-				service = std::static_pointer_cast<ServiceType> (it->second);
+				service = result;
 			}
 
 			return result != nullptr;
@@ -118,8 +118,14 @@ namespace mm
 		// subscription : The subscription.
 		// consumer : The consumer subscribing to it.
 		//
-		template<typename Message> bool subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
+		template<typename Message> bool subscribe(const Subscription& subscription, IConsumer<Message>* consumer)
 		{
+			if (consumer == nullptr)
+			{
+				LOGERR("Attempt to subscribe with null consumer to {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return false;
+			}
+
 			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 			{
 				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
@@ -142,8 +148,14 @@ namespace mm
 		//
 		// return : The count of subscription made.
 		//
-		template<typename Message> std::int64_t subscribeAll(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer)
+		template<typename Message> std::int64_t subscribeAll(const Subscription& subscription, IConsumer<Message>* consumer)
 		{
+			if (consumer == nullptr)
+			{
+				LOGERR("Attempt to subscribe with null consumer to {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return false;
+			}
+
 			int count = 0;
 
 			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)

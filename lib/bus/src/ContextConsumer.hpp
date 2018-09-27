@@ -10,6 +10,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 
 #include <IConsumer.hpp>
 
@@ -23,8 +24,8 @@ namespace mm
 	public:
 
 		ContextConsumer(
-				std::shared_ptr<Dispatcher>& dispatcher,
-				std::shared_ptr<IConsumer<Message> >& consumer) :
+				Dispatcher& dispatcher,
+				IConsumer<Message>& consumer) :
 			key(consumer->getKey()),
 			dispatcher(dispatcher),
 			consumer(consumer)
@@ -35,8 +36,8 @@ namespace mm
 
 		virtual void consume(const std::shared_ptr<const Message>& message) override
 		{
-			dispatcher->submit(key, [message]() {
-				consumer->consume(message);
+			dispatcher.submit(key, [message]() {
+				consumer.consume(message);
 			});
 		}
 
@@ -46,10 +47,10 @@ namespace mm
 		const Key key;
 
 		// The dispatcher.
-		std::shared_ptr<Dispatcher> dispatcher;
+		Dispatcher& dispatcher;
 
 		// The wrapped consumer.
-		std::shared_ptr<IConsumer<Message> > consumer;
+		IConsumer<Message>& consumer;
 	};
 }
 

@@ -41,7 +41,7 @@ namespace mm
 
 	TEST(PublisherAdapterTest, DummyCase)
 	{
-		std::shared_ptr<Dispatcher> dispatcher = std::make_shared<Dispatcher>();
+		Dispatcher dispatcher;
 
 		PublisherAdapter<DummyMessage> adapter(dispatcher);
 

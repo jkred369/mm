@@ -34,7 +34,7 @@ namespace mm
 		//
 		// dispatcher : The dispatcher used.
 		//
-		PublisherAdapter(const std::shared_ptr<Dispatcher>& dispatcher) : dispatcher(dispatcher), count(0)
+		PublisherAdapter(Dispatcher& dispatcher) : dispatcher(dispatcher), count(0)
 		{
 		}
 
@@ -56,29 +56,53 @@ namespace mm
 			for (const ConsumerDetail& detail : it->second)
 			{
 				// TODO: this piece of code needs to be reviewed for performance.
-				const std::shared_ptr<IConsumer<Message> > consumer = detail.consumer;
+				IConsumer<Message>* consumer = detail.consumer;
 
-				dispatcher->submit(detail.dispatchKey, [consumer, message] () {
+				dispatcher.submit(detail.dispatchKey, [consumer, message] () {
 					consumer->consume(message);
 				});
 			}
 		}
 
-		virtual void subscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer) override
+		virtual void subscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
 		{
+			// safe guard for input
+			if (consumer == nullptr)
+			{
+				LOGERR("Ignoring null consumer for subscription {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return;
+			}
+
 			SpinLockGuard<Mutex> guard(mutex);
+			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
+
+			// sanity check for duplicated subscription
+			if (std::find_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
+				return detail.consumer == consumer;
+			}) != consumers.end())
+			{
+				LOGWARN("Consumer on {} already submitted to {}-{}-{}. Ignoring.", consumer->getKey(),
+						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return;
+			}
 
 			consumerMap[subscription].push_back(ConsumerDetail(consumer));
 			++count;
 		}
 
-		virtual void unsubscribe(const Subscription& subscription, const std::shared_ptr<IConsumer<Message> >& consumer) override
+		virtual void unsubscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
 		{
-			SpinLockGuard<Mutex> guard(mutex);
+			// safe guard for input
+			if (consumer == nullptr)
+			{
+				LOGERR("Ignoring null consumer for unsubscribing {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return;
+			}
 
+			SpinLockGuard<Mutex> guard(mutex);
 			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 
-			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (ConsumerDetail& detail) {
+			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
 				return detail.consumer == consumer;
 			}));
 		}
@@ -107,7 +131,7 @@ namespace mm
 			//
 			// consuemr : The consumer detail captured.
 			//
-			ConsumerDetail(const std::shared_ptr<IConsumer<Message> >& consumer) :
+			ConsumerDetail(IConsumer<Message>* consumer) :
 				dispatchKey(consumer->getKey()), consumer(consumer)
 			{
 			}
@@ -116,14 +140,14 @@ namespace mm
 			KeyType dispatchKey;
 
 			// The consumer.
-			std::shared_ptr<IConsumer<Message> > consumer;
+			IConsumer<Message>* consumer;
 		};
 
 		// The logger for this class.
 		static Logger logger;
 
 		// The dispatcher.
-		const std::shared_ptr<Dispatcher> dispatcher;
+		Dispatcher& dispatcher;
 
 		// The map where key is the subscription object and value is the consumer(s) subscribing to it.
 		std::unordered_map<Subscription, std::vector<ConsumerDetail> > consumerMap;
