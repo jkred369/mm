@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstring>
 #include <locale>
 #include <string>
@@ -25,6 +26,12 @@ namespace mm
 	//
 	struct StringUtil
 	{
+		// string representation for inf.
+		static constexpr char* FP_INF_STRING = "Inf";
+
+		// string representation for nan.
+		static constexpr char* FP_NAN_STRING = "NaN";
+
 		//
 		// trim the input string from start.
 		//
@@ -99,6 +106,84 @@ namespace mm
 			else
 			{
 				return false;
+			}
+		}
+
+		//
+		// Fill the dest buffer with the string representation of the double.
+		//
+		// dest : The destination.
+		// value : The double value.
+		// count : Max count of chars to copy.
+		//
+		// return : Flag if the conversion is done successfully.
+		//
+		template<std::size_t Precision=6> static inline bool fromDouble(char* dest, const double value, const std::size_t count)
+		{
+			static constexpr int DIVISOR = std::pow(10, Precision);
+			static constexpr char* STRINGS[] = {FP_NAN_STRING, FP_INF_STRING};
+
+			const int type = std::fpclassify(value);
+
+			switch (type)
+			{
+				case FP_NAN:
+				case FP_INFINITE:
+				{
+					if (LIKELY(count >= std::strlen(STRINGS[type])))
+					{
+						std::memcpy(dest, &STRINGS[type], std::strlen(STRINGS[type]));
+						return true;
+					}
+					else
+					{
+						return false;
+					}
+				}
+				case FP_ZERO:
+				{
+					// write this separately coz 0 is quite common
+					if (LIKELY(count > 0))
+					{
+						dest[0] = '0';
+						return true;
+					}
+
+					return false;
+				}
+				case FP_SUBNORMAL:
+				case FP_NORMAL:
+				{
+					long integral = (long) value;
+					long fractional = std::lrint((value - integral) * DIVISOR);
+
+					fmt::format_int formatIntegral(integral);
+					if (LIKELY(formatIntegral.size() + Precision + 1) <= count)
+					{
+						fmt::format_int formatFractional(fractional);
+
+						if (LIKELY(formatFractional.size() <= Precision))
+						{
+							// write the content
+							char* buffer = dest;
+							std::memcpy(buffer, formatIntegral.data(), formatIntegral.size());
+							buffer += formatIntegral.size();
+
+							buffer = '.';
+							buffer += 1;
+
+							std::memset(buffer, '0', Precision - formatFractional.size());
+							buffer += Precision - formatFractional.size();
+
+							std::memcpy(buffer, formatFractional.data(), formatFractional.size());
+							return true;
+						}
+					}
+
+					return false;
+				}
+				default:
+					return false;
 			}
 		}
 	};

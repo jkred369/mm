@@ -8,6 +8,8 @@
 #ifndef LIB_MESSAGING_SRC_CSVBUFFER_HPP_
 #define LIB_MESSAGING_SRC_CSVBUFFER_HPP_
 
+#include <sstream>
+
 #include <StringUtil.hpp>
 
 namespace mm
@@ -18,6 +20,9 @@ namespace mm
 	class CsvBuffer
 	{
 
+	private:
+
+		std::stringstream ss;
 	};
 }
 
