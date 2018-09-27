@@ -9,7 +9,7 @@ target_include_directories(Product PUBLIC
 	${Product_INCLUDES}
 )
 
-target_link_libraries(Threading
+target_link_libraries(Product
 	${Boost_LIBRARIES}
 	${TBB_LIBS}
 	${POCO_LIBS}
