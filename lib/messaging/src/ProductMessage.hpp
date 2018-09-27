@@ -9,6 +9,7 @@
 #define LIB_MESSAGING_SRC_PRODUCTMESSAGE_HPP_
 
 #include "CallPutType.hpp"
+#include "Currency.hpp"
 #include "Exchange.hpp"
 #include "FieldDefinition.hpp"
 #include "Message.hpp"
@@ -40,6 +41,9 @@ namespace mm
 
 		// product type
 		ProductType productType;
+
+		// currency in which the product is quoted / traded
+		Currency currency;
 
 		// call-put type
 		CallPutType callPut;

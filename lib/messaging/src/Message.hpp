@@ -116,6 +116,26 @@ namespace mm
 		{
 		}
 
+		//
+		// The template method for serialize to buffer.
+		// used to provide a uniform behavrior across buffer types.
+		//
+		// buffer : The buffer to write to.
+		//
+		template<typename Buffer> void serialize(Buffer& buffer)
+		{
+		}
+
+		//
+		// The template method for deserialize from buffer.
+		// used to provide a uniform behavrior across buffer types.
+		//
+		// buffer : The buffer to read from.
+		//
+		template<typename Buffer> void deserialize(Buffer& buffer)
+		{
+		}
+
 	};
 }
 
