@@ -56,7 +56,7 @@ namespace mm
 		//
 		// publisher functionality.
 		//
-		virtual void subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
+		virtual bool subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 
 		//

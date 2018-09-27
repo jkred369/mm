@@ -120,9 +120,12 @@ namespace mm
 		session = nullptr;
 	}
 
-	void FemasMarketDataSession::subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
+	bool FemasMarketDataSession::subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
-		PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer);
+		if (!PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer))
+		{
+			return false;
+		}
 
 		fmt::format_int format(subscription.key);
 
@@ -133,7 +136,10 @@ namespace mm
 		if (result != 0)
 		{
 			LOGERR("Error subscribing to {}", subscription.key);
+			return false;
 		}
+
+		return true;
 	}
 
 	void FemasMarketDataSession::unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)

@@ -41,7 +41,9 @@ namespace mm
 		// subscription : The topic on which the message will be received.
 		// consumer : The consumer subscribing.
 		//
-		virtual void subscribe(const Subscription& subscription, IConsumer<Message>* consumer) = 0;
+		// return : true if the subscription is successful.
+		//
+		virtual bool subscribe(const Subscription& subscription, IConsumer<Message>* consumer) = 0;
 
 		//
 		// Unsubscribe to a message.

@@ -64,13 +64,13 @@ namespace mm
 			}
 		}
 
-		virtual void subscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
+		virtual bool subscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
 		{
 			// safe guard for input
 			if (consumer == nullptr)
 			{
 				LOGERR("Ignoring null consumer for subscription {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-				return;
+				return false;
 			}
 
 			SpinLockGuard<Mutex> guard(mutex);
@@ -83,11 +83,13 @@ namespace mm
 			{
 				LOGWARN("Consumer on {} already submitted to {}-{}-{}. Ignoring.", consumer->getKey(),
 						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-				return;
+				return true;
 			}
 
 			consumerMap[subscription].push_back(ConsumerDetail(consumer));
 			++count;
+
+			return true;
 		}
 
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
