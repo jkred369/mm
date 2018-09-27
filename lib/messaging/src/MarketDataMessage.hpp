@@ -10,9 +10,9 @@
 
 #include <cstdint>
 
-#include <FieldDefinition.hpp>
-#include <Message.hpp>
-#include <Side.hpp>
+#include "FieldDefinition.hpp"
+#include "Message.hpp"
+#include "Side.hpp"
 
 namespace mm
 {
@@ -36,7 +36,7 @@ namespace mm
 		static constexpr size_t MAX_DEPTH = 5;
 
 		// Instrument ID.
-		InstrumentIDType instrumentId;
+		std::int64_t instrumentId;
 
 		// open price
 		double open;
