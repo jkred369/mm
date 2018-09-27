@@ -19,6 +19,7 @@ const std::string mm::LoggerConfig::LOG_CONFIG = "Logger";
 const std::string mm::LoggerConfig::LOG_PATH = "Path";
 const std::string mm::LoggerConfig::LOG_LEVEL = "Level";
 const std::string mm::LoggerConfig::LOG_NAME = "Name";
+const std::string mm::LoggerConfig::LOG_PATTERN = "Pattern";
 
 namespace mm
 {

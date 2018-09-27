@@ -107,11 +107,8 @@ namespace mm
 			const KeyType key = className == "A" ? 1 : 2;
 			dispatcher.submit(key, [&] () {
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
-				std::cout << "running" << std::endl;
 				++this->counter;
 			});
-
-			std::cout << "inserted" << std::endl;
 
 			return true;
 		}

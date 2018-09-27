@@ -68,6 +68,9 @@ namespace mm
 
 		// The logger name
 		static const std::string LOG_NAME;
+
+		// The log pattern
+		static const std::string LOG_PATTERN;
 	};
 
 }

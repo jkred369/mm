@@ -28,8 +28,9 @@ namespace mm
 		// levl : The log level.
 		// path : The log file path.
 		// loggerName : The name of the logger.
+		// pattern : The log pattern.
 		//
-		SpdLogger(LogLevel level, const std::string& path, const std::string& loggerName);
+		SpdLogger(LogLevel level, const std::string& path, const std::string& loggerName, const std::string& pattern);
 
 		//
 		// Set the global log level.
@@ -58,14 +59,18 @@ namespace mm
 	{
 	public:
 
+		// The default log pattern.
+		static const std::string defaultPattern;
+
 		//
 		// Initialize the global logger singleton.
 		//
 		// level : The log level.
 		// path : The log file path.
 		// loggerName : The logger name.
+		// pattern : The log pattern.
 		//
-		static void init(LogLevel level, const std::string& path, const std::string& loggerName);
+		static void init(LogLevel level, const std::string& path, const std::string& loggerName, const std::string& pattern);
 
 		//
 		// Get the logger.
@@ -84,6 +89,9 @@ namespace mm
 
 		// The logger name.
 		static std::string loggerName;
+
+		// The log pattern.
+		static std::string pattern;
 	};
 
 }

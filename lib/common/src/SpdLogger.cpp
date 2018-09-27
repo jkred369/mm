@@ -13,10 +13,12 @@
 mm::LogLevel mm::SpdLoggerSingleton::level = mm::LogLevel::TRACE;
 std::string mm::SpdLoggerSingleton::path = "";
 std::string mm::SpdLoggerSingleton::loggerName = "DefaultLogger";
+std::string mm::SpdLoggerSingleton::pattern = "[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v";
+const std::string mm::SpdLoggerSingleton::defaultPattern = "[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v";
 
 namespace mm
 {
-	SpdLogger::SpdLogger(LogLevel level, const std::string& path, const std::string& loggerName)
+	SpdLogger::SpdLogger(LogLevel level, const std::string& path, const std::string& loggerName, const std::string& pattern)
 	{
 	    spdlog::init_thread_pool(8192, 1);
 	    std::vector<spdlog::sink_ptr> sinks;
@@ -34,6 +36,7 @@ namespace mm
 
 		logger = std::make_shared<spdlog::async_logger>(loggerName, sinks.begin(), sinks.end(),
 				spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+		logger->set_pattern(pattern);
 
 		spdlog::register_logger(logger);
 		setLevel(level);
@@ -71,16 +74,17 @@ namespace mm
 		logger->info("Logging level set to {}", mm::LogLevelConstant::getName(level));
 	}
 
-	void SpdLoggerSingleton::init(LogLevel level, const std::string& path, const std::string& loggerName)
+	void SpdLoggerSingleton::init(LogLevel level, const std::string& path, const std::string& loggerName, const std::string& pattern)
 	{
 		SpdLoggerSingleton::level = level;
 		SpdLoggerSingleton::path = path;
 		SpdLoggerSingleton::loggerName = loggerName;
+		SpdLoggerSingleton::pattern = pattern;
 	}
 
 	std::shared_ptr<spdlog::logger> SpdLoggerSingleton::getLogger()
 	{
-		static SpdLogger logger(level, path, loggerName);
+		static SpdLogger logger(level, path, loggerName, pattern);
 		return logger.getLogger();
 	}
 
