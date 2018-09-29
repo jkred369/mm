@@ -92,20 +92,20 @@ namespace mm
 		// value : The integer value.
 		// count : Max count of chars to copy.
 		//
-		// return : Flag if the conversion is done successfully.
+		// return : length of the char written. 0 in case buffer isn't long enough.
 		//
-		static inline bool fromInt(char* dest, const std::int64_t value, const std::size_t count)
+		static inline std::size_t fromInt(char* dest, const std::int64_t value, const std::size_t count)
 		{
 			fmt::format_int format(value);
 
 			if (LIKELY(format.size() < count))
 			{
 				std::strcpy(dest, format.c_str());
-				return true;
+				return format.size() + 1;
 			}
 			else
 			{
-				return false;
+				return 0;
 			}
 		}
 

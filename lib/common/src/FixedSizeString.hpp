@@ -121,6 +121,16 @@ namespace mm
 		}
 
 		//
+		// Get the data from the string.
+		//
+		// return : The data from the string.
+		//
+		const char* data() const
+		{
+			return buffer;
+		}
+
+		//
 		// Get the capacity of the string.
 		//
 		// return : The capacity of the string.
