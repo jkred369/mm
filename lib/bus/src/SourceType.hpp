@@ -28,6 +28,9 @@ namespace mm
 
 		// arb algos
 		ARB = 3,
+
+		// product service
+		PRODUCT_SERVICE = 4,
 	};
 }
 

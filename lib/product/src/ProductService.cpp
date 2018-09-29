@@ -5,6 +5,8 @@
  *      Author: suoalex
  */
 
+#include <NativeDefinition.hpp>
+
 #include "ProductService.hpp"
 
 mm::Logger mm::ProductService::logger;
@@ -59,15 +61,17 @@ namespace mm
 
 	void ProductService::consume(const std::shared_ptr<const ProductMessage>& message)
 	{
+		const std::int64_t id = message->id;
+
 		std::shared_ptr<Product> product;
 		{
-			auto it = productMap.find(message->id);
+			auto it = productMap.find(id);
 			if (it == productMap.end())
 			{
 				product = std::make_shared<Product> ();
-				productMap[message->id] = product;
+				productMap[id] = product;
 
-				LOGINFO("New product {} added to cache", message->id);
+				LOGINFO("New product {} added to cache", id);
 			}
 			else
 			{
@@ -76,19 +80,34 @@ namespace mm
 		}
 
 		// update product content
+		// the ID of the product must match the ID from the message here.
 		if (!(product->getContent() == *message))
 		{
-			LOGINFO("Updating product {}", message->id);
+			LOGINFO("Updating product {}", id);
 
-			// firstly remove all the existing dependencies, if any
+			const std::int64_t curUnderlyerId = product->getContent().underlyerId;
+			const std::int64_t newUnderlyerId = message->underlyerId;
+			product->content = *message;
+
+			// manage underlyer dependencies.
+			if (UNLIKELY(curUnderlyerId != newUnderlyerId))
 			{
-				if (product->getContent().underlyerId != 0)
+				if (curUnderlyerId != 0)
 				{
+					std::vector<std::int64_t>& dependents = dependencyMap[curUnderlyerId];
+					dependents.erase(std::remove_if(dependents.begin(), dependents.end(), [&id] (const std::int64_t& value) {
+						return id == value;
+					}));
+				}
 
+				if (newUnderlyerId != 0)
+				{
+					dependencyMap[newUnderlyerId].push_back(id);
 				}
 			}
 
-			product->content = *message;
+			const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
+			publish(subscription, product);
 		}
 	}
 
