@@ -15,30 +15,55 @@
 namespace mm
 {
 	//
+	// A constituent.
+	//
+	struct Constituent
+	{
+		//
+		// Default constructor.
+		//
+		Constituent();
+
+		// ID of the constituent.
+		std::int64_t id;
+
+		// weight.
+		double weight;
+	};
+
+	//
 	// This class defines the constituent information for basket and indices.
 	//
 	class ProductConstituentMessage : public Message
 	{
 		// Max size of constituents for the product.
-		static constexpr std::size_t MAX_CONSTITUENTS = 2000;
+		static constexpr std::size_t MAX_CONSTITUENTS = 256;
 
 		//
 		// Default constructor.
 		//
 		ProductConstituentMessage();
 
+		//
+		// Check for equalness of product message.
+		//
+		// rhs : The other product.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const ProductConstituentMessage& rhs) const;
+
 		// The instrument ID.
-		std::int64_t instrumentId;
+		std::int64_t id;
 
 		// The count of constituents.
 		std::int64_t count;
 
-		// The constituent IDs.
-		std::array<std::int64_t, MAX_CONSTITUENTS> constituents;
-
-		// The weight of the constituents.
-		std::array<double, MAX_CONSTITUENTS> weights;
+		// The constituents.
+		std::array<Constituent, MAX_CONSTITUENTS> constituents;
 	};
+
+	DEFINE_OPERATORS(ProductConstituentMessage)
 }
 
 

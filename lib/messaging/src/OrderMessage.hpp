@@ -54,6 +54,8 @@ namespace mm
 		// The offset type
 		OffsetType offsetType;
 	};
+
+	DEFINE_OPERATORS(OrderMessage)
 }
 
 

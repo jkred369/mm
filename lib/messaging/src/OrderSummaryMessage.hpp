@@ -62,6 +62,9 @@ namespace mm
 		// current order status.
 		OrderStatus status;
 	};
+
+	DEFINE_OPERATORS(OrderSummaryMessage)
+
 }
 
 

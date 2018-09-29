@@ -81,6 +81,8 @@ namespace mm
 		// Market depth
 		MarketDataLevel levels[2][MAX_DEPTH];
 	};
+
+	DEFINE_OPERATORS(MarketDataMessage)
 }
 
 

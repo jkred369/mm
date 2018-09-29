@@ -86,18 +86,7 @@ namespace mm
 		std::int64_t constituentCount;
 	};
 
-	//
-	// Implement custom comparison for the product message.
-	//
-	// lhs : The left product message.
-	// rhs : The right product message.
-	//
-	// return : true if the 2 product messages are identical.
-	//
-	inline bool operator == (const ProductMessage& lhs, const ProductMessage& rhs)
-	{
-		return lhs.equals(rhs);
-	}
+	DEFINE_OPERATORS(ProductMessage)
 
 }
 
