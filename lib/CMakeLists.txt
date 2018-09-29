@@ -12,7 +12,7 @@ file(GLOB_RECURSE Threading_HEADERS "${Messaging_INCLUDES}/*.hpp")
 add_subdirectory(messaging)
 
 set(Product_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/product/src")
-file(GLOB_RECURSE Product_HEADERS "${Messaging_INCLUDES}/*.hpp")
+file(GLOB_RECURSE Product_HEADERS "${Product_INCLUDES}/*.hpp")
 add_subdirectory(product)
 
 set(Threading_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/threading/src")

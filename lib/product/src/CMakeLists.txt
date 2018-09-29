@@ -1,12 +1,11 @@
 # target
 file(GLOB_RECURSE Product_SOURCES "*.cpp")
 
-add_library(Product SHARED ${Product_SOURCES})
+add_library(Product SHARED ${Product_HEADERS} ${Product_SOURCES})
 
 target_include_directories(Product PUBLIC
 	${Common_INCLUDES}
 	${Messaging_INCLUDES}
-	${Product_INCLUDES}
 	${Service_INCLUDES}
 )
 
