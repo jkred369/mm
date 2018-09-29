@@ -116,11 +116,11 @@ namespace mm
 		// value : The double value.
 		// count : Max count of chars to copy.
 		//
-		// return : Flag if the conversion is done successfully.
+		// return : Count of number of chars written to dest.
 		//
-		template<std::size_t Precision=6> static inline bool fromDouble(char* dest, const double value, const std::size_t count)
+		template<std::size_t Precision=6> static inline std::size_t fromDouble(char* dest, const double value, const std::size_t count)
 		{
-			static constexpr int DIVISOR = std::pow(10, Precision);
+			static constexpr int FACTOR = std::pow(10, Precision);
 			static constexpr char* STRINGS[] = {FP_NAN_STRING, FP_INF_STRING};
 
 			const int type = std::fpclassify(value);
@@ -133,11 +133,11 @@ namespace mm
 					if (LIKELY(count >= std::strlen(STRINGS[type])))
 					{
 						std::memcpy(dest, &STRINGS[type], std::strlen(STRINGS[type]));
-						return true;
+						return std::strlen(STRINGS[type]);
 					}
 					else
 					{
-						return false;
+						return 0;
 					}
 				}
 				case FP_ZERO:
@@ -146,44 +146,58 @@ namespace mm
 					if (LIKELY(count > 0))
 					{
 						dest[0] = '0';
-						return true;
+						return 1;
 					}
 
-					return false;
+					return 0;
 				}
 				case FP_SUBNORMAL:
 				case FP_NORMAL:
 				{
-					long integral = (long) value;
-					long fractional = std::lrint((value - integral) * DIVISOR);
+					char* buffer = dest;
 
-					fmt::format_int formatIntegral(integral);
-					if (LIKELY(formatIntegral.size() + Precision + 1) <= count)
+					std::int64_t i = (std::int64_t) std::lrint(value * FACTOR);
+					std::int64_t ai = (std::int64_t) std::abs(i);
+
+					const fmt::format_int integral(i / FACTOR);
+					const std::size_t integralSize = integral.size();
+
+					if (LIKELY(integralSize + Precision + 1) <= count)
 					{
-						fmt::format_int formatFractional(fractional);
+						// copy over the integral part
+						std::memcpy(buffer, integral.data(), integralSize);
+						buffer += integralSize;
 
-						if (LIKELY(formatFractional.size() <= Precision))
+						// this branch must be here for precision == 0 case
+						// fortunately it can be optimized away
+						if (LIKELY(Precision > 0))
 						{
-							// write the content
-							char* buffer = dest;
-							std::memcpy(buffer, formatIntegral.data(), formatIntegral.size());
-							buffer += formatIntegral.size();
+							// append decimal point
+							*buffer = '.';
+							++buffer;
 
-							buffer = '.';
-							buffer += 1;
+							// get the fractional part
+							const fmt::format_int fraction(ai % FACTOR);
+							const std::size_t fractionSize = fraction.size();
 
-							std::memset(buffer, '0', Precision - formatFractional.size());
-							buffer += Precision - formatFractional.size();
+							// adding 1 more branch for safety
+							if (LIKELY(Precision >= fractionSize))
+							{
+								// prepend the 0s
+								std::memset(buffer, '0', Precision - fractionSize);
+								buffer += Precision - fractionSize;
 
-							std::memcpy(buffer, formatFractional.data(), formatFractional.size());
-							return true;
+								// get the fraction
+								std::memcpy(buffer, fraction.data(), fractionSize);
+								buffer += fractionSize;
+							}
 						}
 					}
 
-					return false;
+					return buffer - dest;
 				}
 				default:
-					return false;
+					return 0;
 			}
 		}
 	};
