@@ -22,6 +22,11 @@ namespace mm
 		// Max size of constituents for the product.
 		static constexpr std::size_t MAX_CONSTITUENTS = 2000;
 
+		//
+		// Default constructor.
+		//
+		ProductConstituentMessage();
+
 		// The instrument ID.
 		std::int64_t instrumentId;
 

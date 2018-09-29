@@ -26,6 +26,7 @@ namespace mm
 		//
 		FixedSizeString() : length(0)
 		{
+			buffer[0] = '\0';
 		}
 
 		//

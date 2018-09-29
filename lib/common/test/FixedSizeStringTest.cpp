@@ -31,6 +31,16 @@ namespace mm
 
 			delete buffer;
 		}
+
+		{
+			char* buffer = new char[2];
+			std::memset(buffer, 2, 2);
+
+			dummyString.copy(buffer);
+			ASSERT_TRUE(std::strlen(buffer) == 0);
+
+			delete buffer;
+		}
 	}
 
 	TEST(FixedSizeStringTest, SimpleCase)
