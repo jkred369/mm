@@ -26,7 +26,19 @@ namespace mm
 	{
 	public:
 
+		//
+		// Default constructor.
+		//
 		ProductMessage();
+
+		//
+		// Check for equalness of product message.
+		//
+		// rhs : The other product.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const ProductMessage& rhs) const;
 
 		// The instrument ID.
 		std::int64_t id;
@@ -73,6 +85,20 @@ namespace mm
 		// constituent count - 0 for any product apart from basket and index.
 		std::int64_t constituentCount;
 	};
+
+	//
+	// Implement custom comparison for the product message.
+	//
+	// lhs : The left product message.
+	// rhs : The right product message.
+	//
+	// return : true if the 2 product messages are identical.
+	//
+	inline bool operator == (const ProductMessage& lhs, const ProductMessage& rhs)
+	{
+		return lhs.equals(rhs);
+	}
+
 }
 
 

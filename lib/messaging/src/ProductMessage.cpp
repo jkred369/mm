@@ -27,6 +27,23 @@ namespace mm
 	{
 	}
 
+	bool ProductMessage::equals (const ProductMessage& rhs) const
+	{
+		return id == rhs.id &&
+				underlyerId == rhs.underlyerId &&
+				exchange == rhs.exchange &&
+				productType == rhs.productType &&
+				currency == rhs.currency &&
+				lotSize == rhs.lotSize &&
+				listingDate == rhs.listingDate &&
+				lastTradingDate == rhs.lastTradingDate &&
+				expiryDate == rhs.expiryDate &&
+				strike == rhs.strike &&
+				contractRatio == rhs.contractRatio &&
+				conversionRatio == rhs.conversionRatio &&
+				constituentCount == rhs.constituentCount;
+	}
+
 }
 
 

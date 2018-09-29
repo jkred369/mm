@@ -9,7 +9,7 @@ add_executable(BusTest
 target_include_directories(BusTest PUBLIC
 	${Bus_INCLUDES}
 	${Common_INCLUDES}
-	${Message_INCLUDES}
+	${Messaging_INCLUDES}
 	${Threading_INCLUDES}
 )
 
@@ -19,6 +19,7 @@ target_link_libraries(BusTest
 	${POCO_LIBS}
 	${GTEST_LIBS}
 	Common
+	Messaging
 	Threading
 )
 

@@ -1,7 +1,7 @@
 # target
 file(GLOB_RECURSE Service_SOURCES "*.cpp")
 
-add_library(Service SHARED ${Service_SOURCES})
+add_library(Service SHARED ${Service_HEADERS} ${Service_SOURCES})
 
 target_include_directories(Service PUBLIC
 	${Bus_INCLUDES}

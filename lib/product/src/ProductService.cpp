@@ -17,7 +17,8 @@ namespace mm
 			Dispatcher& dispatcher,
 			ServiceContext& serviceContext,
 			std::istream& is) :
-		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext)
+		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
+		PublisherAdapter<Product>(dispatcher)
 	{
 	}
 
@@ -27,7 +28,8 @@ namespace mm
 			Dispatcher& dispatcher,
 			ServiceContext& serviceContext,
 			std::istream&& is) :
-		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext)
+		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
+		PublisherAdapter<Product>(dispatcher)
 	{
 	}
 
@@ -52,7 +54,6 @@ namespace mm
 
 	void ProductService::stop()
 	{
-		serviceContext.unsubscribe(Subscription(SourceType::ALL, DataType::PRODUCT, ALL_ID), dynamic_cast<IConsumer<ProductMessage>*> (this));
 		DispatchableService::stop();
 	}
 
@@ -60,11 +61,13 @@ namespace mm
 	{
 		std::shared_ptr<Product> product;
 		{
-			auto it = simpleProductMap.find(message->id);
-			if (it == simpleProductMap.end())
+			auto it = productMap.find(message->id);
+			if (it == productMap.end())
 			{
-				product = simpleProductMap[message->id];
-				LOGINFO("New product {} added to cache", instrumentId);
+				product = std::make_shared<Product> ();
+				productMap[message->id] = product;
+
+				LOGINFO("New product {} added to cache", message->id);
 			}
 			else
 			{
@@ -73,13 +76,13 @@ namespace mm
 		}
 
 		// update product content
-		if (product->getContent() != *message)
+		if (!(product->getContent() == *message))
 		{
 			LOGINFO("Updating product {}", message->id);
 
 			// firstly remove all the existing dependencies, if any
 			{
-				if (product->getContent().underlyingId != INVALID_ID)
+				if (product->getContent().underlyerId != 0)
 				{
 
 				}

@@ -1,7 +1,7 @@
 # target
-file(GLOB_RECURSE Service_SOURCES "*.cpp")
+file(GLOB_RECURSE Arb_SOURCES "*.cpp")
 
-add_library(Arb SHARED ${Service_SOURCES})
+add_library(Arb SHARED ${Arb_HEADERS} ${Arb_SOURCES})
 
 target_include_directories(Arb PUBLIC
 	${Bus_INCLUDES}

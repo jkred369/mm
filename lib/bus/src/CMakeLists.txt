@@ -5,7 +5,7 @@ file(GLOB_RECURSE Bus_SOURCES "*.cpp")
 
 #target_include_directories(Bus PUBLIC
 #	${Common_INCLUDES}
-#	${Message_INCLUDES}
+#	${Messaging_INCLUDES}
 #	${Threading_INCLUDES}
 #)
 
@@ -15,5 +15,6 @@ file(GLOB_RECURSE Bus_SOURCES "*.cpp")
 #	${POCO_LIBS}
 #	${GTEST_LIBS}
 #	Common
+#	Messaging
 #	Threading
 #)

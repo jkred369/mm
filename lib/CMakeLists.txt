@@ -11,10 +11,6 @@ set(Messaging_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/messaging/src")
 file(GLOB_RECURSE Threading_HEADERS "${Messaging_INCLUDES}/*.hpp")
 add_subdirectory(messaging)
 
-set(Product_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/product/src")
-file(GLOB_RECURSE Product_HEADERS "${Product_INCLUDES}/*.hpp")
-add_subdirectory(product)
-
 set(Threading_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/threading/src")
 file(GLOB_RECURSE Threading_HEADERS "${Threading_INCLUDES}/*.hpp")
 add_subdirectory(threading)
@@ -26,6 +22,10 @@ add_subdirectory(bus)
 set(Service_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/service/src")
 file(GLOB_RECURSE Service_HEADERS "${Service_INCLUDES}/*.hpp")
 add_subdirectory(service)
+
+set(Product_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/product/src")
+file(GLOB_RECURSE Product_HEADERS "${Product_INCLUDES}/*.hpp")
+add_subdirectory(product)
 
 set(Femas_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/femas/src")
 file(GLOB_RECURSE Femas_HEADERS "${Femas_INCLUDES}/*.hpp") 
