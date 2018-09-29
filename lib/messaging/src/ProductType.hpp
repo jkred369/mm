@@ -40,7 +40,7 @@ namespace mm
 
 		// American option.
 		AMERICAN = 7,
-	}
+	};
 }
 
 

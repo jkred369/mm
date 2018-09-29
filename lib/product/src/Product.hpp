@@ -8,6 +8,7 @@
 #ifndef LIB_PRODUCT_SRC_PRODUCT_HPP_
 #define LIB_PRODUCT_SRC_PRODUCT_HPP_
 
+#include <memory>
 #include <vector>
 
 #include <ProductMessage.hpp>
@@ -32,7 +33,7 @@ namespace mm
 		// content : The product content itself.
 		// underlying : The underlying product pointer.
 		//
-		Product(const ProductMessage& content, const std::shared_ptr<const Product>& underlying);
+		Product(const ProductMessage& content, const std::shared_ptr<const Product>&& underlying);
 
 		//
 		// Constructor.
@@ -41,7 +42,7 @@ namespace mm
 		// underlying : The underlying product pointer.
 		// constituents : The constituents.
 		//
-		Product(const ProductMessage& consnte, const std::shared_ptr<const Product>& underlying, std::vector<std::shared_ptr<const Product> >& constituents);
+		Product(const ProductMessage& content, const std::shared_ptr<const Product>&& underlying, std::vector<std::shared_ptr<const Product> >&& constituents);
 
 		//
 		// Get the content of the product.

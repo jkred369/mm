@@ -27,10 +27,10 @@ namespace mm
 	struct StringUtil
 	{
 		// string representation for inf.
-		static constexpr char* FP_INF_STRING = "Inf";
+		static constexpr char FP_INF_STRING[] = {'I', 'n', 'f'};
 
 		// string representation for nan.
-		static constexpr char* FP_NAN_STRING = "NaN";
+		static constexpr char FP_NAN_STRING[] = {'N', 'a', 'N'};
 
 		//
 		// trim the input string from start.
@@ -121,7 +121,7 @@ namespace mm
 		template<std::size_t Precision=6> static inline std::size_t fromDouble(char* dest, const double value, const std::size_t count)
 		{
 			static constexpr int FACTOR = std::pow(10, Precision);
-			static constexpr char* STRINGS[] = {FP_NAN_STRING, FP_INF_STRING};
+			static constexpr const char* STRINGS[] = {FP_NAN_STRING, FP_INF_STRING};
 
 			const int type = std::fpclassify(value);
 

@@ -5,7 +5,7 @@
  *      Author: suoalex
  */
 
-#include <ProductMessage.hpp>
+#include "ProductMessage.hpp"
 
 namespace mm
 {

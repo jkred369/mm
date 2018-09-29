@@ -31,7 +31,7 @@ namespace mm
 
 		// Euro
 		EUR = 4,
-	}
+	};
 }
 
 
