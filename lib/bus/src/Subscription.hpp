@@ -59,8 +59,10 @@ namespace mm
 		Key key;
 	};
 
-	typedef SubscriptionT<KeyType> Subscription;
+	// The ID for subscriting to all keys on this subscription
+	static constexpr KeyType ALL_ID = -1;
 
+	typedef SubscriptionT<KeyType> Subscription;
 }
 
 namespace std

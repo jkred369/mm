@@ -35,13 +35,19 @@ namespace mm
 		}
 
 		// wire up all the subscriptions
-		serviceContext->subscribe(
+		if (!serviceContext.subscribe(
 				Subscription(SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId),
-				dynamic_cast<IConsumer<MarketDataMessage>*> (this));
+				dynamic_cast<IConsumer<MarketDataMessage>*> (this)))
+		{
+			return false;
+		}
 
-		serviceContext->subscribe(
+		if (!serviceContext.subscribe(
 				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, instrumentId),
-				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this));
+				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this)))
+		{
+			return false;
+		}
 
 		return true;
 	}
@@ -49,11 +55,11 @@ namespace mm
 	void SingleInstrumentArb::stop()
 	{
 		// stop all the subscriptions
-		serviceContext->unsubscribe(
+		serviceContext.unsubscribe(
 				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, instrumentId),
 				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this));
 
-		serviceContext->unsubscribe(
+		serviceContext.unsubscribe(
 				Subscription(SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId),
 				dynamic_cast<IConsumer<MarketDataMessage>*> (this));
 

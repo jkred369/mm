@@ -21,7 +21,15 @@ namespace mm
 	//
 	struct MarketDataLevel
 	{
+		//
+		// default constructor.
+		//
+		MarketDataLevel();
+
+		// the price.
 		double price;
+
+		// the avaiable qty
 		std::int64_t qty;
 	};
 
@@ -34,6 +42,11 @@ namespace mm
 
 		// The maximum market data depth.
 		static constexpr size_t MAX_DEPTH = 5;
+
+		//
+		// Default constructor.
+		//
+		MarketDataMessage();
 
 		// Instrument ID.
 		std::int64_t instrumentId;

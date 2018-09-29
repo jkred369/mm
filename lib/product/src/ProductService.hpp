@@ -11,9 +11,13 @@
 #include <istream>
 #include <unordered_map>
 
-#include <IService.hpp>
+#include <DispatchableService.hpp>
+#include <Logger.hpp>
 #include <PublisherAdapter.hpp>
 #include <ProductMessage.hpp>
+#include <ProductConstituentMessage.hpp>
+
+#include "Product.hpp"
 
 namespace mm
 {
@@ -22,20 +26,69 @@ namespace mm
 	// The service provide product message in a single way. Product relationship should be constructed by ProductCache.
 	//
 	class ProductService :
-			public IService,
-			public PublisherAdapter<ProductMessage>
+			public DispatchableService,
+			public IConsumer<ProductMessage>,
+			public IConsumer<ProductConstituentMessage>,
+			public PublisherAdapter<Product>
 	{
 	public:
 
-		ProductService(std::istream& is);
+		//
+		// Constructor.
+		//
+		// dispatchKey : The dispatch key.
+		// serviceName : The name of the service in context.
+		// dispatcher : The dispatcher used.
+		// serviceContext : The service context for subscription and source other service.
+		// is : The input stream for the product definitions.
+		//
+		ProductService(
+				const KeyType dispatchKey,
+				const std::string serviceName,
+				Dispatcher& dispatcher,
+				ServiceContext& serviceContext,
+				std::istream& is);
 
-		ProductService(std::istream&& is);
+		//
+		// Constructor.
+		//
+		// dispatchKey : The dispatch key.
+		// serviceName : The name of the service in context.
+		// dispatcher : The dispatcher used.
+		// serviceContext : The service context for subscription and source other service.
+		// is : The input stream for the product definitions.
+		//
+		ProductService(
+				const KeyType dispatchKey,
+				const std::string serviceName,
+				Dispatcher& dispatcher,
+				ServiceContext& serviceContext,
+				std::istream&& is);
 
 		virtual ~ProductService();
 
+		//
+		// The service interface.
+		//
+		virtual bool start() override;
+		virtual void stop() override;
+
+		//
+		// The consumer interface.
+		//
+		virtual void consume(const std::shared_ptr<const ProductMessage>& message) override;
+		virtual void consume(const std::shared_ptr<const ProductConstituentMessage>& message) override;
+
 	private:
 
-		std::unordered_map<std::int64_t, >
+		// Logger of the class.
+		static Logger logger;
+
+		// The product map where key is the instrument ID and value is the product object.
+		std::unordered_map<std::int64_t, std::shared_ptr<Product> > productMap;
+
+		// The map where key is the instrument ID and value are the instruments depending on it.
+		std::unordered_map<std::int64_t, std::vector<std::int64_t> > dependencyMap;
 	};
 }
 

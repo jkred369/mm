@@ -23,26 +23,10 @@ namespace mm
 	{
 	public:
 
-		// The order ID.
-		std::int64_t orderId;
-
-		// The instrument ID.
-		std::int64_t instrumentId;
-
-		// The trade ID.
-		std::int64_t executionId;
-
-		// The order side.
-		Side side;
-
-		// Trade qty.
-		std::int64_t qty;
-
-		// Trade price.
-		double price;
-
-		// The current order status.
-		OrderStatus status;
+		//
+		// Default constructor.
+		//
+		ExecutionMessage();
 
 		//
 		// Determine if the message contains a trade.
@@ -63,6 +47,27 @@ namespace mm
 		{
 			return qty * price;
 		}
+
+		// The order ID.
+		std::int64_t orderId;
+
+		// The instrument ID.
+		std::int64_t instrumentId;
+
+		// The trade ID.
+		std::int64_t executionId;
+
+		// The order side.
+		Side side;
+
+		// Trade qty.
+		std::int64_t qty;
+
+		// Trade price.
+		double price;
+
+		// The current order status.
+		OrderStatus status;
 	};
 }
 

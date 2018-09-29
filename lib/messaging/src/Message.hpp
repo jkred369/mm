@@ -110,15 +110,8 @@ namespace mm
 		static const std::string TIME_FORMAT_STRING;
 
 		//
-		// Virtual destructor.
-		//
-		virtual ~Message()
-		{
-		}
-
-		//
 		// The template method for serialize to buffer.
-		// used to provide a uniform behavrior across buffer types.
+		// used to provide a uniform behavior across buffer types.
 		//
 		// buffer : The buffer to write to.
 		//

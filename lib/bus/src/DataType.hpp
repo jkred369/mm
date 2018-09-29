@@ -92,6 +92,11 @@ namespace mm
 	    // Summary of order current status.
 	    ORDER_SUMMARY = 24,
 
+		// Decoupled product (for product service)
+		DECOUPLED_PRODUCT = 25,
+
+		// Decoupled product constitution (for product service)
+		DECOUPLED_PRODUCT_CONSTITUENT = 26,
 	};
 }
 

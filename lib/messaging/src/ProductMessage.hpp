@@ -20,12 +20,13 @@ namespace mm
 	//
 	// This class defines a message strong enough for holding cash, delta 1 and simple vanillas.
 	//
+	// Note that the constituents information is in another message in order not to over complicate the simple products.
+	//
 	class ProductMessage : public Message
 	{
 	public:
 
-		// The ID for underlyer ID as in no underlyer.
-		static constexpr std::int64_t INVALID_ID = -1;
+		ProductMessage();
 
 		// The instrument ID.
 		std::int64_t id;
@@ -68,6 +69,9 @@ namespace mm
 
 		// conversion ratio as in product to underlying ratio (if any)
 		double conversionRatio;
+
+		// constituent count - 0 for any product apart from basket and index.
+		std::int64_t constituentCount;
 	};
 }
 

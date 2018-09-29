@@ -23,6 +23,21 @@ namespace mm
 	{
 	public:
 
+		//
+		// Default constructor.
+		//
+		OrderSummaryMessage();
+
+		//
+		// Get the remain qty of the order.
+		//
+		// return : remain qty as total qty - traded qty.
+		//
+		inline std::int64_t remainQty() const
+		{
+			return totalQty - tradedQty;
+		}
+
 		// The order ID.
 		std::int64_t orderId;
 
@@ -46,16 +61,6 @@ namespace mm
 
 		// current order status.
 		OrderStatus status;
-
-		//
-		// Get the remain qty of the order.
-		//
-		// return : remain qty as total qty - traded qty.
-		//
-		inline std::int64_t remainQty() const
-		{
-			return totalQty - tradedQty;
-		}
 	};
 }
 

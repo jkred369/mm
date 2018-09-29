@@ -25,6 +25,11 @@ namespace mm
 	{
 	public:
 
+		//
+		// Default constructor.
+		//
+		OrderMessage();
+
 		// The order ID.
 		std::int64_t orderId;
 
