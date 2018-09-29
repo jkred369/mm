@@ -29,6 +29,15 @@ namespace mm
 		ExecutionMessage();
 
 		//
+		// Check for equality of execution.
+		//
+		// rhs : The other message.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const ExecutionMessage& rhs) const;
+
+		//
 		// Determine if the message contains a trade.
 		//
 		// return : true if the message contains a trade.

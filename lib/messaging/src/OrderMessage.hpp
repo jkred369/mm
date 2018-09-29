@@ -30,6 +30,15 @@ namespace mm
 		//
 		OrderMessage();
 
+		//
+		// Check for equalness of order message.
+		//
+		// rhs : The other message.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const OrderMessage& rhs) const;
+
 		// The order ID.
 		std::int64_t orderId;
 

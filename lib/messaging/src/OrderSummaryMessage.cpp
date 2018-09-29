@@ -21,6 +21,18 @@ namespace mm
 	{
 	}
 
+	bool OrderSummaryMessage::equals(const OrderSummaryMessage& rhs) const
+	{
+		return orderId == rhs.orderId &&
+				instrumentId == rhs.instrumentId &&
+				side == rhs.side &&
+				totalQty == rhs.totalQty &&
+				tradedQty == rhs.tradedQty &&
+				price == rhs.price &&
+				avgTradedPrice = rhs.avgTradedPrice &&
+				status == rhs.status;
+	}
+
 }
 
 

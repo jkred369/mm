@@ -26,12 +26,23 @@ namespace mm
 		//
 		MarketDataLevel();
 
+		//
+		// Check for equalness of level.
+		//
+		// rhs : The other message.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const MarketDataLevel& rhs) const;
+
 		// the price.
 		double price;
 
 		// the avaiable qty
 		std::int64_t qty;
 	};
+
+	DEFINE_OPERATORS(MarketDataLevel)
 
 	//
 	// The market data message.
@@ -47,6 +58,15 @@ namespace mm
 		// Default constructor.
 		//
 		MarketDataMessage();
+
+		//
+		// Check for equalness of market data.
+		//
+		// rhs : The other message.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const MarketDataMessage& rhs) const;
 
 		// Instrument ID.
 		std::int64_t instrumentId;

@@ -29,6 +29,15 @@ namespace mm
 		OrderSummaryMessage();
 
 		//
+		// Check for equalness of order summary message.
+		//
+		// rhs : The other message.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const OrderSummaryMessage& rhs) const;
+
+		//
 		// Get the remain qty of the order.
 		//
 		// return : remain qty as total qty - traded qty.
