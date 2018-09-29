@@ -11,6 +11,7 @@ target_include_directories(ProductTest PUBLIC
 	${Common_INCLUDES}
 	${Messaging_INCLUDES}
 	${Product_INCLUDES}
+	#{Service_INCLUDES}
 )
 
 target_link_libraries(ProductTest 
@@ -20,6 +21,7 @@ target_link_libraries(ProductTest
 	${GTEST_LIBS}
 	Common
 	Messaging
+	Service
 )
 
 add_test(ProductTest, ProductTest)

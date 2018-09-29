@@ -33,7 +33,7 @@ namespace mm
 		// content : The product content itself.
 		// underlying : The underlying product pointer.
 		//
-		Product(const ProductMessage& content, const std::shared_ptr<const Product>&& underlying);
+		Product(const ProductMessage& content, const std::shared_ptr<const Product>& underlying);
 
 		//
 		// Constructor.
@@ -42,7 +42,9 @@ namespace mm
 		// underlying : The underlying product pointer.
 		// constituents : The constituents.
 		//
-		Product(const ProductMessage& content, const std::shared_ptr<const Product>&& underlying, std::vector<std::shared_ptr<const Product> >&& constituents);
+		Product(const ProductMessage& content,
+				const std::shared_ptr<const Product>& underlying,
+				const std::vector<std::shared_ptr<const Product> >& constituents);
 
 		//
 		// Get the content of the product.

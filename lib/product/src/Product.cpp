@@ -9,19 +9,19 @@
 
 namespace mm
 {
-	Product::Product() : Product(ProductMessage(), std::shared_ptr<const Product> ())
+	Product::Product()
 	{
 	}
 
-	Product::Product(const ProductMessage& content, const std::shared_ptr<const Product>&& underlying) :
-			Product(content, underlying, std::vector<std::shared_ptr<const Product> > ())
+	Product::Product(const ProductMessage& content, const std::shared_ptr<const Product>& underlying) :
+			content(content), underlying(underlying)
 	{
 	}
 
 	Product::Product(
 			const ProductMessage& content,
-			const std::shared_ptr<const Product>&& underlying,
-			const std::vector<std::shared_ptr<const Product> >&& constituents) :
+			const std::shared_ptr<const Product>& underlying,
+			const std::vector<std::shared_ptr<const Product> >& constituents) :
 			content(content),
 			underlying(underlying),
 			constituents(constituents)

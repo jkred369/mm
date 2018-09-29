@@ -7,6 +7,7 @@ target_include_directories(Product PUBLIC
 	${Common_INCLUDES}
 	${Messaging_INCLUDES}
 	${Product_INCLUDES}
+	${Service_INCLUDES}
 )
 
 target_link_libraries(Product
@@ -16,4 +17,5 @@ target_link_libraries(Product
 	${GTEST_LIBS}
 	Common
 	Messaging
+	Service
 )
