@@ -35,6 +35,34 @@ namespace mm
 		//
 		bool equals(const MarketDataLevel& rhs) const;
 
+		//
+		// The template method for serialize to buffer.
+		// used to provide a uniform behavior across buffer types.
+		//
+		// buffer : The buffer to write to.
+		//
+		// return : true if the serialization done successfully.
+		//
+		template<typename WriteBuffer> bool serialize(WriteBuffer& buffer) const
+		{
+			buffer << price << qty;
+			return buffer.getError();
+		}
+
+		//
+		// The template method for deserialize from buffer.
+		// used to provide a uniform behavrior across buffer types.
+		//
+		// buffer : The buffer to read from.
+		//
+		// return : true if the deserialization done successfully.
+		//
+		template<typename ReadBuffer> bool deserialize(ReadBuffer& buffer)
+		{
+			buffer >> price >> qty;
+			return buffer.getError();
+		}
+
 		// the price.
 		double price;
 
@@ -67,6 +95,62 @@ namespace mm
 		// return : True if the other message is identical.
 		//
 		bool equals(const MarketDataMessage& rhs) const;
+
+		//
+		// The template method for serialize to buffer.
+		// used to provide a uniform behavior across buffer types.
+		//
+		// buffer : The buffer to write to.
+		//
+		// return : true if the serialization done successfully.
+		//
+		template<typename WriteBuffer> bool serialize(WriteBuffer& buffer) const
+		{
+			if (UNLIKELY(!Message::serialize(buffer)))
+			{
+				return false;
+			}
+
+			buffer << instrumentId << open << close << high << low << last << highLimit << lowLimit << volume << turnover;
+
+			for (std::size_t i = 0; i < 2; ++i)
+			{
+				for (std::size_t j = 0; j < MAX_DEPTH; ++j)
+				{
+					buffer << levels[i][j];
+				}
+			}
+
+			return buffer.getError();
+		}
+
+		//
+		// The template method for deserialize from buffer.
+		// used to provide a uniform behavrior across buffer types.
+		//
+		// buffer : The buffer to read from.
+		//
+		// return : true if the deserialization done successfully.
+		//
+		template<typename ReadBuffer> bool deserialize(ReadBuffer& buffer)
+		{
+			if (UNLIKELY(!Message::deserialize(buffer)))
+			{
+				return false;
+			}
+
+			buffer >> instrumentId >> open >> close >> high >> low >> last >> highLimit >> lowLimit >> volume >> turnover;
+
+			for (std::size_t i = 0; i < 2; ++i)
+			{
+				for (std::size_t j = 0; j < MAX_DEPTH; ++j)
+				{
+					buffer >> levels[i][j];
+				}
+			}
+
+			return buffer.getError();
+		}
 
 		// Instrument ID.
 		std::int64_t instrumentId;
