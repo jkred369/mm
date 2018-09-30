@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include <DispatchableService.hpp>
 #include <Dispatcher.hpp>
 #include <IConsumer.hpp>
 #include <IService.hpp>
@@ -25,7 +26,7 @@ namespace mm
 	// This class is the generic order manager implementing OrderListener concept.
 	//
 	template<typename ExchangeInterface, typename Pool> class OrderManager :
-			public IService,
+			public DispatchableService,
 			public IConsumer<OrderMessage>,
 			public IConsumer<ExecutionMessage>,
 			public PublisherAdapter<OrderSummaryMessage>
@@ -41,7 +42,7 @@ namespace mm
 		// publisher : The publisher.
 		// exchange : The exchange interface.
 		//
-		OrderManager(const std::shared_ptr<Dispatcher> dispatcher, const std::shared_ptr<ExchangeInterface> exchange) :
+		OrderManager(const std::shared_ptr<Dispatcher> dispatcher, ExchangeInterface const* exchange) :
 			PublisherAdapter<OrderSummaryMessage> (dispatcher),
 			exchange(exchange)
 		{
@@ -89,7 +90,7 @@ namespace mm
 		static Pool<ExchangeOrder, 1000> pool;
 
 		// The exchange interface.
-		ExchangeInterface* exchange;
+		ExchangeInterface const* exchange;
 
 		// The live orders.
 		OrderCache<ExchangeOrder> liveCache;
