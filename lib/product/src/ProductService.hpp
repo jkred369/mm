@@ -49,22 +49,6 @@ namespace mm
 				ServiceContext& serviceContext,
 				std::istream& is);
 
-		//
-		// Constructor.
-		//
-		// dispatchKey : The dispatch key.
-		// serviceName : The name of the service in context.
-		// dispatcher : The dispatcher used.
-		// serviceContext : The service context for subscription and source other service.
-		// is : The input stream for the product definitions.
-		//
-		ProductService(
-				const KeyType dispatchKey,
-				const std::string serviceName,
-				Dispatcher& dispatcher,
-				ServiceContext& serviceContext,
-				std::istream&& is);
-
 		virtual ~ProductService();
 
 		//

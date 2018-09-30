@@ -6,6 +6,7 @@
  */
 
 #include <NativeDefinition.hpp>
+#include <StringBuffer.hpp>
 
 #include "ProductService.hpp"
 
@@ -22,17 +23,36 @@ namespace mm
 		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
 		PublisherAdapter<Product>(dispatcher)
 	{
-	}
+		try
+		{
+			for (std::string line; std::getline(is, line); )
+			{
+				StringUtil::trim(line);
+				if (line.size() == 0 || line[0] == '#')
+				{
+					continue;
+				}
 
-	ProductService::ProductService(
-			const KeyType dispatchKey,
-			const std::string serviceName,
-			Dispatcher& dispatcher,
-			ServiceContext& serviceContext,
-			std::istream&& is) :
-		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
-		PublisherAdapter<Product>(dispatcher)
-	{
+				StringBuffer buffer(line);
+				std::shared_ptr<ProductMessage> product = std::make_shared<ProductMessage();
+
+				if (!product->deserialize(buffer))
+				{
+					LOGERR("Error loading product from line; skipped: {}", line);
+					continue;
+				}
+
+				consume(product);
+			}
+		}
+		catch (std::exception& e)
+		{
+			LOGERR("Failed to read property: {}", e.what());
+		}
+		catch (...)
+		{
+			LOGERR("Failed to read property with unknown reason.");
+		}
 	}
 
 	ProductService::~ProductService()
