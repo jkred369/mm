@@ -39,14 +39,11 @@ namespace mm
 			ProductService* productService;
 			if (!serviceContext.getService(productServiceName, productService))
 			{
+				LOGERR("Market data session failed to get product service from service context");
 				throw std::runtime_error("Failed to create Femas market data session. Cannot find product service with name: " + productServiceName);
 			}
 
-			productService->visit([&] (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair) {
-				const ProductMessage& content = pair.second->getContent();
-				symbolMap[content.symbol] = content.id;
-			});
-
+			productService->initSnapshot(this);
 			LOGINFO("Symbol map created with {} products.", symbolMap.size());
 		}
 
@@ -189,6 +186,12 @@ namespace mm
 		{
 			LOGERR("Error unsubscribing from {}", subscription.key);
 		}
+	}
+
+	void FemasMarketDataSession::consume(const std::shared_ptr<const Product>& message)
+	{
+		const ProductMessage& content = message->getContent();
+		symbolMap[content.symbol] = content.id;
 	}
 
 	void FemasMarketDataSession::OnFrontConnected()

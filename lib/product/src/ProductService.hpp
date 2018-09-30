@@ -8,6 +8,7 @@
 #ifndef LIB_PRODUCT_SRC_PRODUCTSERVICE_HPP_
 #define LIB_PRODUCT_SRC_PRODUCTSERVICE_HPP_
 
+#include <atomic>
 #include <functional>
 #include <istream>
 #include <unordered_map>
@@ -63,6 +64,11 @@ namespace mm
 		virtual bool subscribe(const Subscription& subscription, IConsumer<Product>* consumer) override;
 
 		//
+		// override to provide snapshoting
+		//
+		virtual std::size_t initSnapshot(IConsumer<Product>* consumer) const override;
+
+		//
 		// The consumer interface.
 		//
 		virtual void consume(const std::shared_ptr<const ProductMessage>& message) override;
@@ -105,6 +111,9 @@ namespace mm
 
 		// The map where key is the instrument ID and value are the instruments depending on it.
 		std::unordered_map<std::int64_t, std::vector<std::int64_t> > dependencyMap;
+
+		// Flag if the service is started.
+		std::atomic<bool> startFlag;
 	};
 }
 

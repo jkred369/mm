@@ -42,6 +42,14 @@ namespace mm
 		{
 		}
 
+		//
+		// By default we don't do any snapshot.
+		//
+		virtual std::size_t initSnapshot(IConsumer<Message>* consmer) const override
+		{
+			return 0;
+		}
+
 		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
 		{
 			SpinLockGuard<Mutex> guard(mutex);

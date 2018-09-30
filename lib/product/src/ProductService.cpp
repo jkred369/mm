@@ -65,6 +65,8 @@ namespace mm
 			return false;
 		}
 
+		startFlag.store(true);
+
 		if (!serviceContext.subscribe(Subscription(SourceType::ALL, DataType::PRODUCT, ALL_ID), dynamic_cast<IConsumer<ProductMessage>*> (this)))
 		{
 			LOGWARN("No other product service to sync with.");
@@ -75,6 +77,7 @@ namespace mm
 
 	void ProductService::stop()
 	{
+		startFlag.store(false);
 		DispatchableService::stop();
 	}
 
@@ -100,6 +103,22 @@ namespace mm
 		}
 
 		return true;
+	}
+
+	std::size_t ProductService::initSnapshot(IConsumer<Product>* consumer) const
+	{
+		// don't provide any snapshot if the service readily started
+		if (startFlag.load())
+		{
+			return 0;
+		}
+
+		for (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair : productMap)
+		{
+			consumer->consume(pair.second);
+		}
+
+		return productMap.size();
 	}
 
 	void ProductService::consume(const std::shared_ptr<const ProductMessage>& message)

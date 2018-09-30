@@ -17,10 +17,12 @@
 
 #include <EnumType.hpp>
 #include <FieldDefinition.hpp>
+#include <IConsumer.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
 #include <MarketDataMessage.hpp>
 #include <NativeDefinition.hpp>
+#include <Product.hpp>
 #include <PublisherAdapter.hpp>
 #include <ServiceContext.hpp>
 
@@ -34,7 +36,8 @@ namespace mm
 	class FemasMarketDataSession :
 			public IService,
 			public CUstpFtdcMduserSpi,
-			public PublisherAdapter<MarketDataMessage>
+			public PublisherAdapter<MarketDataMessage>,
+			public IConsumer<Product>
 	{
 	public:
 
@@ -66,6 +69,11 @@ namespace mm
 		//
 		virtual bool subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
+
+		//
+		// consumer functionality.
+		//
+		virtual void consume(const std::shared_ptr<const Product>& message) override;
 
 		//
 		// Fired when the session is connected.

@@ -28,6 +28,19 @@ namespace mm
 		}
 
 		//
+		// Request an initial snapshot from the publisher before the whole context starts.
+		//
+		// This can be seen as a violation of the pub/sub structure but sometimes such a snapshot is needed,
+		// especially for the (almost) static data stores. The snapshot is done before dispatcher start up,
+		// most likely during construction. Thus calling of the consumer is still guaranteed to be thread safe.
+		//
+		// consumer : The consumer.
+		//
+		// return : no. of messages passed to consumer.
+		//
+		virtual std::size_t initSnapshot(IConsumer<Message>* consumer) const = 0;
+
+		//
 		// Publish a message to the bus.
 		//
 		// subscription : The topic on which the message will be delivered.
