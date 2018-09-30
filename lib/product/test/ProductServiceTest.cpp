@@ -43,6 +43,21 @@ namespace mm
 		}
 	};
 
+	struct DummyConsumer : IConsumer<Product>
+	{
+		virtual const KeyType getKey() const override
+		{
+			return 2;
+		}
+
+		virtual void consume(const std::shared_ptr<const Product>& message) override
+		{
+			product = message;
+		}
+
+		std::shared_ptr<const Product> product;
+	};
+
 	class DummyServiceContext : public ServiceContext
 	{
 	public:
@@ -99,6 +114,20 @@ namespace mm
 		ASSERT_TRUE(serviceContext.setService("DummyProductService", service));
 		ASSERT_TRUE(service->start());
 
+		// a subscription should return the product
+		DummyConsumer consumer;
+		service->subscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer);
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		ASSERT_TRUE(consumer.product.get());
+
+		const ProductMessage& content = consumer.product->getContent();
+		ASSERT_TRUE(content.id == 1);
+		ASSERT_TRUE(content.underlyerId == 0);
+		ASSERT_TRUE(content.symbol == "IF1503");
+
+		// tear down
+		service->unsubscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer);
 		service->stop();
 	}
 

@@ -150,7 +150,10 @@ namespace mm
 			}
 
 			const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
-			publish(subscription, product);
+			if (getConsumerCount(subscription) > 0)
+			{
+				publish(subscription, product);
+			}
 		}
 	}
 

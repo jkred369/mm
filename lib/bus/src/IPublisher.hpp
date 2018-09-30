@@ -58,7 +58,16 @@ namespace mm
 		//
 		// return : The count of the consumers.
 		//
-		virtual size_t getConsumerCount() const = 0;
+		virtual std::size_t getConsumerCount() const = 0;
+
+		//
+		// Get the count of consumer.
+		//
+		// subscription : The subscription to check.
+		//
+		// return : The count of the consumers.
+		//
+		virtual std::size_t getConsumerCount(const Subscription& subscription) const = 0;
 
 		//
 		// Remove all the consumers.

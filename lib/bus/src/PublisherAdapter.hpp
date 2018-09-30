@@ -104,10 +104,18 @@ namespace mm
 			}));
 		}
 
-		virtual size_t getConsumerCount() const override
+		virtual std::size_t getConsumerCount() const override
 		{
 			SpinLockGuard<Mutex> guard(mutex);
 			return count;
+		}
+
+		virtual std::size_t getConsumerCount(const Subscription& subscription) const override
+		{
+			SpinLockGuard<Mutex> guard(mutex);
+			auto it = consumerMap.find(subscription);
+
+			return it == consumerMap.end() ? 0 : it->second.size();
 		}
 
 		virtual void removeAll() override

@@ -85,12 +85,12 @@ namespace mm
 		//
 		void output(std::ostream& os) const
 		{
-			for (const std::string& item : items)
+			for (std::size_t i = 0; i < items.size() - 1; ++i)
 			{
-				os << item << Message::CSV_SEPARATOR;
+				os << items[i] << Message::CSV_SEPARATOR;
 			}
 
-			os << std::endl;
+			os << items[items.size() - 1] << std::endl;
 		}
 
 		//

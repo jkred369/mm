@@ -59,7 +59,7 @@ namespace mm
 			buffer << lotSize << listingDate << lastTradingDate << expiryDate;
 			buffer << strike << contractRatio << conversionRatio << constituentCount;
 
-			return buffer.getError();
+			return !buffer.getError();
 		}
 
 		//
@@ -81,7 +81,7 @@ namespace mm
 			buffer >> lotSize >> listingDate >> lastTradingDate >> expiryDate;
 			buffer >> strike >> contractRatio >> conversionRatio >> constituentCount;
 
-			return buffer.getError();
+			return !buffer.getError();
 		}
 
 		// The instrument ID.

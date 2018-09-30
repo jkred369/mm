@@ -17,9 +17,12 @@ namespace mm
 	//
 	// This class is a fixed size string to avoid allocating heap memory and wraps common routines for strings.
 	//
-	template<size_t size> class FixedSizeString
+	template<std::size_t size> class FixedSizeString
 	{
 	public:
+
+		// friend of itself
+		template<std::size_t OtherSize> friend class FixedSizeString;
 
 		//
 		// Default constructor.
@@ -72,6 +75,30 @@ namespace mm
 			std::strncpy(buffer, string.c_str(), length);
 
 			return *this;
+		}
+
+		//
+		// Check if the contents are equal.
+		//
+		// rhs : The other string.
+		//
+		// return : true if the contents are equal.
+		//
+		template<std::size_t RightSize> bool equals(FixedSizeString<RightSize>& rhs) const
+		{
+			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
+		}
+
+		//
+		// Check if the contents are equal.
+		//
+		// rhs : The other string.
+		//
+		// return : true if the contents are equal.
+		//
+		bool equals(const std::string& rhs) const
+		{
+			return length == rhs.length() && std::memcmp(buffer, rhs.c_str(), length) == 0;
 		}
 
 		//
@@ -147,6 +174,17 @@ namespace mm
 		// Actual storage
 		char buffer[size];
 	};
+
+	template<std::size_t LeftSize, std::size_t RightSize> bool operator == (const FixedSizeString<LeftSize> lhs, const FixedSizeString<RightSize>& rhs)
+	{
+		return lhs.equals(rhs);
+	}
+
+	template<std::size_t Size> bool operator == (const FixedSizeString<Size> lhs, const std::string& rhs)
+	{
+		return lhs.equals(rhs);
+	}
+
 }
 
 
