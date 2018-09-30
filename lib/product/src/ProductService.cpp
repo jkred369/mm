@@ -78,6 +78,30 @@ namespace mm
 		DispatchableService::stop();
 	}
 
+	bool ProductService::subscribe(const Subscription& subscription, IConsumer<Product>* consumer)
+	{
+		if (subscription.sourceType != SourceType::PRODUCT_SERVICE && subscription.dataType != DataType::PRODUCT)
+		{
+			return false;
+		}
+
+		if (!PublisherAdapter::subscribe(subscription, consumer))
+		{
+			return false;
+		}
+
+		// check if we have the product - if yes just return it.
+		const std::int64_t id = subscription.key;
+		auto it = productMap.find(id);
+
+		if (it != productMap.end())
+		{
+			publishTo(consumer->getKey(), consumer, it->second);
+		}
+
+		return true;
+	}
+
 	void ProductService::consume(const std::shared_ptr<const ProductMessage>& message)
 	{
 		const std::int64_t id = message->id;

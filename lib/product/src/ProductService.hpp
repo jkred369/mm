@@ -57,6 +57,11 @@ namespace mm
 		virtual void stop() override;
 
 		//
+		// override to publish product after subscription when its available.
+		//
+		virtual bool subscribe(const Subscription& subscription, IConsumer<Product>* consumer) override;
+
+		//
 		// The consumer interface.
 		//
 		virtual void consume(const std::shared_ptr<const ProductMessage>& message) override;

@@ -83,7 +83,7 @@ namespace mm
 		//
 		// so : The stream.
 		//
-		std::ostream& operator << (std::ostream& os) const
+		void output(std::ostream& os) const
 		{
 			for (const std::string& item : items)
 			{
@@ -91,7 +91,6 @@ namespace mm
 			}
 
 			os << std::endl;
-			return os;
 		}
 
 		//
@@ -352,6 +351,18 @@ namespace mm
 		// The read index.
 		std::size_t readIndex;
 	};
+
+	//
+	// output to a stream.
+	//
+	// so : The stream.
+	// buffer : The buffer object.
+	//
+	std::ostream& operator << (std::ostream& os, const StringBuffer& buffer)
+	{
+		buffer.output(os);
+		return os;
+	}
 
 }
 

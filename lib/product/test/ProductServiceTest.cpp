@@ -22,6 +22,8 @@
 
 #include <gtest/gtest.h>
 
+#include <StringBuffer.hpp>
+
 #include "ProductService.hpp"
 
 namespace mm
@@ -61,6 +63,37 @@ namespace mm
 		DummyServiceContext serviceContext(std::stringstream(""), factory);
 
 		std::stringstream ss;
+		std::shared_ptr<ProductService> service(new ProductService(1, "DummyProductService", serviceContext, ss));
+
+		ASSERT_TRUE(serviceContext.setService("DummyProductService", service));
+		ASSERT_TRUE(service->start());
+
+		service->stop();
+	}
+
+	TEST(ProductServiceTest, SimpleProductCase)
+	{
+		DummyFactory factory;
+		DummyServiceContext serviceContext(std::stringstream(""), factory);
+
+		std::stringstream ss;
+		{
+			StringBuffer buffer;
+
+			ProductMessage message;
+			message.id = 1;
+			message.underlyerId = 0;
+			message.symbol = "IF1503";
+			message.exchange = Exchange::SHFE;
+			message.productType = ProductType::FUTURE;
+			message.currency = Currency::CNY;
+			message.callPut = CallPutType::CALL;
+			message.lotSize = 1;
+
+			message.serialize(buffer);
+			ss << buffer;
+		}
+
 		std::shared_ptr<ProductService> service(new ProductService(1, "DummyProductService", serviceContext, ss));
 
 		ASSERT_TRUE(serviceContext.setService("DummyProductService", service));

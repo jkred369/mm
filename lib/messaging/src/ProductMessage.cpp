@@ -16,7 +16,7 @@ namespace mm
 			productType(ProductType::STOCK),
 			currency(Currency::CNY),
 			callPut(CallPutType::CALL),
-			lotSize(0),
+			lotSize(1),
 			listingDate(0),
 			lastTradingDate(0),
 			expiryDate(0),

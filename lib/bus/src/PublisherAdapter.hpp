@@ -55,12 +55,7 @@ namespace mm
 
 			for (const ConsumerDetail& detail : it->second)
 			{
-				// TODO: this piece of code needs to be reviewed for performance.
-				IConsumer<Message>* consumer = detail.consumer;
-
-				dispatcher.submit(detail.dispatchKey, [consumer, message] () {
-					consumer->consume(message);
-				});
+				publishTo(detail.dispatchKey, detail.consumer, message);
 			}
 		}
 
@@ -119,6 +114,23 @@ namespace mm
 		{
 			SpinLockGuard<Mutex> guard(mutex);
 			consumerMap.clear();
+		}
+
+	protected:
+
+		//
+		// Utility to publish to a specific consumer (without flashing the existing consumers).
+		//
+		// dispatchKey : The dispatch key.
+		// consumer : The consumer.
+		// message : The message to publish.
+		//
+		inline void publishTo(KeyType dispatchKey, IConsumer<Message>* consumer, const std::shared_ptr<const Message>& message)
+		{
+			// TODO: this piece of code needs to be reviewed for performance.
+			dispatcher.submit(dispatchKey, [consumer, message] () {
+				consumer->consume(message);
+			});
 		}
 
 	private:
