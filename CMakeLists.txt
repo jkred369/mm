@@ -39,6 +39,11 @@ set(SPDLOG_INCLUDE_DIR "/usr/include/spdlog")
 
 include_directories(${SPDLOG_INCLUDE_DIR})
 
+# moody camel queue
+set(MOODY_CAMEL_INCLUDE_DIR "/usr/include/moodycamel")
+
+include_directories(${MOODY_CAMEL_INCLUDE_DIR})
+
 # gtest
 set(GTEST_INCLUDE_DIR "/usr/include/gtest")
 set(GTEST_LIB_DIR "/usr/lib/gtest-1.8.0")

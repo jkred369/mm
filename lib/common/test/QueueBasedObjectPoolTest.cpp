@@ -1,21 +1,26 @@
+/*
+ * QueueBasedObjectPool.hpp
+ *
+ *  Created on: Sep 30, 2018
+ *      Author: suoalex
+ */
+
 #include <array>
 #include <cstdint>
 #include <chrono>
 #include <iostream>
 #include <thread>
 
-#include <boost/intrusive_ptr.hpp>
-
 #include <gtest/gtest.h>
 
-#include "ObjectPool.hpp"
+#include "QueueBasedObjectPool.hpp"
 #include "Timer.hpp"
 
 namespace mm
 {
-	TEST(ObjectPoolTest, PrimitiveCase)
+	TEST(QueueBasedObjectPoolTest, PrimitiveCase)
 	{
-		ObjectPool<std::int64_t> pool(1, false);
+		QueueBasedObjectPool<std::int64_t> pool(1, false);
 		ASSERT_TRUE(!pool.empty());
 
 		{
@@ -43,9 +48,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, MultipleCase)
+	TEST(QueueBasedObjectPoolTest, MultipleCase)
 	{
-		ObjectPool<std::int64_t> pool(4, false);
+		QueueBasedObjectPool<std::int64_t> pool(4, false);
 		ASSERT_TRUE(!pool.empty());
 
 		std::int64_t* value1 = nullptr;
@@ -72,7 +77,7 @@ namespace mm
 			pool.release(value);
 		}
 
-		ASSERT_TRUE(value1 == value2);
+		ASSERT_TRUE(value1 != value2);
 
 		// take all out then return
 		{
@@ -120,9 +125,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, SharedPtrCase)
+	TEST(QueueBasedObjectPoolTest, SharedPtrCase)
 	{
-		ObjectPool<std::int64_t> pool(1, false);
+		QueueBasedObjectPool<std::int64_t> pool(1, false);
 		ASSERT_TRUE(!pool.empty());
 
 		{
@@ -152,9 +157,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, SmallObjectPerformanceCase)
+	TEST(QueueBasedObjectPoolTest, SmallObjectPerformanceCase)
 	{
-		ObjectPool<double> pool(10, false);
+		QueueBasedObjectPool<double> pool(10, false);
 		ASSERT_TRUE(!pool.empty());
 
 		HighResTimer timer;
@@ -212,14 +217,14 @@ namespace mm
 
 	}
 
-	TEST(ObjectPoolTest, BigObjectPerformanceCase)
+	TEST(QueueBasedObjectPoolTest, BigObjectPerformanceCase)
 	{
 		struct BigObject
 		{
 			std::array<double, 30> fields;
 		};
 
-		ObjectPool<BigObject> pool(100, false);
+		QueueBasedObjectPool<BigObject> pool(100, false);
 		ASSERT_TRUE(!pool.empty());
 
 		HighResTimer timer;
@@ -278,3 +283,6 @@ namespace mm
 	}
 
 }
+
+
+

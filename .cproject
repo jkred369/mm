@@ -29,6 +29,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/femas"/>
 									<listOptionValue builtIn="false" value="/usr/include/fmt"/>
 									<listOptionValue builtIn="false" value="/usr/include/spdlog"/>
+									<listOptionValue builtIn="false" value="/usr/include/moodycamel"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1249555649" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

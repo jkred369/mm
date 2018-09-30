@@ -148,6 +148,8 @@ namespace mm
 		//
 		void release(ObjectType* object)
 		{
+			object->~ObjectType();
+
 			Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (object) - sizeof(void*));
 			assert(node->pool == this);
 

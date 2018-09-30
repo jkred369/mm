@@ -5,6 +5,7 @@ add_library(Common SHARED ${Common_HEADERS} ${Common_SOURCES})
 
 target_include_directories(Common PUBLIC
 	${SPDLOG_INCLUDE_DIR}
+	${MOODY_CAMEL_INCLUDE_DIR}
 )
 
 target_link_libraries(Common 
