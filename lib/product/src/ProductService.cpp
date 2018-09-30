@@ -146,20 +146,53 @@ namespace mm
 				if (newUnderlyerId != 0)
 				{
 					dependencyMap[newUnderlyerId].push_back(id);
+
+					// assign underlyer where possible
+					if (productMap.find(newUnderlyerId) == productMap.end())
+					{
+						productMap[newUnderlyerId] = std::make_shared<Product> ();
+					}
+
+					product->underlying = productMap[newUnderlyerId];
 				}
 			}
 
-			const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
-			if (getConsumerCount(subscription) > 0)
-			{
-				publish(subscription, product);
-			}
+			publishRecusively(product);
 		}
 	}
 
 	void ProductService::consume(const std::shared_ptr<const ProductConstituentMessage>& message)
 	{
 		// TODO: Provide support for constituent products like basket or indices.
+	}
+
+	void ProductService::publishRecusively(const std::shared_ptr<const Product>& product)
+	{
+		const std::int64_t id = product->getContent().id;
+
+		// update for the product itself
+		const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
+		if (getConsumerCount(subscription) > 0)
+		{
+			publish(subscription, product);
+		}
+
+		// update all the derivatives of the product recursively
+		auto it = dependencyMap.find(id);
+		if (it != dependencyMap.end())
+		{
+			for (const std::int64_t& derivId : it->second)
+			{
+				auto derivIt = productMap.find(derivId);
+				if (UNLIKELY(derivIt == productMap.end()))
+				{
+					LOGERR("Cannot find dependent product {}.", derivId);
+					continue;
+				}
+
+				publishRecusively(derivIt->second);
+			}
+		}
 	}
 
 }

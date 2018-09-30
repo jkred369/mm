@@ -112,11 +112,11 @@ namespace mm
 		std::shared_ptr<ProductService> service(new ProductService(1, "DummyProductService", serviceContext, ss));
 
 		ASSERT_TRUE(serviceContext.setService("DummyProductService", service));
-		ASSERT_TRUE(service->start());
+		ASSERT_TRUE(serviceContext.start());
 
 		// a subscription should return the product
 		DummyConsumer consumer;
-		service->subscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer);
+		ASSERT_TRUE(service->subscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
 		ASSERT_TRUE(consumer.product.get());
@@ -128,7 +128,80 @@ namespace mm
 
 		// tear down
 		service->unsubscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer);
-		service->stop();
+		serviceContext.stop();
+	}
+
+	TEST(ProductServiceTest, DerivProductCase)
+	{
+		DummyFactory factory;
+		DummyServiceContext serviceContext(std::stringstream(""), factory);
+
+		std::stringstream ss;
+		{
+			StringBuffer buffer;
+
+			ProductMessage message;
+			message.id = 1;
+			message.underlyerId = 2;
+			message.symbol = "IF1503";
+			message.exchange = Exchange::SHFE;
+			message.productType = ProductType::FUTURE;
+			message.currency = Currency::CNY;
+			message.callPut = CallPutType::CALL;
+			message.lotSize = 1;
+
+			message.serialize(buffer);
+			ss << buffer;
+		}
+
+		{
+			StringBuffer buffer;
+
+			ProductMessage message;
+			message.id = 2;
+			message.underlyerId = 0;
+			message.symbol = "CSI300";
+			message.exchange = Exchange::SSE;
+			message.productType = ProductType::INDEX;
+			message.currency = Currency::CNY;
+			message.callPut = CallPutType::CALL;
+			message.lotSize = 1;
+
+			message.serialize(buffer);
+			ss << buffer;
+		}
+
+		std::shared_ptr<ProductService> service(new ProductService(1, "DummyProductService", serviceContext, ss));
+
+		ASSERT_TRUE(serviceContext.setService("DummyProductService", service));
+		ASSERT_TRUE(serviceContext.start());
+
+		// a subscription should return the product
+		DummyConsumer consumer;
+		ASSERT_TRUE(service->subscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer));
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(2));
+		ASSERT_TRUE(consumer.product.get());
+
+		{
+			const ProductMessage& content = consumer.product->getContent();
+			ASSERT_TRUE(content.id == 1);
+			ASSERT_TRUE(content.underlyerId == 2);
+			ASSERT_TRUE(content.symbol == "IF1503");
+		}
+
+		{
+			ASSERT_TRUE(consumer.product->getUnderlying().get());
+
+			const ProductMessage& content = consumer.product->getUnderlying()->getContent();
+			ASSERT_TRUE(content.id == 2);
+			ASSERT_TRUE(content.underlyerId == 0);
+			ASSERT_TRUE(content.symbol == "CSI300");
+		}
+
+		// tear down
+		service->unsubscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer);
+		serviceContext.stop();
 	}
 
 }

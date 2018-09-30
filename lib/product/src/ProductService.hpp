@@ -69,6 +69,13 @@ namespace mm
 
 	private:
 
+		//
+		// Recursively publish product updates.
+		//
+		// product : The source product got updated.
+		//
+		void publishRecusively(const std::shared_ptr<const Product>& product);
+
 		// Logger of the class.
 		static Logger logger;
 
