@@ -5,20 +5,22 @@
  *      Author: suoalex
  */
 
-
+#include <algorithm>
 #include <stdexcept>
 
 #include <fmt/format.h>
 
 #include <StringUtil.hpp>
+#include <ProductService.hpp>
+
 #include "FemasMarketDataSession.hpp"
 
 mm::Logger mm::FemasMarketDataSession::logger;
 
 namespace mm
 {
-	FemasMarketDataSession::FemasMarketDataSession(Dispatcher& dispatcher, const FemasUserDetail& detail) :
-		PublisherAdapter<MarketDataMessage>(dispatcher),
+	FemasMarketDataSession::FemasMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail) :
+		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),
@@ -26,6 +28,27 @@ namespace mm
 	{
 		static_assert(BID >= 0, "Bid index must be positive.");
 		static_assert(ASK >= 0, "Ask index must be positive.");
+
+		// TODO : Make the product update dynamic.
+		// for now - we use the product service in the static way.
+		// this means we need to establish the mapping at construction time and
+		// ignore all subsequent updates.
+		//
+		// this is far from optimal and we should be able to do this dynamically; but obviously not the focus now.
+		{
+			ProductService* productService;
+			if (!serviceContext.getService(productServiceName, productService))
+			{
+				throw std::runtime_error("Failed to create Femas market data session. Cannot find product service with name: " + productServiceName);
+			}
+
+			productService->visit([&] (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair) {
+				const ProductMessage& content = pair.second->getContent();
+				symbolMap[content.symbol] = content.id;
+			});
+
+			LOGINFO("Symbol map created with {} products.", symbolMap.size());
+		}
 
 		// basic wiring up - the API interface forced const_cast usage
 		session->RegisterSpi(this);
@@ -124,6 +147,16 @@ namespace mm
 	{
 		if (!PublisherAdapter<MarketDataMessage>::subscribe(subscription, consumer))
 		{
+			return false;
+		}
+
+		// ensure we have the symbol mapping
+		const std::int64_t key = subscription.key;
+		if (std::find_if(symbolMap.begin(), symbolMap.end(), [&key] (const std::pair<SymbolType, std::int64_t>& pair) {
+			return key == pair.second;
+		}) == symbolMap.end())
+		{
+			LOGERR("Cannot subscribe to market data with key: {}. No symbol mapping defined.", key);
 			return false;
 		}
 
@@ -242,7 +275,7 @@ namespace mm
 		MarketDataMessage& message = *messagePointer;
 
 		// level 1 fields
-		message.instrumentId = depthMarketData->InstrumentID;
+		message.instrumentId = symbolMap[depthMarketData->InstrumentID];
 
 		message.open = depthMarketData->OpenPrice;
 		message.close = depthMarketData->ClosePrice;

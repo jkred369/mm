@@ -11,14 +11,18 @@
 #include <atomic>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 #include <femas/USTPFtdcMduserApi.h>
 
 #include <EnumType.hpp>
+#include <FieldDefinition.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
 #include <MarketDataMessage.hpp>
+#include <NativeDefinition.hpp>
 #include <PublisherAdapter.hpp>
+#include <ServiceContext.hpp>
 
 #include "FemasUserDetail.hpp"
 
@@ -37,10 +41,14 @@ namespace mm
 		//
 		// Constructor.
 		//
-		// dispatcher : The dispatcher used.
+		// serviceContext : The service context.
+		// productServiceName : The name of the product service.
 		// userDetail : The configuration details.
 		//
-		FemasMarketDataSession(Dispatcher& dispatcher, const FemasUserDetail& detail);
+		FemasMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail);
+
+		// forbide copy
+		FemasMarketDataSession(FemasMarketDataSession& session) = delete;
 
 		//
 		// Destructor.
@@ -198,6 +206,9 @@ namespace mm
 
 		// The request ID value keeper.
 		std::atomic<int> requestId;
+
+		// The map where key is the symbol and value is the instrument ID for it.
+		std::unordered_map<SymbolType, std::int64_t> symbolMap;
 	};
 }
 

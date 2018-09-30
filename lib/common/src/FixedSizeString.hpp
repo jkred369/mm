@@ -84,7 +84,19 @@ namespace mm
 		//
 		// return : true if the contents are equal.
 		//
-		template<std::size_t RightSize> bool equals(FixedSizeString<RightSize>& rhs) const
+		template<std::size_t RightSize> bool equals(const FixedSizeString<RightSize>& rhs) const
+		{
+			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
+		}
+
+		//
+		// Check if the contents are equal.
+		//
+		// rhs : The other string.
+		//
+		// return : true if the contents are equal.
+		//
+		bool equals(const FixedSizeString& rhs) const
 		{
 			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
 		}
@@ -99,6 +111,22 @@ namespace mm
 		bool equals(const std::string& rhs) const
 		{
 			return length == rhs.length() && std::memcmp(buffer, rhs.c_str(), length) == 0;
+		}
+
+		//
+		// generate a hash value given the content.
+		//
+		// return : hash value for the string.
+		//
+		std::size_t hash() const
+		{
+			std::size_t result = 7;
+			for (std::size_t i = 0; i < length; ++i)
+			{
+				result = result * 31 + buffer[i];
+			}
+
+			return result;
 		}
 
 		//
@@ -187,6 +215,16 @@ namespace mm
 
 }
 
+namespace std
+{
+	template<std::size_t Size> struct hash<mm::FixedSizeString<Size> >
+	{
+		std::size_t operator()(const mm::FixedSizeString<Size>& value) const
+		{
+			return value.hash();
+		}
+	};
+}
 
 
 #endif /* LIB_COMMON_SRC_FIXEDSIZESTRING_HPP_ */

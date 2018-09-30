@@ -71,6 +71,9 @@ namespace mm
 		//
 		ServiceContext(const std::shared_ptr<IConfig>& config, IServiceFactory& factory);
 
+		// forbide copy
+		ServiceContext(const ServiceContext& rhs) = delete;
+
 		//
 		// IService implementation
 		//
