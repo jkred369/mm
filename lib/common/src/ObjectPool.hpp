@@ -106,7 +106,7 @@ namespace mm
 				}
 
 				// must check here in case we back from condition signal
-				if (UNLIKELY(result != nullptr))
+				if (LIKELY(result != nullptr))
 				{
 					next = result->next.load();
 					if (first.compare_exchange_weak(result, next, std::memory_order_release, std::memory_order_relaxed))
@@ -123,7 +123,7 @@ namespace mm
 		}
 
 		//
-		// Get a shared pointer poining to a new instance retrieved from the pool.
+		// Get a shared pointer pointing to a new instance retrieved from the pool.
 		//
 		// return : shared pointer to a new object constructed from the queue.
 		//

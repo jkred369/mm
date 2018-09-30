@@ -17,6 +17,7 @@ namespace mm
 	// Define timers with the common method as
 	//
 	// std::int64_t getTimeInMillis() const
+	// std::int64_t getTimeInMicros() const
 	// std::int64_t getTimeInNanos() const
 	//
 	// Such timers will be used later in the other class with such template methods assumed.
@@ -37,6 +38,16 @@ namespace mm
 		inline std::int64_t getTimeInMillis() const
 		{
 			return std::chrono::high_resolution_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
+		}
+
+		//
+		// Get the current time as no. of microseconds from epoch.
+		//
+		// return : The current time as no. of microseconds from epoch.
+		//
+		inline std::int64_t getTimeInMicros() const
+		{
+			return std::chrono::high_resolution_clock::now().time_since_epoch() / std::chrono::microseconds(1);
 		}
 
 		//

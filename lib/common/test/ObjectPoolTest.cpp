@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 
 #include "ObjectPool.hpp"
+#include "Timer.hpp"
 
 namespace mm
 {
@@ -148,6 +149,68 @@ namespace mm
 
 			ASSERT_TRUE(!pool.empty());
 		}
+	}
+
+	TEST(ObjectPoolTest, PerformanceCase)
+	{
+		ObjectPool<double> pool(10, false);
+		ASSERT_TRUE(!pool.empty());
+
+		HighResTimer timer;
+
+		// naive case
+		{
+			const int count = 10000;
+			double timeSum = 0;
+
+			for (int i = 0; i < 10000; ++i)
+			{
+				const long start = timer.getTimeInNanos();
+				double* value = new double();
+				const long end = timer.getTimeInNanos();
+
+				timeSum += end - start;
+				delete value;
+			}
+
+			std::cout << "Native Time per retrieval: " << (timeSum / count) << std::endl;
+		}
+
+		// native pointer case
+		{
+			const int count = 10000;
+			double timeSum = 0;
+
+			for (int i = 0; i < 10000; ++i)
+			{
+				const long start = timer.getTimeInNanos();
+				double* value = pool.get();
+				const long end = timer.getTimeInNanos();
+
+				timeSum += end - start;
+				pool.release(value);
+			}
+
+			std::cout << "ptr Time per retrieval: " << (timeSum / count) << std::endl;
+		}
+
+		// shared ptr case
+		{
+			const int count = 10000;
+			double timeSum = 0;
+
+			for (int i = 0; i < 10000; ++i)
+			{
+				const long start = timer.getTimeInNanos();
+				std::shared_ptr<double> value = pool.getShared();
+				const long end = timer.getTimeInNanos();
+
+				timeSum += end - start;
+			}
+
+			std::cout << "std::shared_ptr Time per retrieval: " << (timeSum / count) << std::endl;
+		}
+
 	}
 
 }
