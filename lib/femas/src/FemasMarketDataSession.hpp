@@ -50,9 +50,6 @@ namespace mm
 		//
 		FemasMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail);
 
-		// forbide copy
-		FemasMarketDataSession(FemasMarketDataSession& session) = delete;
-
 		//
 		// Destructor.
 		//

@@ -19,6 +19,13 @@ namespace mm
 	{
 	public:
 
+		// default constructor.
+		IService() {}
+
+		// service shouldn't copyable
+		IService(const IService& ) = delete;
+		IService& operator = (const IService& ) = delete;
+
 		virtual ~IService() {}
 
 		//

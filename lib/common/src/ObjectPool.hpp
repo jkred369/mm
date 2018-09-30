@@ -14,6 +14,8 @@
 #include <mutex>
 #include <memory>
 
+#include <NativeDefinition.hpp>
+
 namespace mm
 {
 	//
@@ -90,7 +92,7 @@ namespace mm
 
 			while (true)
 			{
-				if ((result = first.load()) == nullptr)
+				if (UNLIKELY((result = first.load()) == nullptr))
 				{
 					if (blocking)
 					{
@@ -104,7 +106,7 @@ namespace mm
 				}
 
 				// must check here in case we back from condition signal
-				if (result != nullptr)
+				if (UNLIKELY(result != nullptr))
 				{
 					next = result->next.load();
 					if (first.compare_exchange_weak(result, next, std::memory_order_release, std::memory_order_relaxed))
@@ -118,6 +120,25 @@ namespace mm
 			result->next.store(nullptr);
 
 			return new (result->objectBuffer) ObjectType();
+		}
+
+		//
+		// Get a shared pointer poining to a new instance retrieved from the pool.
+		//
+		// return : shared pointer to a new object constructed from the queue.
+		//
+		std::shared_ptr<ObjectType> getShared()
+		{
+			ObjectType* instance = get();
+			if (LIKELY(instance != nullptr))
+			{
+				return std::shared_ptr<ObjectType> (instance, [] (ObjectType* instance) {
+					Node* node = reinterpret_cast<Node*> (reinterpret_cast<char*> (instance) - sizeof(void*));
+					node->pool->release(instance);
+				});
+			}
+
+			return std::shared_ptr<ObjectType> ();
 		}
 
 		//
@@ -141,7 +162,7 @@ namespace mm
 		void release(Node* node)
 		{
 			// sanity check
-			if (node < &pool[0] || node > &pool[size - 1])
+			if (UNLIKELY(node < &pool[0] || node > &pool[size - 1]))
 			{
 				return;
 			}

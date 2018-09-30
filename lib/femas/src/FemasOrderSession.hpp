@@ -45,9 +45,6 @@ namespace mm
 		//
 		FemasOrderSession(const FemasUserDetail& detail);
 
-		// forbide copy
-		FemasOrderSession(FemasOrderSession& session) = delete;
-
 		// virtual destructor.
 		virtual ~FemasOrderSession();
 

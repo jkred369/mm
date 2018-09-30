@@ -118,4 +118,36 @@ namespace mm
 		}
 	}
 
+	TEST(ObjectPoolTest, SharedPtrCase)
+	{
+		ObjectPool<std::int64_t> pool(1, false);
+		ASSERT_TRUE(!pool.empty());
+
+		{
+			{
+				std::shared_ptr<std::int64_t> value = pool.getShared();
+				ASSERT_TRUE(value.get());
+				*value = 1;
+
+				ASSERT_TRUE(pool.empty());
+				ASSERT_TRUE(pool.getShared().get() == nullptr);
+			}
+
+			ASSERT_TRUE(!pool.empty());
+		}
+
+		{
+			{
+				std::shared_ptr<std::int64_t> value = pool.getShared();
+				ASSERT_TRUE(value.get());
+				ASSERT_TRUE(*value == 0);
+
+				ASSERT_TRUE(pool.empty());
+				ASSERT_TRUE(pool.getShared().get() == nullptr);
+			}
+
+			ASSERT_TRUE(!pool.empty());
+		}
+	}
+
 }
