@@ -63,11 +63,11 @@ namespace mm
 		// The dispatch key for the service.
 		const KeyType dispatchKey;
 
-		// The service context.
-		ServiceContext& serviceContext;
-
 		// The name of the service in context.
 		const std::string serviceName;
+
+		// The service context.
+		ServiceContext& serviceContext;
 	};
 }
 
