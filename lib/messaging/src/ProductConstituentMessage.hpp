@@ -24,6 +24,15 @@ namespace mm
 		//
 		Constituent();
 
+		//
+		// Check for equality of constituent.
+		//
+		// rhs : The other product.
+		//
+		// return : True if the other message is identical.
+		//
+		bool equals(const Constituent& rhs) const;
+
 		// ID of the constituent.
 		std::int64_t id;
 
@@ -31,11 +40,15 @@ namespace mm
 		double weight;
 	};
 
+	DEFINE_OPERATORS(Constituent)
+
 	//
 	// This class defines the constituent information for basket and indices.
 	//
 	class ProductConstituentMessage : public Message
 	{
+	public:
+
 		// Max size of constituents for the product.
 		static constexpr std::size_t MAX_CONSTITUENTS = 256;
 

@@ -12,7 +12,7 @@
 #include <string>
 
 #define DEFINE_OPERATORS(MessageName) \
-
+\
 	inline bool operator == (const MessageName& lhs, const MessageName& rhs) \
 	{ \
 		return lhs.equals(rhs); \

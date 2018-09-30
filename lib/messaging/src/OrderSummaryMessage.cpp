@@ -29,7 +29,7 @@ namespace mm
 				totalQty == rhs.totalQty &&
 				tradedQty == rhs.tradedQty &&
 				price == rhs.price &&
-				avgTradedPrice = rhs.avgTradedPrice &&
+				avgTradedPrice == rhs.avgTradedPrice &&
 				status == rhs.status;
 	}
 

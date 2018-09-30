@@ -27,7 +27,7 @@ namespace mm
 				instrumentId == rhs.instrumentId &&
 				side == rhs.side &&
 				totalQty == rhs.totalQty &&
-				price = rhs.price &&
+				price == rhs.price &&
 				status == rhs.status &&
 				type == rhs.type &&
 				offsetType == rhs.offsetType;

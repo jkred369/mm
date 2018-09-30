@@ -19,7 +19,7 @@ namespace mm
 				instrumentId == rhs.instrumentId &&
 				executionId == rhs.executionId &&
 				side == rhs.side &&
-				qty = rhs.qty &&
+				qty == rhs.qty &&
 				price == rhs.price &&
 				status == rhs.status;
 	}

@@ -11,7 +11,16 @@
 
 namespace mm
 {
-	ProductConstituentMessage::ProductConstituentMessage() : instrumentId(0), count(0)
+	Constituent::Constituent() : id(0), weight(0.0)
+	{
+	}
+
+	bool Constituent::equals(const Constituent& rhs) const
+	{
+		return id == rhs.id && weight == rhs.weight;
+	}
+
+	ProductConstituentMessage::ProductConstituentMessage() : id(0), count(0)
 	{
 	}
 
