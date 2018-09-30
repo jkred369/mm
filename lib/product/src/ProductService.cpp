@@ -17,11 +17,10 @@ namespace mm
 	ProductService::ProductService(
 			const KeyType dispatchKey,
 			const std::string serviceName,
-			Dispatcher& dispatcher,
 			ServiceContext& serviceContext,
 			std::istream& is) :
-		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
-		PublisherAdapter<Product>(dispatcher)
+		DispatchableService(dispatchKey, serviceName, serviceContext),
+		PublisherAdapter<Product>(serviceContext.getDispatcher())
 	{
 		try
 		{
@@ -34,7 +33,7 @@ namespace mm
 				}
 
 				StringBuffer buffer(line);
-				std::shared_ptr<ProductMessage> product = std::make_shared<ProductMessage();
+				std::shared_ptr<ProductMessage> product = std::make_shared<ProductMessage>();
 
 				if (!product->deserialize(buffer))
 				{
@@ -68,7 +67,7 @@ namespace mm
 
 		if (!serviceContext.subscribe(Subscription(SourceType::ALL, DataType::PRODUCT, ALL_ID), dynamic_cast<IConsumer<ProductMessage>*> (this)))
 		{
-			return false;
+			LOGWARN("No other product service to sync with.");
 		}
 
 		return true;

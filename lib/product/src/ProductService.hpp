@@ -45,7 +45,6 @@ namespace mm
 		ProductService(
 				const KeyType dispatchKey,
 				const std::string serviceName,
-				Dispatcher& dispatcher,
 				ServiceContext& serviceContext,
 				std::istream& is);
 

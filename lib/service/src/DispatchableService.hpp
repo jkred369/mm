@@ -30,13 +30,11 @@ namespace mm
 		//
 		// dispatchKey : The dispatch key.
 		// serviceName : The name of the service in context.
-		// dispatcher : The dispatcher used.
 		// serviceContext : The service context for subscription and source other service.
 		//
 		DispatchableService(
 				const KeyType dispatchKey,
 				const std::string serviceName,
-				Dispatcher& dispatcher,
 				ServiceContext& serviceContext);
 
 		//
@@ -64,9 +62,6 @@ namespace mm
 
 		// The dispatch key for the service.
 		const KeyType dispatchKey;
-
-		// The dispatcher used.
-		Dispatcher& dispatcher;
 
 		// The service context.
 		ServiceContext& serviceContext;

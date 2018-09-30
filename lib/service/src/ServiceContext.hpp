@@ -172,6 +172,30 @@ namespace mm
 			return count;
 		}
 
+	protected:
+
+		//
+		// Add a service to the context.
+		//
+		// serviceName : The service name.
+		// service : The service.
+		//
+		// return : True if the service has been added.
+		//
+		inline bool setService(const std::string& serviceName, const std::shared_ptr<IService>& service)
+		{
+			if (serviceMap.find(serviceName) != serviceMap.end())
+			{
+				LOGERR("Service with name {} already exist. Skipped.", serviceName);
+				return false;
+			}
+
+			serviceMap[serviceName] = service;
+			LOGINFO("Service {} added to context.", serviceName);
+
+			return true;
+		}
+
 	private:
 
 		// The logger for this class.

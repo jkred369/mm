@@ -17,9 +17,12 @@
 
 #include <fmt/format.h>
 
+#include <EnumType.hpp>
 #include <FixedSizeString.hpp>
 #include <Logger.hpp>
+#include <Message.hpp>
 #include <NativeDefinition.hpp>
+#include <StringUtil.hpp>
 
 namespace mm
 {
@@ -143,6 +146,17 @@ namespace mm
 		// value : The string.
 		//
 		inline StringBuffer& operator << (const std::string& value)
+		{
+			items.push_back(value);
+			return *this;
+		}
+
+		//
+		// output a string to the buffer.
+		//
+		// value : The string.
+		//
+		inline StringBuffer& operator << (const std::string&& value)
 		{
 			items.push_back(value);
 			return *this;
@@ -287,10 +301,10 @@ namespace mm
 				return *this;
 			}
 
-			typename std::underlying_type<E>::type underlyingValue;
+			typename std::underlying_type<EnumType>::type underlyingValue;
 			operator >> (underlyingValue);
 
-			value = fromValue(underlyingValue);
+			value = fromValue<EnumType>(underlyingValue);
 			return *this;
 		}
 
@@ -301,7 +315,17 @@ namespace mm
 		//
 		template<std::size_t size> inline StringBuffer& operator >> (FixedSizeString<size>& value)
 		{
-			return operator >> (value.toString());
+			if (UNLIKELY(readIndex >= items.size()))
+			{
+				LOGERR("Attempt to read fix string beyond items. Index: {}, item size: {}", readIndex, items.size());
+				errorFlag = true;
+				return *this;
+			}
+
+			value = items[readIndex];
+
+			++readIndex;
+			return *this;
 		}
 
 		//

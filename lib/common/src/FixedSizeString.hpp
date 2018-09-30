@@ -69,7 +69,7 @@ namespace mm
 		FixedSizeString<size>& operator = (const std::string& string)
 		{
 			length = std::min(size, string.size());
-			std::strncpy(buffer, string, length);
+			std::strncpy(buffer, string.c_str(), length);
 
 			return *this;
 		}

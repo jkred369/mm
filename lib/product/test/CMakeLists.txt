@@ -21,6 +21,7 @@ target_link_libraries(ProductTest
 	${GTEST_LIBS}
 	Common
 	Messaging
+	Product
 	Service
 )
 
