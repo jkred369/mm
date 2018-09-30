@@ -109,9 +109,12 @@ namespace mm
 		//
 		// value : The int32 value.
 		//
-		CsvBufferT& operator << (std::int32_t value)
+		inline CsvBufferT& operator << (std::int32_t value)
 		{
-			writePtr += StringUtil::fromInt(writePtr, value, remainSize());
+			const std::size_t writtenSize = StringUtil::fromInt(writePtr, value, remainSize());
+			errorFlag &= writtenSize == 0;
+			writePtr += writtenSize;
+
 			return *this;
 		}
 
@@ -120,10 +123,14 @@ namespace mm
 		//
 		// value : The int64 value.
 		//
-		CsvBufferT& operator << (std::int64_t value)
+		inline CsvBufferT& operator << (std::int64_t value)
 		{
-			writePtr += StringUtil::fromInt(writePtr, value, remainSize());
+			const std::size_t writtenSize = StringUtil::fromInt(writePtr, value, remainSize());
+			errorFlag &= writtenSize == 0;
+			writePtr += writtenSize;
+
 			return *this;
+
 		}
 
 		//
@@ -131,9 +138,12 @@ namespace mm
 		//
 		// value : The double value;
 		//
-		CsvBufferT& operator << (double value)
+		inline CsvBufferT& operator << (double value)
 		{
-			writePtr += StringUtil::fromDouble(writePtr, value, remainSize());
+			const std::size_t writtenSize = StringUtil::fromDouble(writePtr, value, remainSize());
+			errorFlag &= writtenSize == 0;
+			writePtr += writtenSize;
+
 			return *this;
 		}
 
@@ -142,13 +152,17 @@ namespace mm
 		//
 		// value : The string.
 		//
-		CsvBufferT& operator << (const std::string& value)
+		inline CsvBufferT& operator << (const std::string& value)
 		{
 			const std::size_t inputSize = value.size();
-			if (LIKELY(inputSize >= size))
+			if (LIKELY(inputSize < remainSize()))
 			{
 				std::memcpy(writePtr, value.c_str(), inputSize + 1);
 				writePtr += inputSize + 1;
+			}
+			else
+			{
+				errorFlag = true;
 			}
 
 			return *this;
@@ -159,7 +173,7 @@ namespace mm
 		//
 		// value : The enum type.
 		//
-		template<typename EnumType> CsvBufferT& operator << (EnumType value)
+		template<typename EnumType> inline CsvBufferT& operator << (EnumType value)
 		{
 			return operator << (toValue(value));
 		}
@@ -169,7 +183,7 @@ namespace mm
 		//
 		// value : The fixed size string.
 		//
-		template<std::size_t size> CsvBufferT& operator << (FixedSizeString<size> value)
+		template<std::size_t size> inline CsvBufferT& operator << (FixedSizeString<size> value)
 		{
 			if (LIKELY(value.stringSize() < remainSize()))
 			{
@@ -185,7 +199,7 @@ namespace mm
 		//
 		// value : The int32 value.
 		//
-		CsvBufferT& operator >> (std::int32_t& value)
+		inline CsvBufferT& operator >> (std::int32_t& value)
 		{
 			char* pos = std::strchr(readPtr, Message::CSV_SEPARATOR);
 			if (LIKELY(pos != nullptr))
@@ -206,7 +220,7 @@ namespace mm
 		//
 		// value : The int64 value.
 		//
-		CsvBufferT& operator >> (std::int64_t& value)
+		inline CsvBufferT& operator >> (std::int64_t& value)
 		{
 			char* pos = std::strchr(readPtr, Message::CSV_SEPARATOR);
 			if (LIKELY(pos != nullptr))
@@ -227,7 +241,7 @@ namespace mm
 		//
 		// value : The double value.
 		//
-		CsvBufferT& operator >> (double& value)
+		inline CsvBufferT& operator >> (double& value)
 		{
 			char* pos = std::strchr(readPtr, Message::CSV_SEPARATOR);
 			if (LIKELY(pos != nullptr))
@@ -248,7 +262,7 @@ namespace mm
 		//
 		// value : The string value.
 		//
-		CsvBufferT& operator >> (std::string& value)
+		inline CsvBufferT& operator >> (std::string& value)
 		{
 			char* pos = std::strchr(readPtr, Message::CSV_SEPARATOR);
 			if (LIKELY(pos != nullptr))
@@ -269,7 +283,7 @@ namespace mm
 		//
 		// value : The enum.
 		//
-		template<typename EnumType> CsvBufferT& operator >> (EnumType& value)
+		template<typename EnumType> inline CsvBufferT& operator >> (EnumType& value)
 		{
 			typename std::underlying_type<E>::type underlyingValue;
 			operator >> (underlyingValue);
@@ -283,7 +297,7 @@ namespace mm
 		//
 		// value : The fixed size string.
 		//
-		template<std::size_t size> CsvBufferT& operator >> (FixedSizeString<size>& value)
+		template<std::size_t size> inline CsvBufferT& operator >> (FixedSizeString<size>& value)
 		{
 			char* pos = std::strchr(readPtr, Message::CSV_SEPARATOR);
 			pos = pos == nullptr ? buffer + size : pos;
@@ -317,7 +331,7 @@ namespace mm
 		//
 		inline bool getError() const
 		{
-			return readError;
+			return errorFlag;
 		}
 
 		//
@@ -350,7 +364,7 @@ namespace mm
 		char* writePtr = buffer;
 
 		// The error flag for reading.
-		bool readError = false;
+		bool errorFlag = false;
 	};
 
 	// Define the commonly used class.

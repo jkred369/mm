@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <string>
 
+#include <NativeDefinition.hpp>
+
 #define DEFINE_OPERATORS(MessageName) \
 \
 	inline bool operator == (const MessageName& lhs, const MessageName& rhs) \
@@ -127,8 +129,11 @@ namespace mm
 		//
 		// buffer : The buffer to write to.
 		//
-		template<typename Buffer> void serialize(Buffer& buffer)
+		// return : true if the serialization done successfully.
+		//
+		template<typename WriteBuffer> bool serialize(WriteBuffer& buffer) const
 		{
+			return true;
 		}
 
 		//
@@ -137,8 +142,11 @@ namespace mm
 		//
 		// buffer : The buffer to read from.
 		//
-		template<typename Buffer> void deserialize(Buffer& buffer)
+		// return : true if the deserialization done successfully.
+		//
+		template<typename ReadBuffer> bool deserialize(ReadBuffer& buffer)
 		{
+			return true;
 		}
 
 	};
