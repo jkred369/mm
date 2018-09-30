@@ -16,7 +16,7 @@ target_link_libraries(FemasTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${FEMAS_LIBS}
+	Femas
 )
 
 add_test(FemasTest, FemasTest)
