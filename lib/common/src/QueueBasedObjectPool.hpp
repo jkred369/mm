@@ -52,7 +52,7 @@ namespace mm
 		//
 		// return : true if the pool looks empty.
 		//
-		bool empty() const
+		inline bool empty() const
 		{
 			return queue.size_approx() == 0;
 		}
@@ -62,7 +62,7 @@ namespace mm
 		//
 		// return : The object constructed from the queue.
 		//
-		ObjectType* get()
+		inline ObjectType* get()
 		{
 			ObjectType* result = nullptr;
 
@@ -88,7 +88,7 @@ namespace mm
 		//
 		// return : shared pointer to a new object constructed from the queue.
 		//
-		std::shared_ptr<ObjectType> getShared()
+		inline std::shared_ptr<ObjectType> getShared()
 		{
 			ObjectType* instance = get();
 			if (LIKELY(instance != nullptr))
@@ -106,7 +106,7 @@ namespace mm
 		//
 		// object : The object to be released.
 		//
-		void release(ObjectType* object)
+		inline void release(ObjectType* object)
 		{
 			object->~ObjectType();
 

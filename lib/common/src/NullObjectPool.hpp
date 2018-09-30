@@ -39,7 +39,7 @@ namespace mm
 		//
 		// return : always false.
 		//
-		bool empty() const
+		inline bool empty() const
 		{
 			return false;
 		}
@@ -49,7 +49,7 @@ namespace mm
 		//
 		// return : The object constructed from the queue.
 		//
-		ObjectType* get()
+		inline ObjectType* get()
 		{
 			return new ObjectType();
 		}
@@ -59,7 +59,7 @@ namespace mm
 		//
 		// return : shared pointer to a new object constructed from the queue.
 		//
-		std::shared_ptr<ObjectType> getShared()
+		inline std::shared_ptr<ObjectType> getShared()
 		{
 			return std::make_shared<ObjectType> ();
 		}
@@ -69,7 +69,7 @@ namespace mm
 		//
 		// object : The object to be released.
 		//
-		void release(ObjectType* object)
+		inline void release(ObjectType* object)
 		{
 			delete object;
 		}
