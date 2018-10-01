@@ -89,6 +89,16 @@ namespace mm
 		}
 
 		//
+		// Get the global scheduler.
+		//
+		// return : the global scheduler.
+		//
+		inline Scheduler& getScheduler() const
+		{
+			return *scheduler;
+		}
+
+		//
 		// Get the service with the given name.
 		//
 		// serviceName : name of the service.

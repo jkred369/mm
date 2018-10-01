@@ -30,11 +30,6 @@ namespace mm
 		static_assert(ASK >= 0, "Ask index must be positive.");
 
 		// TODO : Make the product update dynamic.
-		// for now - we use the product service in the static way.
-		// this means we need to establish the mapping at construction time and
-		// ignore all subsequent updates.
-		//
-		// this is far from optimal and we should be able to do this dynamically; but obviously not the focus now.
 		{
 			ProductService* productService;
 			if (!serviceContext.getService(productServiceName, productService))
