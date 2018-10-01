@@ -27,6 +27,10 @@ set(Product_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/product/src")
 file(GLOB_RECURSE Product_HEADERS "${Product_INCLUDES}/*.hpp")
 add_subdirectory(product)
 
+set(Simulation_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/simulation/src")
+file(GLOB_RECURSE Simulation_HEADERS "${Simulation_INCLUDES}/*.hpp") 
+add_subdirectory(simulation)
+
 set(Femas_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/femas/src")
 file(GLOB_RECURSE Femas_HEADERS "${Femas_INCLUDES}/*.hpp") 
 add_subdirectory(femas)
