@@ -14,9 +14,6 @@ Logger.Pattern=[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v
 Dispatcher.ThreadCount=4
 Dispatcher.CpuAffinity=0,1,2,3
 
-# We dont use a scheduler yet 
-# If we do schedule must be set after dispatcher here
-
 # Now need to create all the services
 # The general rule is from fundemental services to custom services
 ServiceList=Product,MarketData,OrderSession,FutureArb
