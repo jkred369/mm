@@ -119,6 +119,7 @@ namespace mm
 
 	void RandomMarketDataSession::unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
+		PublisherAdapter<MarketDataMessage>::unsubscribe(subscription, consumer);
 	}
 
 	void RandomMarketDataSession::consume(const std::shared_ptr<const Product>& message)
