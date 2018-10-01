@@ -7,6 +7,8 @@
 
 #include <chrono>
 
+#include <ProductService.hpp>
+
 #include "RandomMarketDataSession.hpp"
 
 mm::Logger mm::RandomMarketDataSession::logger;
@@ -16,6 +18,7 @@ namespace mm
 	RandomMarketDataSession::RandomMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName) :
 		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		scheduler(serviceContext.getScheduler()),
+		pool(100),
 		distribution(-1, 1)
 	{
 		static_assert(BID >= 0, "Bid index must be positive.");
@@ -40,6 +43,7 @@ namespace mm
 
 	bool RandomMarketDataSession::start()
 	{
+		return true;
 	}
 
 	void RandomMarketDataSession::stop()
@@ -50,7 +54,7 @@ namespace mm
 	{
 		if (subscription.dataType != DataType::MARKET_DATA)
 		{
-			return;
+			return false;
 		}
 
 		const std::int64_t id = subscription.key;
@@ -97,19 +101,20 @@ namespace mm
 			// market data levels - silly yes but fast
 			for (int i = 0; i < 5; ++i)
 			{
-				message.levels[BID][i].price = std::max(last - 1, 0);
+				message.levels[BID][i].price = std::max(message.last - i, 0.0);
 				message.levels[BID][i].qty = 10000 - i * 1000;
 
-				message.levels[ASK][i].price = last + 1;
+				message.levels[ASK][i].price = message.last + i;
 				message.levels[ASK][i].qty = 10000 - i * 1000;
 			}
 
 			const Subscription subscription = {SourceType::ALL, DataType::MARKET_DATA, id};
 			this->publish(subscription, messagePtr);
 
-		}, std::chrono::seconds(1), std::chrono::milliseconds(100));
+		}, std::chrono::milliseconds(1000), std::chrono::milliseconds(100));
 
 		LOGINFO("Simulating market data for {}", id);
+		return true;
 	}
 
 	void RandomMarketDataSession::unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
