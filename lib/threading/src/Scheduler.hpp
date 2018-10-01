@@ -10,6 +10,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <memory>
 #include <mutex>
 #include <thread>
 
@@ -68,12 +69,17 @@ namespace mm
 		// Constructor.
 		//
 		// dispatcher : The dispatcher which will execute the actual task.
+		// startOnCreate : If to start the scheduler on creation.
 		//
-		DefaultScheduler(Dispatcher& dispatcher) :
+		DefaultScheduler(Dispatcher& dispatcher, bool startOnCreate = true) :
 			dispatcher(dispatcher),
-			stopRequested(false),
-			scheduleThread([this] () { this->run(); } )
+			runningFlag(false),
+			stopRequested(false)
 		{
+			if (startOnCreate)
+			{
+				start();
+			}
 		}
 
 		//
@@ -81,17 +87,43 @@ namespace mm
 		//
 		~DefaultScheduler()
 		{
-			if (!stopRequested.load() || scheduleThread.joinable())
+			stop();
+		}
+
+		//
+		// Start the scheduler.
+		//
+		void start()
+		{
+			bool expected = false;
+
+			if (runningFlag.compare_exchange_strong(expected, true))
 			{
-				stopRequested.store(true);
+				scheduleThread.reset(new std::thread([this] () { this->run(); }));
+			}
+		}
 
-				// notify then wait for thread
+		//
+		// Stop the scheduler.
+		//
+		void stop()
+		{
+			bool expected = true;
+
+			if (runningFlag.compare_exchange_strong(expected, false))
+			{
+				if (!stopRequested.load() || scheduleThread->joinable())
 				{
-					SpinLockGuard<Mutex> guard(mutex);
-					condition.notify_all();
-				}
+					stopRequested.store(true);
 
-				scheduleThread.join();
+					// notify then wait for thread
+					{
+						SpinLockGuard<Mutex> guard(mutex);
+						condition.notify_all();
+					}
+
+					scheduleThread->join();
+				}
 			}
 		}
 
@@ -286,12 +318,17 @@ namespace mm
 		// The condition variable used.
 		std::condition_variable_any condition;
 
+		// Flag if the dispatcher is running.
+		std::atomic<bool> runningFlag;
+
 		// Flag if stop is requested
 		std::atomic<bool> stopRequested;
 
 		// The schedule thread.
-		std::thread scheduleThread;
+		std::unique_ptr<std::thread> scheduleThread;
 	};
+
+	typedef DefaultScheduler<Dispatcher, KeyType> Scheduler;
 }
 
 

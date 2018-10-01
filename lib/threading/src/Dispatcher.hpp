@@ -36,6 +36,9 @@ namespace mm
 
 		// The thread count.
 		static const std::string THREAD_COUNT;
+
+		// The CPU affinity for threads.
+		static const std::string CPU_AFFINITY;
 	};
 
 	//

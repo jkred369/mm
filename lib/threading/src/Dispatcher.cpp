@@ -9,3 +9,4 @@
 
 const std::string mm::DispatcherConfig::DISPATCHER_CONFIG = "Dispatcher";
 const std::string mm::DispatcherConfig::THREAD_COUNT = "ThreadCount";
+const std::string mm::DispatcherConfig::CPU_AFFINITY = "CpuAffinity";

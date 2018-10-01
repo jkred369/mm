@@ -33,7 +33,7 @@ MarketData.Password=TestPassword
 MarketData.DataCenterID=1
 
 OrderSession.Class=FemasOrderSession
-OrderSession.FrontAddress=tcp:?/101.251.67.3:17196
+OrderSession.FrontAddress=tcp://101.251.67.3:17196
 OrderSession.BrokerID=0110
 OrderSession.UserID=TestTrader
 OrderSession.Password=TestPassword

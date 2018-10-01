@@ -19,6 +19,7 @@
 #include <IConsumer.hpp>
 #include <IPublisher.hpp>
 #include <Logger.hpp>
+#include <Scheduler.hpp>
 #include <Subscription.hpp>
 
 #include "IService.hpp"
@@ -229,6 +230,9 @@ namespace mm
 
 		// The global dispatcher.
 		std::shared_ptr<Dispatcher> dispatcher;
+
+		// The gobal scheduler.
+		std::shared_ptr<Scheduler> scheduler;
 
 		// The map where key is the service name and value is the service object.
 		std::unordered_map<std::string, std::shared_ptr<IService> > serviceMap;

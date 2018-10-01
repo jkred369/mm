@@ -75,6 +75,11 @@ namespace mm
 			LOGINFO("Dispatcher created with {} threads.", threadCount);
 		}
 
+		// scheduler
+		{
+			scheduler.reset(new Scheduler(*dispatcher, false));
+		}
+
 		// create services
 		{
 			const std::vector<std::string> serviceList = config->getStringList(ServiceContext::SERVICE_LIST);
@@ -108,6 +113,9 @@ namespace mm
 		dispatcher->start();
 		LOGINFO("Dispatcher started.");
 
+		scheduler->start();
+		LOGINFO("Scheduler started");
+
 		for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 		{
 			if (!pair.second->start())
@@ -125,6 +133,9 @@ namespace mm
 
 	void ServiceContext::stop()
 	{
+		scheduler->stop();
+		LOGINFO("Scheduler stopped.");
+
 		dispatcher->stop();
 		LOGINFO("Dispatcher stopped.");
 
