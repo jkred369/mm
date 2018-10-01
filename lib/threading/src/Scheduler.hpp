@@ -318,7 +318,7 @@ namespace mm
 		// The condition variable used.
 		std::condition_variable_any condition;
 
-		// Flag if the dispatcher is running.
+		// Flag if the scheduler is running.
 		std::atomic<bool> runningFlag;
 
 		// Flag if stop is requested
