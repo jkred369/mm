@@ -1,0 +1,50 @@
+#
+# The simulation configuration for stratregy profiling
+# Also serve as a sample of application set up
+#
+
+# First of all always set up logger
+Logger.Level=DEBUG
+Logger.Path=~/temp/Trader.log
+Logger.Name=Trader
+Logger.Pattern=[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v
+
+# Then set up the dispatcher
+# Set processor affinity where needed
+Dispatcher.ThreadCount=4
+Dispatcher.CpuAffinity=0,1,2,3
+
+# We dont use a scheduler yet 
+# If we do schedule must be set after dispatcher here
+
+# Now need to create all the services
+# The general rule is from fundemental services to custom services
+ServiceList=Product,MarketData,OrderSession,FutureArb
+
+# Followed by service definitions and custom fields
+Product.Class=ProductService
+Product.FilePath=./data/product.txt
+
+MarketData.Class=FemasMarketDataSession
+MarketData.FrontAddress=tcp://101.251.67.3:17101
+MarketData.BrokerID=0110
+MarketData.UserID=TestUser
+MarketData.Password=TestPassword
+MarketData.DataCenterID=1
+
+OrderSession.Class=FemasOrderSession
+OrderSession.FrontAddress=tcp:?/101.251.67.3:17196
+OrderSession.BrokerID=0110
+OrderSession.UserID=TestTrader
+OrderSession.Password=TestPassword
+OrderSession.DataCenterID=1
+
+FutureArb.Class=SingleInstrumentArb
+FutureArb.ID=2
+FutureArb.SampleCount=20
+
+
+
+
+
+
