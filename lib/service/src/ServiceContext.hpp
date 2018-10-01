@@ -172,6 +172,29 @@ namespace mm
 			return count;
 		}
 
+		//
+		// Make the consumer unsubscribe from the given subscription.
+		//
+		// subscription : The subscription.
+		// consumer : The consumer unsubscribing from it.
+		//
+		template<typename Message> void unsubscribe(const Subscription& subscription, IConsumer<Message>* consumer)
+		{
+			if (consumer == nullptr)
+			{
+				LOGERR("Attempt to unsubscribe with null consumer from {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return;
+			}
+
+			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
+			{
+				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
+				{
+					subscriber->unsubscribe(subscription, consumer);
+				}
+			}
+		}
+
 	protected:
 
 		//

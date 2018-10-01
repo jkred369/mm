@@ -15,11 +15,10 @@ namespace mm
 	SingleInstrumentArb::SingleInstrumentArb(
 			const KeyType dispatchKey,
 			const std::string serviceName,
-			Dispatcher& dispatcher,
 			ServiceContext& serviceContext,
 			const std::int64_t instrumentId,
 			const std::size_t sampleCount) :
-		DispatchableService(dispatchKey, serviceName, dispatcher, serviceContext),
+		DispatchableService(dispatchKey, serviceName, serviceContext),
 		instrumentId(instrumentId),
 		messages(sampleCount),
 		liveOrderId(0)
@@ -94,14 +93,14 @@ namespace mm
 
 		// assuming we have decided to generate a new order and its a buy
 		// TODO: a pool need to be used here, will do later
-		std::shared_ptr<OrderMessage> order = std::make_shared(new OrderMessage());
+		std::shared_ptr<OrderMessage> order = std::make_shared<OrderMessage>();
 
 		// TODO: use an order ID generator
 		order->orderId = 1;
 		order->instrumentId = instrumentId;
 		order->side = Side::ASK;
 		order->totalQty = 1;
-		order->price = messages.back()->levels[toValue(Side::ASK)][0];
+		order->price = messages.back()->levels[toValue(Side::ASK)][0].price;
 		order->status = OrderStatus::LIVE;
 
 		const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, instrumentId};

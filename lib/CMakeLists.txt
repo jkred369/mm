@@ -30,3 +30,7 @@ add_subdirectory(product)
 set(Femas_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/femas/src")
 file(GLOB_RECURSE Femas_HEADERS "${Femas_INCLUDES}/*.hpp") 
 add_subdirectory(femas)
+
+set(Arb_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/arb/src")
+file(GLOB_RECURSE Arb_HEADERS "${Arb_INCLUDES}/*.hpp") 
+add_subdirectory(arb)

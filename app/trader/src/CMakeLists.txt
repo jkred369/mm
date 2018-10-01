@@ -25,9 +25,7 @@ target_link_libraries(Trader
 	Config
 	Messaging
 	Threading
-	Bus
 	Service
 	Arb
-	Order
 	Femas
 )

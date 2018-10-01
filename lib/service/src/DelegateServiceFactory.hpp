@@ -10,15 +10,16 @@
 
 #include <unordered_map>
 
-#include <IServiceFactory.hpp>
 #include <Logger.hpp>
+
+#include "IServiceFactory.hpp"
 
 namespace mm
 {
 	//
 	// This class works as a aggregated service factory instance.
 	//
-	class DelegateServiceFactory : IServiceFactory
+	class DelegateServiceFactory : public IServiceFactory
 	{
 	public:
 
@@ -43,7 +44,7 @@ namespace mm
 		static Logger logger;
 
 		// The delegators.
-		std::unordered_map<std::string, IServiceFactory> factoryMap;
+		std::unordered_map<std::string, IServiceFactory*> factoryMap;
 	};
 }
 

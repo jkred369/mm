@@ -12,6 +12,7 @@
 #include "ServiceContextManager.hpp"
 
 mm::Logger mm::ServiceContextManager::logger;
+std::atomic<bool> mm::ServiceContextManager::shutDownFlag;
 
 namespace mm
 {
@@ -23,7 +24,7 @@ namespace mm
 		}
 	}
 
-	ServiceContextManager::createContextAndStart(const std::string path)
+	void ServiceContextManager::createContextAndStart(const std::string path)
 	{
 		shutDownFlag.store(false);
 
@@ -33,7 +34,7 @@ namespace mm
 
 		// start the context
 		DelegateServiceFactory& factory = DelegateServiceFactory::getFactory();
-		context = new ServiceContext(path, factory);
+		context.reset(new ServiceContext(path, factory));
 
 		if (!context->start())
 		{
@@ -61,18 +62,11 @@ namespace mm
 		}
 	}
 
-	ServiceContextManager::shutdown()
+	void ServiceContextManager::shutdown()
 	{
 		LOGINFO("Shutting down service context");
 		context->stop();
-
 		LOGINFO("Service context shut down successfully");
-
-		// notify all the threads to finish
-		{
-			std::lock_guard<Mutex> guard(mutex);
-			condition.notify_all();
-		}
 	}
 
 }

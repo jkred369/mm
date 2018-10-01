@@ -4,21 +4,22 @@ file(GLOB_RECURSE Arb_SOURCES "*.cpp")
 add_library(Arb SHARED ${Arb_HEADERS} ${Arb_SOURCES})
 
 target_include_directories(Arb PUBLIC
-	${Bus_INCLUDES}
 	${Common_INCLUDES}
 	${Config_INCLUDES}
 	${Messaging_INCLUDES}
+	${Bus_INCLUDES}
 	${Threading_INCLUDES}
+	${Service_INCLUDES}
 )
 
-target_link_libraries(Service 
+target_link_libraries(Arb 
 	${Boost_LIBRARIES}
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	Bus
 	Common
 	Config
 	Messaging
 	Threading
+	Service
 )

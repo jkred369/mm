@@ -18,7 +18,7 @@ target_include_directories(TraderTest PUBLIC
 	${Trader_INCLUDES}
 )
 
-target_link_libraries(ArbTest 
+target_link_libraries(TraderTest 
 	${Boost_LIBRARIES}
 	${TBB_LIBS}
 	${POCO_LIBS}
@@ -27,7 +27,6 @@ target_link_libraries(ArbTest
 	Common
 	Config
 	Messaging
-	Order
 	Service
 	Femas
 )
