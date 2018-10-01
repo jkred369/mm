@@ -75,3 +75,4 @@ set(BUILD_TESTING ON)
 
 # project structure
 add_subdirectory(lib)
+add_subdirectory(app)
