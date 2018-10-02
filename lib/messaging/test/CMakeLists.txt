@@ -8,6 +8,7 @@ add_executable(MessagingTest
 )
 
 target_include_directories(MessagingTest PUBLIC
+	${Common_INCLUDES}
 	${Messaging_INCLUDES}
 )
 
@@ -16,7 +17,8 @@ target_link_libraries(MessagingTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Common}
+	Common
+	Messaging
 )
 
 add_test(MessagingTest, MessagingTest)

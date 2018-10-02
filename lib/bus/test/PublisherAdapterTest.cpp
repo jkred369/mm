@@ -41,10 +41,9 @@ namespace mm
 
 	TEST(PublisherAdapterTest, DummyCase)
 	{
-		KeyType dispatchKey = 5;
 		Dispatcher dispatcher;
 
-		PublisherAdapter<DummyMessage> adapter(dispatchKey, dispatcher);
+		PublisherAdapter<DummyMessage> adapter(dispatcher);
 
 		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, 1};
 		adapter.publish(subscription, std::make_shared<DummyMessage>());

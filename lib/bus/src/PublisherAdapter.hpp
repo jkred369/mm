@@ -33,10 +33,9 @@ namespace mm
 		//
 		// Constructor.
 		//
-		// dispatchKey : The dispatch key.
 		// dispatcher : The dispatcher used.
 		//
-		PublisherAdapter(KeyType dispatchKey, Dispatcher& dispatcher) : dispatchKey(dispatchKey), dispatcher(dispatcher), count(0)
+		PublisherAdapter(Dispatcher& dispatcher) : dispatcher(dispatcher), count(0)
 		{
 		}
 
@@ -177,9 +176,6 @@ namespace mm
 
 		// The logger for this class.
 		static Logger logger;
-
-		// The dispatch key.
-		const KeyType dispatchKey;
 
 		// The dispatcher.
 		Dispatcher& dispatcher;

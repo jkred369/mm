@@ -7,6 +7,7 @@
 
 #include <chrono>
 
+#include <Timer.hpp>
 #include <ProductService.hpp>
 
 #include "RandomMarketDataSession.hpp"
@@ -16,7 +17,7 @@ mm::Logger mm::RandomMarketDataSession::logger;
 namespace mm
 {
 	RandomMarketDataSession::RandomMarketDataSession(KeyType dispatchKey, ServiceContext& serviceContext, const std::string& productServiceName) :
-		PublisherAdapter<MarketDataMessage>(dispatchKey, serviceContext.getDispatcher()),
+		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		scheduler(serviceContext.getScheduler()),
 		pool(100),
 		distribution(-1, 1)
@@ -80,8 +81,9 @@ namespace mm
 		// some tricks for the market data
 		// assuming all tick size = 1
 		const long initValue = std::abs(id) * 100 * distribution(randSeed);
+		RdtscTimer timer;
 
-		scheduler.scheduleAtFixedRate(DispatchKey::MARKET_DATA, [this, id, initValue] () {
+		scheduler.scheduleAtFixedRate(DispatchKey::MARKET_DATA, [this, id, initValue, &timer] () {
 
 			std::shared_ptr<MarketDataMessage> messagePtr = pool.getShared();
 			MarketDataMessage& message = *messagePtr;
@@ -97,6 +99,7 @@ namespace mm
 			message.lowLimit = std::round(initValue * 0.5);
 			message.volume = 10000;
 			message.turnover = message.last * message.volume;
+			message.timestamp = timer.getTimeInNanos();
 
 			// market data levels - silly yes but fast
 			for (int i = 0; i < 5; ++i)
@@ -111,7 +114,7 @@ namespace mm
 			const Subscription subscription = {SourceType::ALL, DataType::MARKET_DATA, id};
 			this->publish(subscription, messagePtr);
 
-		}, std::chrono::milliseconds(1000), std::chrono::milliseconds(100));
+		}, std::chrono::milliseconds(1000), std::chrono::milliseconds(1));
 
 		LOGINFO("Simulating market data for {}", id);
 		return true;

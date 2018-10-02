@@ -28,7 +28,8 @@ namespace mm
 			highLimit(0.0),
 			lowLimit(0.0),
 			volume(0),
-			turnover(0.0)
+			turnover(0.0),
+			timestamp(0)
 	{
 	}
 
@@ -43,7 +44,8 @@ namespace mm
 				highLimit != rhs.highLimit ||
 				lowLimit != rhs.lowLimit ||
 				volume != rhs.volume ||
-				turnover != rhs.turnover)
+				turnover != rhs.turnover ||
+				timestamp != rhs.timestamp)
 		{
 			return false;
 		}

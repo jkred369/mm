@@ -111,7 +111,7 @@ namespace mm
 				return false;
 			}
 
-			buffer << instrumentId << open << close << high << low << last << highLimit << lowLimit << volume << turnover;
+			buffer << instrumentId << open << close << high << low << last << highLimit << lowLimit << volume << turnover << timestamp;
 
 			for (std::size_t i = 0; i < 2; ++i)
 			{
@@ -139,7 +139,7 @@ namespace mm
 				return false;
 			}
 
-			buffer >> instrumentId >> open >> close >> high >> low >> last >> highLimit >> lowLimit >> volume >> turnover;
+			buffer >> instrumentId >> open >> close >> high >> low >> last >> highLimit >> lowLimit >> volume >> turnover >> timestamp;
 
 			for (std::size_t i = 0; i < 2; ++i)
 			{
@@ -181,6 +181,9 @@ namespace mm
 
 		// cumulative turnover.
 		double turnover;
+
+		// exchange timestamp.
+		std::uint64_t timestamp;
 
 		// Market depth
 		MarketDataLevel levels[2][MAX_DEPTH];

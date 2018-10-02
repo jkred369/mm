@@ -8,6 +8,7 @@ add_executable(SimulationTest
 )
 
 target_include_directories(SimulationTest PUBLIC
+	${Common_INCLUDES}
 	${Simulation_INCLUDES}
 )
 
@@ -16,6 +17,7 @@ target_link_libraries(SimulationTest
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
+	Common
 	Simulation
 )
 

@@ -120,6 +120,19 @@ namespace mm
 		}
 
 		//
+		// output an int64 to the buffer.
+		//
+		// value : The int64 value.
+		//
+		inline StringBuffer& operator << (std::uint64_t value)
+		{
+			const fmt::format_int format(value);
+			items.push_back(format.str());
+
+			return *this;
+		}
+
+		//
 		// output a double to the buffer.
 		//
 		// value : The double value;
@@ -227,6 +240,34 @@ namespace mm
 			try
 			{
 				value = boost::lexical_cast<std::int64_t> (items[readIndex]);
+			}
+			catch (const boost::bad_lexical_cast& e)
+			{
+				errorFlag = true;
+				LOGERR("Failed to read int32 value from buffer: {}, {}", items[readIndex], e.what());
+			}
+
+			++readIndex;
+			return *this;
+		}
+
+		//
+		// input an uint64 from the buffer.
+		//
+		// value : The uint64 value.
+		//
+		inline StringBuffer& operator >> (std::uint64_t& value)
+		{
+			if (UNLIKELY(readIndex >= items.size()))
+			{
+				LOGERR("Attempt to read int64 beyond items. Index: {}, item size: {}", readIndex, items.size());
+				errorFlag = true;
+				return *this;
+			}
+
+			try
+			{
+				value = boost::lexical_cast<std::uint64_t> (items[readIndex]);
 			}
 			catch (const boost::bad_lexical_cast& e)
 			{
