@@ -19,8 +19,12 @@ mm::Logger mm::FemasMarketDataSession::logger;
 
 namespace mm
 {
-	FemasMarketDataSession::FemasMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail) :
-		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
+	FemasMarketDataSession::FemasMarketDataSession(
+			KeyType dispatchKey,
+			ServiceContext& serviceContext,
+			const std::string& productServiceName,
+			const FemasUserDetail& detail) :
+		PublisherAdapter<MarketDataMessage>(dispatchKey, serviceContext.getDispatcher()),
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),

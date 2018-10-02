@@ -28,9 +28,7 @@
 namespace mm
 {
 	//
-	// This class defines an order session.
-	//
-	// An order session subcribes to order message for order status manipulation and publishes order summary.
+	// This class defines an order session on femas modeling ExchangeInterface concept.
 	//
 	class FemasOrderSession :
 			public IService,

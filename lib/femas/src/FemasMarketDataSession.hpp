@@ -44,11 +44,12 @@ namespace mm
 		//
 		// Constructor.
 		//
+		// dispatchKey : The dispatch key for the session.
 		// serviceContext : The service context.
 		// productServiceName : The name of the product service.
 		// userDetail : The configuration details.
 		//
-		FemasMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail);
+		FemasMarketDataSession(KeyType dispatchKey, ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail);
 
 		//
 		// Destructor.

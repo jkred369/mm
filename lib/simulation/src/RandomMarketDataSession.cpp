@@ -15,8 +15,8 @@ mm::Logger mm::RandomMarketDataSession::logger;
 
 namespace mm
 {
-	RandomMarketDataSession::RandomMarketDataSession(ServiceContext& serviceContext, const std::string& productServiceName) :
-		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
+	RandomMarketDataSession::RandomMarketDataSession(KeyType dispatchKey, ServiceContext& serviceContext, const std::string& productServiceName) :
+		PublisherAdapter<MarketDataMessage>(dispatchKey, serviceContext.getDispatcher()),
 		scheduler(serviceContext.getScheduler()),
 		pool(100),
 		distribution(-1, 1)

@@ -17,6 +17,7 @@
 #include <Dispatcher.hpp>
 #include <IPublisher.hpp>
 #include <Logger.hpp>
+#include <NativeDefinition.hpp>
 #include <SpinLockGuard.hpp>
 #include <Subscription.hpp>
 
@@ -25,16 +26,17 @@ namespace mm
 	//
 	// This class provides basic implementation for publisher.
 	//
-	template<typename Message, typename Mutex = std::mutex> class PublisherAdapter : public IPublisher<Message>
+	template<typename Message> class PublisherAdapter : public IPublisher<Message>
 	{
 	public:
 
 		//
 		// Constructor.
 		//
+		// dispatchKey : The dispatch key.
 		// dispatcher : The dispatcher used.
 		//
-		PublisherAdapter(Dispatcher& dispatcher) : dispatcher(dispatcher), count(0)
+		PublisherAdapter(KeyType dispatchKey, Dispatcher& dispatcher) : dispatchKey(dispatchKey), dispatcher(dispatcher), count(0)
 		{
 		}
 
@@ -52,19 +54,20 @@ namespace mm
 
 		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
 		{
-			SpinLockGuard<Mutex> guard(mutex);
+			dispatcher.submit(dispatchKey, [subscription, message, this] () {
+				auto it = consumerMap.find(subscription);
+				if (UNLIKELY(it == consumerMap.end()))
+				{
+					LOGWARN("Cannot find consumers for subscription {}-{}-{}",
+							toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+					return;
+				}
 
-			auto it = consumerMap.find(subscription);
-			if (it == consumerMap.end())
-			{
-				LOGWARN("Cannot find consumers for subscription {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-				return;
-			}
-
-			for (const ConsumerDetail& detail : it->second)
-			{
-				publishTo(detail.dispatchKey, detail.consumer, message);
-			}
+				for (const ConsumerDetail& detail : it->second)
+				{
+					publishTo(detail.dispatchKey, detail.consumer, message);
+				}
+			});
 		}
 
 		virtual bool subscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
@@ -72,25 +75,28 @@ namespace mm
 			// safe guard for input
 			if (consumer == nullptr)
 			{
-				LOGERR("Ignoring null consumer for subscription {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				LOGERR("Ignoring null consumer for subscription {}-{}-{}",
+						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
 				return false;
 			}
 
-			SpinLockGuard<Mutex> guard(mutex);
-			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
+			dispatcher.submit(dispatchKey, [subscription, consumer, this] () {
+				std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 
-			// sanity check for duplicated subscription
-			if (std::find_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
-				return detail.consumer == consumer;
-			}) != consumers.end())
-			{
-				LOGWARN("Consumer on {} already submitted to {}-{}-{}. Ignoring.", consumer->getKey(),
-						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-				return true;
-			}
-
-			consumerMap[subscription].push_back(ConsumerDetail(consumer));
-			++count;
+				// sanity check for duplicated subscription
+				if (std::find_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
+					return detail.consumer == consumer;
+				}) == consumers.end())
+				{
+					consumerMap[subscription].push_back(ConsumerDetail(consumer));
+					++count;
+				}
+				else
+				{
+					LOGWARN("Consumer on {} already submitted to {}-{}-{}. Ignoring.", consumer->getKey(),
+							toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				}
+			});
 
 			return true;
 		}
@@ -104,32 +110,20 @@ namespace mm
 				return;
 			}
 
-			SpinLockGuard<Mutex> guard(mutex);
-			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
+			dispatcher.submit(dispatchKey, [subscription, consumer, this] () {
+				std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 
-			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
-				return detail.consumer == consumer;
-			}));
-		}
-
-		virtual std::size_t getConsumerCount() const override
-		{
-			SpinLockGuard<Mutex> guard(mutex);
-			return count;
-		}
-
-		virtual std::size_t getConsumerCount(const Subscription& subscription) const override
-		{
-			SpinLockGuard<Mutex> guard(mutex);
-			auto it = consumerMap.find(subscription);
-
-			return it == consumerMap.end() ? 0 : it->second.size();
+				consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
+					return detail.consumer == consumer;
+				}));
+			});
 		}
 
 		virtual void removeAll() override
 		{
-			SpinLockGuard<Mutex> guard(mutex);
-			consumerMap.clear();
+			dispatcher.submit(dispatchKey, [&] () {
+				consumerMap.clear();
+			});
 		}
 
 	protected:
@@ -176,6 +170,9 @@ namespace mm
 		// The logger for this class.
 		static Logger logger;
 
+		// The dispatch key.
+		const KeyType dispatchKey;
+
 		// The dispatcher.
 		Dispatcher& dispatcher;
 
@@ -184,13 +181,10 @@ namespace mm
 
 		// The total number of consumers.
 		std::size_t count;
-
-		// The mutex used to access the consumer map.
-		mutable Mutex mutex;
 	};
 }
 
-template<typename Message, typename Mutex> mm::Logger mm::PublisherAdapter<Message, Mutex>::logger;
+template<typename Message> mm::Logger mm::PublisherAdapter<Message>::logger;
 
 
 #endif /* LIB_BUS_SRC_PUBLISHERADAPTER_HPP_ */

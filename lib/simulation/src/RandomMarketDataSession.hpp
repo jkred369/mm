@@ -42,10 +42,12 @@ namespace mm
 		//
 		// Constructor.
 		//
+		// dispatchKey : The dispatch key.
 		// serviceContext : The service context.
 		// productServiceName : The name of the product service.
 		//
 		RandomMarketDataSession(
+				KeyType dispatchKey,
 				ServiceContext& serviceContext,
 				const std::string& productServiceName);
 

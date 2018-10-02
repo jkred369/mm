@@ -12,6 +12,7 @@
 
 #include <DispatchKey.hpp>
 #include <IConsumer.hpp>
+#include <IDispatchable.hpp>
 #include <Subscription.hpp>
 
 namespace mm
@@ -65,22 +66,6 @@ namespace mm
 		// consumer : The consumer unsubscribing from the topic.
 		//
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<Message>* consumer) = 0;
-
-		//
-		// Get the count of consumer.
-		//
-		// return : The count of the consumers.
-		//
-		virtual std::size_t getConsumerCount() const = 0;
-
-		//
-		// Get the count of consumer.
-		//
-		// subscription : The subscription to check.
-		//
-		// return : The count of the consumers.
-		//
-		virtual std::size_t getConsumerCount(const Subscription& subscription) const = 0;
 
 		//
 		// Remove all the consumers.

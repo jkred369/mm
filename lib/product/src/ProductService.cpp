@@ -20,7 +20,7 @@ namespace mm
 			ServiceContext& serviceContext,
 			std::istream& is) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
-		PublisherAdapter<Product>(serviceContext.getDispatcher())
+		PublisherAdapter<Product>(dispatchKey, serviceContext.getDispatcher())
 	{
 		try
 		{
@@ -191,10 +191,7 @@ namespace mm
 
 		// update for the product itself
 		const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
-		if (getConsumerCount(subscription) > 0)
-		{
-			publish(subscription, product);
-		}
+		publish(subscription, product);
 
 		// update all the derivatives of the product recursively
 		auto it = dependencyMap.find(id);
