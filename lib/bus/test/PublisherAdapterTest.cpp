@@ -29,6 +29,18 @@ namespace mm
 		std::atomic<int> counter;
 	};
 
+	struct DummyPublisherAdapter : PublisherAdapter<DummyMessage>
+	{
+		DummyPublisherAdapter(Dispatcher& dispatcher) : PublisherAdapter<DummyMessage>(dispatcher)
+		{
+		}
+
+		virtual const KeyType getKey() const override
+		{
+			return 1;
+		}
+	};
+
 	struct DummyConsumer : IConsumer<DummyMessage>
 	{
 		virtual void consume(const std::shared_ptr<const DummyMessage>& message) override
@@ -43,7 +55,7 @@ namespace mm
 	{
 		Dispatcher dispatcher;
 
-		PublisherAdapter<DummyMessage> adapter(dispatcher);
+		DummyPublisherAdapter adapter(dispatcher);
 
 		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, 1};
 		adapter.publish(subscription, std::make_shared<DummyMessage>());

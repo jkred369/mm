@@ -24,7 +24,7 @@ namespace mm
 			ServiceContext& serviceContext,
 			const std::string& productServiceName,
 			const FemasUserDetail& detail) :
-		PublisherAdapter<MarketDataMessage>(dispatchKey, serviceContext.getDispatcher()),
+		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),

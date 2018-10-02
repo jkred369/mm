@@ -20,7 +20,7 @@ namespace mm
 	//
 	// The publisher defines the interface for sending a message.
 	//
-	template<typename Message> class IPublisher
+	template<typename Message> class IPublisher : public virtual IDispatchable
 	{
 	public:
 

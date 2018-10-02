@@ -129,6 +129,8 @@ namespace mm
 		// subscription : The subscription.
 		// consumer : The consumer subscribing to it.
 		//
+		// return : flag if a subscription request is sent.
+		//
 		template<typename Message> bool subscribe(const Subscription& subscription, IConsumer<Message>* consumer)
 		{
 			if (consumer == nullptr)
@@ -141,10 +143,11 @@ namespace mm
 			{
 				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
 				{
-					if (subscriber->subscribe(subscription, consumer))
-					{
-						return true;
-					}
+					dispatcher->submit(subscriber->getKey(), [subscription, consumer, subscriber] () {
+						subscriber->subscribe(subscription, consumer);
+					});
+
+					return true;
 				}
 			}
 
@@ -173,10 +176,11 @@ namespace mm
 			{
 				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
 				{
-					if (subscriber->subscribe(subscription, consumer))
-					{
-						++count;
-					}
+					dispatcher->submit(subscriber->getKey(), [subscription, consumer, subscriber] () {
+						subscriber->subscribe(subscription, consumer);
+					});
+
+					++count;
 				}
 			}
 
@@ -201,7 +205,9 @@ namespace mm
 			{
 				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
 				{
-					subscriber->unsubscribe(subscription, consumer);
+					dispatcher->submit(subscriber->getKey(), [subscription, consumer, subscriber] () {
+						subscriber->unsubscribe(subscription, consumer);
+					});
 				}
 			}
 		}
