@@ -81,6 +81,22 @@ namespace mm
 		DispatchableService::stop();
 	}
 
+	std::size_t ProductService::initSnapshot(IConsumer<Product>* consumer) const
+	{
+		// don't provide any snapshot if the service readily started
+		if (startFlag.load())
+		{
+			return 0;
+		}
+
+		for (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair : productMap)
+		{
+			consumer->consume(pair.second);
+		}
+
+		return productMap.size();
+	}
+
 	bool ProductService::subscribe(const Subscription& subscription, IConsumer<Product>* consumer)
 	{
 		if (subscription.sourceType != SourceType::PRODUCT_SERVICE && subscription.dataType != DataType::PRODUCT)
@@ -103,22 +119,6 @@ namespace mm
 		}
 
 		return true;
-	}
-
-	std::size_t ProductService::initSnapshot(IConsumer<Product>* consumer) const
-	{
-		// don't provide any snapshot if the service readily started
-		if (startFlag.load())
-		{
-			return 0;
-		}
-
-		for (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair : productMap)
-		{
-			consumer->consume(pair.second);
-		}
-
-		return productMap.size();
 	}
 
 	void ProductService::consume(const std::shared_ptr<const ProductMessage>& message)
@@ -191,7 +191,10 @@ namespace mm
 
 		// update for the product itself
 		const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
-		publish(subscription, product);
+		if (getConsumerCount(subscription) > 0)
+		{
+			publish(subscription, product);
+		}
 
 		// update all the derivatives of the product recursively
 		auto it = dependencyMap.find(id);

@@ -59,14 +59,14 @@ namespace mm
 		virtual void stop() override;
 
 		//
-		// override to publish product after subscription when its available.
-		//
-		virtual bool subscribe(const Subscription& subscription, IConsumer<Product>* consumer) override;
-
-		//
 		// override to provide snapshoting
 		//
 		virtual std::size_t initSnapshot(IConsumer<Product>* consumer) const override;
+
+		//
+		// override to publish product after subscription when its available.
+		//
+		virtual bool subscribe(const Subscription& subscription, IConsumer<Product>* consumer) override;
 
 		//
 		// The consumer interface.

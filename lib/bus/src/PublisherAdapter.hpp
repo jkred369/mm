@@ -54,20 +54,18 @@ namespace mm
 
 		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
 		{
-			dispatcher.submit(dispatchKey, [subscription, message, this] () {
-				auto it = consumerMap.find(subscription);
-				if (UNLIKELY(it == consumerMap.end()))
-				{
-					LOGWARN("Cannot find consumers for subscription {}-{}-{}",
-							toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-					return;
-				}
+			auto it = consumerMap.find(subscription);
+			if (UNLIKELY(it == consumerMap.end()))
+			{
+				LOGWARN("Cannot find consumers for subscription {}-{}-{}",
+						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return;
+			}
 
-				for (const ConsumerDetail& detail : it->second)
-				{
-					publishTo(detail.dispatchKey, detail.consumer, message);
-				}
-			});
+			for (const ConsumerDetail& detail : it->second)
+			{
+				publishTo(detail.dispatchKey, detail.consumer, message);
+			}
 		}
 
 		virtual bool subscribe(const Subscription& subscription, IConsumer<Message>* consumer) override
@@ -80,23 +78,21 @@ namespace mm
 				return false;
 			}
 
-			dispatcher.submit(dispatchKey, [subscription, consumer, this] () {
-				std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
+			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 
-				// sanity check for duplicated subscription
-				if (std::find_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
-					return detail.consumer == consumer;
-				}) == consumers.end())
-				{
-					consumerMap[subscription].push_back(ConsumerDetail(consumer));
-					++count;
-				}
-				else
-				{
-					LOGWARN("Consumer on {} already submitted to {}-{}-{}. Ignoring.", consumer->getKey(),
-							toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-				}
-			});
+			// sanity check for duplicated subscription
+			if (std::find_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
+				return detail.consumer == consumer;
+			}) == consumers.end())
+			{
+				consumerMap[subscription].push_back(ConsumerDetail(consumer));
+				++count;
+			}
+			else
+			{
+				LOGWARN("Consumer on {} already submitted to {}-{}-{}. Ignoring.", consumer->getKey(),
+						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+			}
 
 			return true;
 		}
@@ -110,20 +106,32 @@ namespace mm
 				return;
 			}
 
-			dispatcher.submit(dispatchKey, [subscription, consumer, this] () {
-				std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
+			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
+			std::size_t prevCount = consumers.size();
 
-				consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
-					return detail.consumer == consumer;
-				}));
-			});
+			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
+				return detail.consumer == consumer;
+			}));
+
+			// maintain the count.
+			count -= prevCount - consumers.size();
+		}
+
+		virtual std::size_t getConsumerCount() const override
+		{
+			return count;
+		}
+
+		virtual std::size_t getConsumerCount(const Subscription& subscription) const override
+		{
+			auto it = consumerMap.find(subscription);
+			return it == consumerMap.end() ? 0 : it->second.size();
 		}
 
 		virtual void removeAll() override
 		{
-			dispatcher.submit(dispatchKey, [&] () {
-				consumerMap.clear();
-			});
+			consumerMap.clear();
+			count = 0;
 		}
 
 	protected:

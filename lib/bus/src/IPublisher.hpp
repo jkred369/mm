@@ -68,6 +68,20 @@ namespace mm
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<Message>* consumer) = 0;
 
 		//
+		// Get consumer count.
+		//
+		// return : The total number of consumers.
+		//
+		virtual std::size_t getConsumerCount() const = 0;
+
+		//
+		// Get consumer count for a specific subscription.
+		//
+		// return : The total number for the given subscription.
+		//
+		virtual std::size_t getConsumerCount(const Subscription& subscription) const = 0;
+
+		//
 		// Remove all the consumers.
 		//
 		virtual void removeAll() = 0;
