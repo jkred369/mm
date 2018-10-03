@@ -98,18 +98,19 @@ namespace mm
 			std::shared_ptr<MarketDataMessage> messagePtr = pool.getShared();
 			MarketDataMessage& message = *messagePtr;
 
-			message.instrumentId = id;
+			message.last = std::round(initValue * (1 + distribution(randSeed)));
+			message.lowLimit = std::round(initValue * 0.5);
 
+			message.timestamp = timer.getTimeInNanos();
+
+			message.instrumentId = id;
 			message.open = initValue;
 			message.close = initValue;
 			message.high = initValue;
 			message.low = initValue;
-			message.last = std::round(initValue * (1 + distribution(randSeed)));
 			message.highLimit = initValue * 2;
-			message.lowLimit = std::round(initValue * 0.5);
 			message.volume = 10000;
 			message.turnover = message.last * message.volume;
-			message.timestamp = timer.getTimeInNanos();
 
 			// market data levels - silly yes but fast
 			for (int i = 0; i < 5; ++i)
