@@ -65,6 +65,7 @@ namespace mm
 		//
 		// publisher functionality.
 		//
+		virtual const KeyType getKey() const override;
 		virtual bool subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 
@@ -83,6 +84,9 @@ namespace mm
 
 		// The logger for this class.
 		static Logger logger;
+
+		// The dispatch key.
+		const KeyType dispatchKey;
 
 		// The scheduler.
 		Scheduler& scheduler;

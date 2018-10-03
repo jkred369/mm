@@ -18,6 +18,7 @@ namespace mm
 {
 	RandomMarketDataSession::RandomMarketDataSession(KeyType dispatchKey, ServiceContext& serviceContext, const std::string& productServiceName) :
 		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
+		dispatchKey(dispatchKey),
 		scheduler(serviceContext.getScheduler()),
 		pool(100),
 		distribution(-1, 1)
@@ -42,6 +43,10 @@ namespace mm
 		randSeed.seed(std::random_device()());
 	}
 
+	RandomMarketDataSession::~RandomMarketDataSession()
+	{
+	}
+
 	bool RandomMarketDataSession::start()
 	{
 		return true;
@@ -49,6 +54,11 @@ namespace mm
 
 	void RandomMarketDataSession::stop()
 	{
+	}
+
+	const KeyType RandomMarketDataSession::getKey() const
+	{
+		return dispatchKey;
 	}
 
 	bool RandomMarketDataSession::subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
@@ -83,7 +93,7 @@ namespace mm
 		const long initValue = std::abs(id) * 100 * distribution(randSeed);
 		RdtscTimer timer;
 
-		scheduler.scheduleAtFixedRate(DispatchKey::MARKET_DATA, [this, id, initValue, &timer] () {
+		scheduler.scheduleAtFixedRate(dispatchKey, [this, id, initValue, &timer] () {
 
 			std::shared_ptr<MarketDataMessage> messagePtr = pool.getShared();
 			MarketDataMessage& message = *messagePtr;

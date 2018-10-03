@@ -20,7 +20,8 @@ namespace mm
 			ServiceContext& serviceContext,
 			std::istream& is) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
-		PublisherAdapter<Product>(serviceContext.getDispatcher())
+		PublisherAdapter<Product>(serviceContext.getDispatcher()),
+		startFlag(false)
 	{
 		try
 		{

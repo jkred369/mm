@@ -64,13 +64,18 @@ namespace mm
 
 		virtual bool start() override
 		{
+			if (!DispatchableService::start())
+			{
+				return false;
+			}
+
 			{
 				const Subscription sub = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, instrumentId};
 				serviceContext.subscribe(sub, dynamic_cast<IConsumer<Product>*> (this));
 			}
 
 			{
-				const Subscription sub = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId};
+				const Subscription sub = {SourceType::ALL, DataType::MARKET_DATA, instrumentId};
 				serviceContext.subscribe(sub, dynamic_cast<IConsumer<MarketDataMessage>*> (this));
 			}
 
@@ -85,9 +90,11 @@ namespace mm
 			}
 
 			{
-				const Subscription sub = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId};
+				const Subscription sub = {SourceType::ALL, DataType::MARKET_DATA, instrumentId};
 				serviceContext.unsubscribe(sub, dynamic_cast<IConsumer<MarketDataMessage>*> (this));
 			}
+
+			DispatchableService::stop();
 		}
 
 		virtual void consume(const std::shared_ptr<const MarketDataMessage>& message) override
@@ -173,11 +180,14 @@ namespace mm
 		CountDownLatch<> latch(1);
 		const std::size_t count = 1000;
 
-		std::shared_ptr<ProductService> service(new ProductService(1, "DummyProductService", serviceContext, ss));
+		std::shared_ptr<ProductService> service(new ProductService(DispatchKey::MARKET_DATA, "DummyProductService", serviceContext, ss));
 		ASSERT_TRUE(serviceContext.setService("DummyProductService", service));
 
-		std::shared_ptr<DummyAlgo> algo(new DummyAlgo(0, "DummyAlgo", serviceContext, 2, latch, count));
-		ASSERT_TRUE(serviceContext.setService("DummyAlgo", service));
+		std::shared_ptr<RandomMarketDataSession> marketDataSession(new RandomMarketDataSession(DispatchKey::MARKET_DATA, serviceContext, "DummyProductService"));
+		ASSERT_TRUE(serviceContext.setService("RandomMarketDataSession", marketDataSession));
+
+		std::shared_ptr<DummyAlgo> algo(new DummyAlgo(DispatchKey::ALGO, "DummyAlgo", serviceContext, 2, latch, count));
+		ASSERT_TRUE(serviceContext.setService("DummyAlgo", algo));
 
 		ASSERT_TRUE(serviceContext.start());
 
