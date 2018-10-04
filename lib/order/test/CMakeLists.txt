@@ -6,7 +6,7 @@ add_executable(OrderTest
 	${Order_Test_SOURCES}
 )
 
-target_include_directories(BusTest PUBLIC
+target_include_directories(OrderTest PUBLIC
 	${Common_INCLUDES}
 	${Bus_INCLUDES}
 	${Messaging_INCLUDES}
@@ -14,15 +14,14 @@ target_include_directories(BusTest PUBLIC
 	${Order_INCLUDES}
 )
 
-target_link_libraries(BusTest 
+target_link_libraries(OrderTest 
 	${Boost_LIBRARIES}
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
-	${Common}
-	${Messaging}
-	${Service}
-	${Order}
+	Common
+	Messaging
+	Service
 )
 
 add_test(OrderTest, OrderTest)

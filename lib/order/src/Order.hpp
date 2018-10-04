@@ -11,6 +11,8 @@
 #include <memory>
 
 #include <ExecutionMessage.hpp>
+#include <IPublisher.hpp>
+#include <Logger.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>
 
@@ -19,7 +21,7 @@ namespace mm
 	//
 	// The order class for order status management and actions.
 	//
-	template<typename Publisher, typename ExchangeInterface, typename Pool> class Order
+	template<typename ExchangeInterface, typename Pool> class Order
 	{
 	public:
 
@@ -29,7 +31,7 @@ namespace mm
 		// publisher : The publisher for order summary.
 		// exchange : The exchange.
 		//
-		Order(const std::shared_ptr<Publisher>& publisher, const std::shared_ptr<ExchangeInterface>& exchange) :
+		Order(IPublisher<OrderSummaryMessage>& publisher, ExchangeInterface& exchange) :
 			publisher(publisher),
 			exchange(exchange),
 			orderId(0),
@@ -74,7 +76,7 @@ namespace mm
 				}
 				else if (message->status == OrderStatus::LIVE)
 				{
-					exchange->sendOrder(message);
+					exchange.sendOrder(message);
 					status = OrderStatus::PENDING_ACK;
 					processed = true;
 				}
@@ -83,7 +85,7 @@ namespace mm
 			{
 				if (message->status == OrderStatus::CANCELLED)
 				{
-					exchange->cancel(message);
+					exchange.cancel(message);
 					status = OrderStatus::PENDING_CANCEL;
 					processed = true;
 				}
@@ -92,7 +94,7 @@ namespace mm
 			// status update
 			if (!processed)
 			{
-				LOGWARN("Ignoring order message for status {} on order status {}", orderMessage->status, status);
+				LOGWARN("Ignoring order message for status {} on order status {}", message->status, status);
 				return;
 			}
 			else if (status != OrderStatus::NEW)
@@ -144,7 +146,7 @@ namespace mm
 			// status update
 			if (!processed)
 			{
-				LOGERR("Ignoring order message for status {} on order status {}", orderMessage->status, status);
+				LOGERR("Ignoring order message for status {} on order status {}", message->status, status);
 				return;
 			}
 
@@ -162,17 +164,18 @@ namespace mm
 				return;
 			}
 
-			std::shared_ptr<OrderSummaryMessage> message = pool.get();
+			std::shared_ptr<OrderSummaryMessage> message = pool.getShared();
 
 			message->orderId = orderId;
 			message->instrumentId = instrumentId;
 			message->side = side;
-			messge->totalQty = totalQty;
+			message->totalQty = totalQty;
 			message->tradedQty = tradedQty;
 			message->price = price;
 			message->avgTradedPrice = avgTradedPrice;
 
-			publisher->publish(message);
+			const Subscription subscription = {SourceType::ALL, DataType::ORDER_SUMMARY, orderId};
+			publisher.publish(subscription, message);
 		}
 
 		//
@@ -258,13 +261,16 @@ namespace mm
 	private:
 
 		// The message pool.
-		static Pool<OrderSummaryMessage, 1000> pool;
+		static Pool pool;
+
+		// Logger of the class.
+		static Logger logger;
 
 		// The publisher.
-		const std::shared_ptr<Publisher> publisher;
+		IPublisher<OrderSummaryMessage>& publisher;
 
 		// The exchange.
-		const std::shared_ptr<ExchangeInterface> exchange;
+		ExchangeInterface& exchange;
 
 		// The order ID.
 		std::int64_t orderId;
@@ -293,6 +299,6 @@ namespace mm
 	};
 }
 
-
+template<typename ExchangeInterface, typename Pool> mm::Logger mm::Order<ExchangeInterface, Pool>::logger;
 
 #endif /* LIB_ORDER_SRC_ORDER_HPP_ */
