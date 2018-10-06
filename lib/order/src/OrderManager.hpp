@@ -12,6 +12,7 @@
 
 #include <DispatchableService.hpp>
 #include <Dispatcher.hpp>
+#include <ExecutionReportMessage.hpp>
 #include <IConsumer.hpp>
 #include <IService.hpp>
 #include <PublisherAdapter.hpp>
@@ -28,8 +29,8 @@ namespace mm
 	template<typename ExchangeInterface, typename Pool> class OrderManager :
 			public DispatchableService,
 			public IConsumer<OrderMessage>,
-			public IConsumer<ExecutionMessage>,
-			public PublisherAdapter<OrderSummaryMessage>
+			public PublisherAdapter<OrderSummaryMessage>,
+			public PublisherAdapter<TradeMessage>
 	{
 	public:
 
@@ -44,6 +45,7 @@ namespace mm
 		//
 		OrderManager(const std::shared_ptr<Dispatcher> dispatcher, ExchangeInterface const* exchange) :
 			PublisherAdapter<OrderSummaryMessage> (dispatcher),
+			PublisherAdapter<TradeMessage> (dispatcher),
 			exchange(exchange)
 		{
 		}
@@ -82,6 +84,17 @@ namespace mm
 			}
 
 			order->consume(message);
+		}
+
+		//
+		// This is the exchange call back on any execution report.
+		// TODO: review the design. should we consume raw pointer? or template the consumer pointer type?
+		//
+		// message : The execution report message.
+		//
+		void onExecutionReport(const ExecutionReportMessage& message)
+		{
+
 		}
 
 	private:
