@@ -84,6 +84,32 @@ namespace mm
 		}
 
 		//
+		// Get an object from the queue.
+		//
+		// return : The object constructed from the queue.
+		//
+		template<class ... Args> inline ObjectType* get(Args... args)
+		{
+			ObjectType* result = nullptr;
+
+			if (blocking)
+			{
+				while (!queue.try_dequeue(result));
+			}
+			else
+			{
+				queue.try_dequeue(result);
+			}
+
+			if (LIKELY(result != nullptr))
+			{
+				new (result) ObjectType(args...);
+			}
+
+			return result;
+		}
+
+		//
 		// Get a shared pointer pointing to a new instance retrieved from the pool.
 		//
 		// return : shared pointer to a new object constructed from the queue.

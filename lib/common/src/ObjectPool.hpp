@@ -87,39 +87,29 @@ namespace mm
 		//
 		inline ObjectType* get()
 		{
-			Node* result;
-			Node* next;
-
-			while (true)
+			Node* result = getNode();
+			if (LIKELY(result != nullptr))
 			{
-				if (UNLIKELY((result = first.load()) == nullptr))
-				{
-					if (blocking)
-					{
-						std::unique_lock<Mutex> lock(mutex);
-						condition.wait(lock);
-					}
-					else
-					{
-						return nullptr;
-					}
-				}
-
-				// must check here in case we back from condition signal
-				if (LIKELY(result != nullptr))
-				{
-					next = result->next.load();
-					if (first.compare_exchange_weak(result, next, std::memory_order_release, std::memory_order_relaxed))
-					{
-						break;
-					}
-				}
+				return new (result->objectBuffer) ObjectType();
 			}
 
-			result->pool = this;
-			result->next.store(nullptr);
+			return nullptr;
+		}
 
-			return new (result->objectBuffer) ObjectType();
+		//
+		// Get an object from the queue with the given constructor parameters.
+		//
+		// return : The object constructed from the queue.
+		//
+		template<class ... Args> inline ObjectType* get(Args... args)
+		{
+			Node* result = getNode();
+			if (LIKELY(result != nullptr))
+			{
+				return new (result->objectBuffer) ObjectType(args...);
+			}
+
+			return nullptr;
 		}
 
 		//
@@ -194,6 +184,48 @@ namespace mm
 		}
 
 	private:
+
+		//
+		// Get a node from the queue.
+		//
+		// return : The object constructed from the queue.
+		//
+		inline Node* getNode()
+		{
+			Node* result;
+			Node* next;
+
+			while (true)
+			{
+				if (UNLIKELY((result = first.load()) == nullptr))
+				{
+					if (blocking)
+					{
+						std::unique_lock<Mutex> lock(mutex);
+						condition.wait(lock);
+					}
+					else
+					{
+						return nullptr;
+					}
+				}
+
+				// must check here in case we back from condition signal
+				if (LIKELY(result != nullptr))
+				{
+					next = result->next.load();
+					if (first.compare_exchange_weak(result, next, std::memory_order_release, std::memory_order_relaxed))
+					{
+						break;
+					}
+				}
+			}
+
+			result->pool = this;
+			result->next.store(nullptr);
+
+			return result;
+		}
 
 		// Flag if this pool should block on empty.
 		const bool blocking;

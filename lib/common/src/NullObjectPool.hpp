@@ -55,6 +55,16 @@ namespace mm
 		}
 
 		//
+		// Get an object from the queue.
+		//
+		// return : The object constructed from the queue.
+		//
+		template<class ... Args> inline ObjectType* get(Args... args)
+		{
+			return new ObjectType(args...);
+		}
+
+		//
 		// Get a shared pointer pointing to a new instance retrieved from the pool.
 		//
 		// return : shared pointer to a new object constructed from the queue.
