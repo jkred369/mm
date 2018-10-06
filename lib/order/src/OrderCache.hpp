@@ -34,7 +34,13 @@ namespace mm
 		//
 		bool hasCrossOrder(const Order* newOrder) const
 		{
-			for (const Order* order : orderByInstrumentMap[newOrder->getInstrumentId()])
+			auto conIt = orderByInstrumentMap.find(newOrder->getInstrumentId());
+			if (UNLIKELY(conIt == orderByInstrumentMap.end()))
+			{
+				return false;
+			}
+
+			for (const Order* order : conIt->second)
 			{
 				if ((order->getSide() == Side::BID && newOrder->getSide() == Side::ASK && order->getPrice() >= newOrder->getPrice()) ||
 					(order->getSide() == Side::ASK && newOrder->getSide() == Side::BID && order->getPrice() <= newOrder->getPrice()))
