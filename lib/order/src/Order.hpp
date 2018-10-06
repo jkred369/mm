@@ -23,21 +23,29 @@ namespace mm
 	//
 	// The order class for order status management and actions.
 	//
-	template<typename ExchangeInterface, typename Pool, typename TradePool> class Order
+	template<typename ExchangeInterface, typename SummaryPool, typename TradePool> class Order
 	{
 	public:
 
 		//
 		// Constructor.
 		//
+		// summaryPool : The pool for summary objects.
+		// tradePool : The pool for trade objects.
 		// publisher : The publisher for order summary.
 		// tradePublisher : The publisher for trade.
 		// exchange : The exchange.
 		//
-		Order(IPublisher<OrderSummaryMessage>& publisher, IPublisher<TradeMessage>& tradePublisher, ExchangeInterface& exchange) :
+		Order(SummaryPool& summarPool,
+				TradePool& tradePool,
+				ExchangeInterface& exchange,
+				IPublisher<OrderSummaryMessage>& publisher,
+				IPublisher<TradeMessage>& tradePublisher) :
+			summaryPool(summaryPool),
+			tradePool(tradePool),
+			exchange(exchange),
 			publisher(publisher),
 			tradePublisher(tradePublisher),
-			exchange(exchange),
 			orderId(0),
 			instrumentId(0),
 			side(Side::BID),
@@ -165,7 +173,7 @@ namespace mm
 				return;
 			}
 
-			std::shared_ptr<OrderSummaryMessage> message = pool.getShared();
+			std::shared_ptr<OrderSummaryMessage> message = summaryPool.getShared();
 
 			message->orderId = orderId;
 			message->instrumentId = instrumentId;
@@ -262,23 +270,23 @@ namespace mm
 
 	private:
 
-		// The message pool.
-		static Pool pool;
-
-		// The trade message pool.
-		static TradePool tradePool;
-
 		// Logger of the class.
 		static Logger logger;
+
+		// The message pool.
+		SummaryPool& summaryPool;
+
+		// The trade message pool.
+		TradePool& tradePool;
+
+		// The exchange.
+		ExchangeInterface& exchange;
 
 		// The publisher.
 		IPublisher<OrderSummaryMessage>& publisher;
 
 		// The execution publisher.
 		IPublisher<TradeMessage>& tradePublisher;
-
-		// The exchange.
-		ExchangeInterface& exchange;
 
 		// The order ID.
 		std::int64_t orderId;

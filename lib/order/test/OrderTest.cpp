@@ -69,11 +69,14 @@ namespace mm
 
 	TEST(OrderTest, SendCase)
 	{
+		NullObjectPool<OrderSummaryMessage> summaryPool(10);
+		NullObjectPool<TradeMessage> tradePool(10);
+
 		Dispatcher dispatcher(2);
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(publisher, publisher, exchange);
+		TestOrder order(summaryPool, tradePool, exchange, publisher, publisher);
 
 		{
 			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -120,11 +123,14 @@ namespace mm
 
 	TEST(OrderTest, SendThenCancelCase)
 	{
+		NullObjectPool<OrderSummaryMessage> summaryPool(10);
+		NullObjectPool<TradeMessage> tradePool(10);
+
 		Dispatcher dispatcher(2);
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(publisher, publisher, exchange);
+		TestOrder order(summaryPool, tradePool, exchange, publisher, publisher);
 
 		// send
 		{
@@ -206,11 +212,14 @@ namespace mm
 
 	TEST(OrderTest, SendLiveTradeCase)
 	{
+		NullObjectPool<OrderSummaryMessage> summaryPool(10);
+		NullObjectPool<TradeMessage> tradePool(10);
+
 		Dispatcher dispatcher(2);
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(publisher, publisher, exchange);
+		TestOrder order(summaryPool, tradePool, exchange, publisher, publisher);
 
 		// send
 		{
