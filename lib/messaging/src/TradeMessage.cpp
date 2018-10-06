@@ -5,15 +5,15 @@
  *      Author: suoalex
  */
 
-#include "ExecutionMessage.hpp"
+#include "TradeMessage.hpp"
 
 namespace mm
 {
-	ExecutionMessage::ExecutionMessage() : orderId(0), instrumentId(0), executionId(0), side(Side::BID), qty(0), price(0.0), status(OrderStatus::NEW)
+	TradeMessage::TradeMessage() : orderId(0), instrumentId(0), executionId(0), side(Side::BID), qty(0), price(0.0), status(OrderStatus::NEW)
 	{
 	}
 
-	bool ExecutionMessage::equals(const ExecutionMessage& rhs) const
+	bool TradeMessage::equals(const TradeMessage& rhs) const
 	{
 		return orderId == rhs.orderId &&
 				instrumentId == rhs.instrumentId &&

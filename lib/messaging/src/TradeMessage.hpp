@@ -5,8 +5,8 @@
  *      Author: suoalex
  */
 
-#ifndef LIB_MESSAGING_SRC_EXECUTIONMESSAGE_HPP_
-#define LIB_MESSAGING_SRC_EXECUTIONMESSAGE_HPP_
+#ifndef LIB_MESSAGING_SRC_TRADEMESSAGE_HPP_
+#define LIB_MESSAGING_SRC_TRADEMESSAGE_HPP_
 
 #include <cstdint>
 
@@ -19,14 +19,14 @@ namespace mm
 	//
 	// This message represents an execution.
 	//
-	class ExecutionMessage : public Message
+	class TradeMessage : public Message
 	{
 	public:
 
 		//
 		// Default constructor.
 		//
-		ExecutionMessage();
+		TradeMessage();
 
 		//
 		// Check for equality of execution.
@@ -35,7 +35,7 @@ namespace mm
 		//
 		// return : True if the other message is identical.
 		//
-		bool equals(const ExecutionMessage& rhs) const;
+		bool equals(const TradeMessage& rhs) const;
 
 		//
 		// The template method for serialize to buffer.
@@ -117,9 +117,9 @@ namespace mm
 		OrderStatus status;
 	};
 
-	DEFINE_OPERATORS(ExecutionMessage)
+	DEFINE_OPERATORS(TradeMessage)
 }
 
 
 
-#endif /* LIB_MESSAGING_SRC_EXECUTIONMESSAGE_HPP_ */
+#endif /* LIB_MESSAGING_SRC_TRADEMESSAGE_HPP_ */

@@ -106,7 +106,92 @@ namespace mm
 				ASSERT_TRUE(summary.status == OrderStatus::PENDING_ACK);
 			}
 		}
+	}
 
+	TEST(OrderTest, SendThenCancelCase)
+	{
+		Dispatcher dispatcher(2);
+		DummyPublisher publisher(dispatcher);
+		DummyExchange exchange;
+
+		TestOrder order(publisher, exchange);
+
+		// send
+		{
+			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
+			OrderMessage& message = *ptr;
+
+			message.orderId = 1;
+			message.instrumentId = 2;
+			message.price = 20000.0;
+			message.totalQty = 1;
+			message.side = Side::BID;
+			message.status = OrderStatus::LIVE;
+
+			order.consume(ptr);
+
+			ASSERT_TRUE(order.getOrderId() == message.orderId);
+			ASSERT_TRUE(order.getInstrumentId() == message.instrumentId);
+			ASSERT_TRUE(order.getPrice() == message.price);
+			ASSERT_TRUE(order.getTotalQty() == message.totalQty);
+			ASSERT_TRUE(order.getSide() == message.side);
+			ASSERT_TRUE(order.getStatus() == OrderStatus::PENDING_ACK);
+
+			ASSERT_TRUE(!exchange.statusMap.empty());
+			ASSERT_TRUE(exchange.statusMap.find(message.orderId) != exchange.statusMap.end());
+			ASSERT_TRUE(exchange.statusMap[message.orderId] == OrderStatus::LIVE);
+
+			ASSERT_TRUE(!publisher.messageMap.empty());
+
+			{
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
+
+				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
+				ASSERT_TRUE(summaryPtr);
+
+				const OrderSummaryMessage& summary = *summaryPtr;
+				ASSERT_TRUE(summary.orderId == message.orderId);
+				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
+				ASSERT_TRUE(summary.price == message.price);
+				ASSERT_TRUE(summary.totalQty == message.totalQty);
+				ASSERT_TRUE(summary.side == message.side);
+				ASSERT_TRUE(summary.status == OrderStatus::PENDING_ACK);
+			}
+		}
+
+		// cancel
+		{
+			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
+			OrderMessage& message = *ptr;
+
+			message.orderId = 1;
+			message.status = OrderStatus::CANCELLED;
+
+			order.consume(ptr);
+
+			ASSERT_TRUE(!exchange.statusMap.empty());
+			ASSERT_TRUE(exchange.statusMap.find(message.orderId) != exchange.statusMap.end());
+			ASSERT_TRUE(exchange.statusMap[message.orderId] == OrderStatus::CANCELLED);
+
+			ASSERT_TRUE(!publisher.messageMap.empty());
+
+			{
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
+
+				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
+				ASSERT_TRUE(summaryPtr);
+
+				const OrderSummaryMessage& summary = *summaryPtr;
+				ASSERT_TRUE(summary.orderId == message.orderId);
+				ASSERT_TRUE(summary.instrumentId == 2);
+				ASSERT_TRUE(summary.price == 20000.0);
+				ASSERT_TRUE(summary.totalQty == 1);
+				ASSERT_TRUE(summary.side == Side::BID);
+				ASSERT_TRUE(summary.status == OrderStatus::PENDING_CANCEL);
+			}
+		}
 	}
 
 }

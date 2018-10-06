@@ -11,11 +11,11 @@
 #include <memory>
 
 #include <EnumType.hpp>
-#include <ExecutionMessage.hpp>
 #include <IPublisher.hpp>
 #include <Logger.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>
+#include <TradeMessage.hpp>
 
 namespace mm
 {
@@ -86,7 +86,7 @@ namespace mm
 					processed = true;
 				}
 			}
-			else if (status == OrderStatus::LIVE)
+			else if (!OrderStatusUtil::completed(status))
 			{
 				if (message->status == OrderStatus::CANCELLED)
 				{
@@ -113,7 +113,7 @@ namespace mm
 		//
 		// executionMessage : The execution.
 		//
-		void consume(const std::shared_ptr<const ExecutionMessage>& message)
+		void consume(const std::shared_ptr<const TradeMessage>& message)
 		{
 			bool processed = false;
 
