@@ -9,7 +9,7 @@
 
 namespace mm
 {
-	TradeMessage::TradeMessage() : orderId(0), instrumentId(0), executionId(0), side(Side::BID), qty(0), price(0.0), status(OrderStatus::NEW)
+	TradeMessage::TradeMessage() : orderId(0), instrumentId(0), executionId(0), side(Side::BID), qty(0), price(0.0)
 	{
 	}
 
@@ -20,8 +20,7 @@ namespace mm
 				executionId == rhs.executionId &&
 				side == rhs.side &&
 				qty == rhs.qty &&
-				price == rhs.price &&
-				status == rhs.status;
+				price == rhs.price;
 	}
 
 }

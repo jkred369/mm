@@ -150,7 +150,7 @@ namespace mm
 				trade->price = message->execPrice;
 
 				const Subscription sub = {SourceType::ALL, DataType::TRADE, trade->executionId};
-				publish(sub, trade);
+				tradePublisher.publish(sub, trade);
 			}
 		}
 

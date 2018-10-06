@@ -52,7 +52,7 @@ namespace mm
 				return false;
 			}
 
-			buffer << orderId << instrumentId << executionId << side << qty << price << status;
+			buffer << orderId << instrumentId << executionId << side << qty << price;
 			return buffer.getError();
 		}
 
@@ -71,8 +71,7 @@ namespace mm
 				return false;
 			}
 
-			buffer >> orderId >> instrumentId >> executionId >> side >> qty >> price >> status;
-			return buffer.getError();
+			buffer >> orderId >> instrumentId >> executionId >> side >> qty >> price;
 		}
 
 		//

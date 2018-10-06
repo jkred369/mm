@@ -17,9 +17,11 @@
 
 namespace mm
 {
-	struct DummyPublisher : PublisherAdapter<OrderSummaryMessage>
+	struct DummyPublisher : PublisherAdapter<OrderSummaryMessage>, PublisherAdapter<TradeMessage>
 	{
-		DummyPublisher(Dispatcher& dispatcher) : PublisherAdapter<OrderSummaryMessage> (dispatcher)
+		DummyPublisher(Dispatcher& dispatcher) :
+			PublisherAdapter<OrderSummaryMessage> (dispatcher),
+			PublisherAdapter<TradeMessage> (dispatcher)
 		{
 		}
 
@@ -34,7 +36,15 @@ namespace mm
 			PublisherAdapter<OrderSummaryMessage>::publish(subscription, message);
 		}
 
+		virtual void publish(const Subscription& subscription, const std::shared_ptr<const TradeMessage>& message) override
+		{
+			tradeMap[subscription] = message;
+			PublisherAdapter<TradeMessage>::publish(subscription, message);
+		}
+
 		std::unordered_map<Subscription, std::shared_ptr<const OrderSummaryMessage> > messageMap;
+
+		std::unordered_map<Subscription, std::shared_ptr<const TradeMessage> > tradeMap;
 	};
 
 	struct DummyExchange
@@ -55,7 +65,7 @@ namespace mm
 		std::unordered_map<std::int64_t, OrderStatus> statusMap;
 	};
 
-	typedef Order<DummyExchange, NullObjectPool<OrderSummaryMessage> > TestOrder;
+	typedef Order<DummyExchange, NullObjectPool<OrderSummaryMessage>, NullObjectPool<TradeMessage> > TestOrder;
 
 	TEST(OrderTest, SendCase)
 	{
@@ -63,7 +73,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(publisher, exchange);
+		TestOrder order(publisher, publisher, exchange);
 
 		{
 			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -114,7 +124,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(publisher, exchange);
+		TestOrder order(publisher, publisher, exchange);
 
 		// send
 		{
