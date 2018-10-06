@@ -19,6 +19,10 @@ namespace mm
 {
 	struct DummyPublisher : PublisherAdapter<OrderSummaryMessage>
 	{
+		DummyPublisher(Dispatcher& dispatcher) : PublisherAdapter<OrderSummaryMessage> (dispatcher)
+		{
+		}
+
 		virtual const KeyType getKey() const override
 		{
 			return DispatchKey::ORDER;
@@ -55,14 +59,15 @@ namespace mm
 
 	TEST(OrderTest, SendCase)
 	{
-		DummyPublisher publisher;
+		Dispatcher dispatcher(2);
+		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
 		TestOrder order(publisher, exchange);
 
 		{
 			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
-			OrderMessage message = *ptr;
+			OrderMessage& message = *ptr;
 
 			message.orderId = 1;
 			message.instrumentId = 2;
@@ -79,6 +84,27 @@ namespace mm
 			ASSERT_TRUE(order.getTotalQty() == message.totalQty);
 			ASSERT_TRUE(order.getSide() == message.side);
 			ASSERT_TRUE(order.getStatus() == OrderStatus::PENDING_ACK);
+
+			ASSERT_TRUE(!exchange.statusMap.empty());
+			ASSERT_TRUE(exchange.statusMap.find(message.orderId) != exchange.statusMap.end());
+
+			ASSERT_TRUE(!publisher.messageMap.empty());
+
+			{
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
+
+				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
+				ASSERT_TRUE(summaryPtr);
+
+				const OrderSummaryMessage& summary = *summaryPtr;
+				ASSERT_TRUE(summary.orderId == message.orderId);
+				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
+				ASSERT_TRUE(summary.price == message.price);
+				ASSERT_TRUE(summary.totalQty == message.totalQty);
+				ASSERT_TRUE(summary.side == message.side);
+				ASSERT_TRUE(summary.status == OrderStatus::PENDING_ACK);
+			}
 		}
 
 	}

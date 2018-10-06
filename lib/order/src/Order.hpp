@@ -10,6 +10,7 @@
 
 #include <memory>
 
+#include <EnumType.hpp>
 #include <ExecutionMessage.hpp>
 #include <IPublisher.hpp>
 #include <Logger.hpp>
@@ -64,20 +65,24 @@ namespace mm
 			// status management
 			if (status == OrderStatus::NEW)
 			{
-				if (message->status == OrderStatus::NEW)
+				if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 				{
-					orderId = message->orderId;
-					instrumentId = message->instrumentId;
-					side = message->side;
-					totalQty = message->totalQty;
-					price = message->price;
+					// orderId == 0 and instrumentId == 0 means the order data isn't loaded
+					if (orderId == 0 && instrumentId == 0)
+					{
+						orderId = message->orderId;
+						instrumentId = message->instrumentId;
+						side = message->side;
+						totalQty = message->totalQty;
+						price = message->price;
+					}
 
-					processed = true;
-				}
-				else if (message->status == OrderStatus::LIVE)
-				{
-					exchange.sendOrder(message);
-					status = OrderStatus::PENDING_ACK;
+					if (message->status == OrderStatus::LIVE)
+					{
+						exchange.sendOrder(message);
+						status = OrderStatus::PENDING_ACK;
+					}
+
 					processed = true;
 				}
 			}
@@ -94,7 +99,7 @@ namespace mm
 			// status update
 			if (!processed)
 			{
-				LOGWARN("Ignoring order message for status {} on order status {}", message->status, status);
+				LOGWARN("Ignoring order message for status {} on order status {}", toValue(message->status), toValue(status));
 				return;
 			}
 			else if (status != OrderStatus::NEW)
@@ -173,6 +178,7 @@ namespace mm
 			message->tradedQty = tradedQty;
 			message->price = price;
 			message->avgTradedPrice = avgTradedPrice;
+			message->status = status;
 
 			const Subscription subscription = {SourceType::ALL, DataType::ORDER_SUMMARY, orderId};
 			publisher.publish(subscription, message);
