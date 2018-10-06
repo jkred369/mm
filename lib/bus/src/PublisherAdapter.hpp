@@ -108,12 +108,15 @@ namespace mm
 			std::vector<ConsumerDetail>& consumers = consumerMap[subscription];
 			std::size_t prevCount = consumers.size();
 
-			consumers.erase(std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
+			auto it = std::remove_if(consumers.begin(), consumers.end(), [&consumer] (const ConsumerDetail& detail) {
 				return detail.consumer == consumer;
-			}));
+			});
 
-			// maintain the count.
-			count -= prevCount - consumers.size();
+			if (LIKELY(it != consumers.end()))
+			{
+				consumers.erase(it);
+				count -= prevCount - consumers.size();
+			}
 		}
 
 		virtual std::size_t getConsumerCount() const override

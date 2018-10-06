@@ -109,7 +109,14 @@ namespace mm
 				return order->getOrderId() == orderId;
 			});
 
-			return it == collection.end() ? nullptr : *it;
+			if (LIKELY(it != collection.end()))
+			{
+				Order* result = *it;
+				collection.erase(it);
+				return result;
+			}
+
+			return nullptr;
 		}
 
 	private:
