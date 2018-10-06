@@ -112,9 +112,6 @@ namespace mm
 
 		// Trade price.
 		double price;
-
-		// The current order status.
-		OrderStatus status;
 	};
 
 	DEFINE_OPERATORS(TradeMessage)

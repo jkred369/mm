@@ -35,7 +35,7 @@ namespace mm
 	public:
 
 		// The exchange order type.
-		typedef Order<OrderManager, ExchangeInterface, Pool> ExchangeOrder;
+		typedef Order<ExchangeInterface, Pool, Pool> ExchangeOrder;
 
 		//
 		// Constructor.
@@ -59,8 +59,7 @@ namespace mm
 		{
 			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
-				const std::shared_Ptr<ExchangeOrder>
-
+				const std::shared_Ptr<ExchangeOrder> order(new Order(this, this, exchange));
 				liveCache.addOrder(pool.get(publisher, exchange));
 			}
 
@@ -73,7 +72,7 @@ namespace mm
 		//
 		// message : The execution message.
 		//
-		virtual void consume(const std::shared_ptr<const ExecutionMessage>& message) override
+		virtual void consume(const std::shared_ptr<const ExecutionReportMessage>& message) override
 		{
 			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
 
@@ -94,7 +93,6 @@ namespace mm
 		//
 		void onExecutionReport(const ExecutionReportMessage& message)
 		{
-
 		}
 
 	private:

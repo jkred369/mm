@@ -11,6 +11,7 @@
 #include <memory>
 
 #include <EnumType.hpp>
+#include <ExecutionReportMessage.hpp>
 #include <IPublisher.hpp>
 #include <Logger.hpp>
 #include <OrderMessage.hpp>
@@ -22,7 +23,7 @@ namespace mm
 	//
 	// The order class for order status management and actions.
 	//
-	template<typename ExchangeInterface, typename Pool> class Order
+	template<typename ExchangeInterface, typename Pool, typename TradePool> class Order
 	{
 	public:
 
@@ -30,10 +31,12 @@ namespace mm
 		// Constructor.
 		//
 		// publisher : The publisher for order summary.
+		// tradePublisher : The publisher for trade.
 		// exchange : The exchange.
 		//
-		Order(IPublisher<OrderSummaryMessage>& publisher, ExchangeInterface& exchange) :
+		Order(IPublisher<OrderSummaryMessage>& publisher, IPublisher<TradeMessage>& tradePublisher, ExchangeInterface& exchange) :
 			publisher(publisher),
+			tradePublisher(tradePublisher),
 			exchange(exchange),
 			orderId(0),
 			instrumentId(0),
@@ -109,53 +112,46 @@ namespace mm
 		}
 
 		//
-		// consume the given execution message for the order.
+		// consume an execution report message.
 		//
-		// executionMessage : The execution.
+		// message : The execution report message.
 		//
-		void consume(const std::shared_ptr<const TradeMessage>& message)
+		void consume(const std::shared_ptr<const ExecutionReportMessage>& message)
 		{
-			bool processed = false;
-
 			// sanity check
-			if (orderId != message->orderId)
+			if (UNLIKELY(orderId != message->orderId))
 			{
-				LOGERR("Invalid order messgae {} on order {}", message->orderId, orderId);
+				LOGERR("Order {} received unexpected message with order ID {}. Ignored.", orderId, message->orderId);
 				return;
 			}
 
-			// process the message if there is a trade
-			if (message->isTrade() && !OrderStatusUtil::completed(status))
+			// firstly populate the latest status of the order
+			if (LIKELY(!OrderStatusUtil::completed(status)))
 			{
-				if (tradedQty == 0 && message->qty == 0)
-				{
-					LOGERR("Execution message has a trade but qty is 0 on instrument {}, order {}, execution {}",
-							instrumentId, orderId, message->executionId);
-				}
-				else
-				{
-					avgTradedPrice = (price * tradedQty + message->price * message->qty) / (tradedQty + message->qty);
-					tradedQty += message->qty;
-
-					processed = true;
-				}
-			}
-
-			// for status update - process regardlessly.
-			if (!OrderStatusUtil::completed(status) && status != message->status)
-			{
+				avgTradedPrice = message->avgTradedPrice;
+				price = message->price;
 				status = message->status;
-				processed = true;
+				totalQty = message->totalQty();
+				tradedQty = message->tradedQty;
+
+				sendSummary();
 			}
 
-			// status update
-			if (!processed)
+			// if there is a trade - publish the trade as well
+			if (message->hasTrade())
 			{
-				LOGERR("Ignoring order message for status {} on order status {}", message->status, status);
-				return;
-			}
+				std::shared_ptr<TradeMessage> trade = tradePool.getShared();
 
-			sendSummary();
+				trade->orderId = orderId;
+				trade->instrumentId = instrumentId;
+				trade->executionId = message->executionId;
+				trade->side = side;
+				trade->qty = message->execQty;
+				trade->price = message->execPrice;
+
+				const Subscription sub = {SourceType::ALL, DataType::TRADE, trade->executionId};
+				publish(sub, trade);
+			}
 		}
 
 		//
@@ -269,11 +265,17 @@ namespace mm
 		// The message pool.
 		static Pool pool;
 
+		// The trade message pool.
+		static TradePool tradePool;
+
 		// Logger of the class.
 		static Logger logger;
 
 		// The publisher.
 		IPublisher<OrderSummaryMessage>& publisher;
+
+		// The execution publisher.
+		IPublisher<TradeMessage>& tradePublisher;
 
 		// The exchange.
 		ExchangeInterface& exchange;
@@ -305,6 +307,6 @@ namespace mm
 	};
 }
 
-template<typename ExchangeInterface, typename Pool> mm::Logger mm::Order<ExchangeInterface, Pool>::logger;
+template<typename ExchangeInterface, typename Pool, typename TradePool> mm::Logger mm::Order<ExchangeInterface, Pool, TradePool>::logger;
 
 #endif /* LIB_ORDER_SRC_ORDER_HPP_ */

@@ -97,6 +97,9 @@ namespace mm
 
 		// Decoupled product constitution (for product service)
 		DECOUPLED_PRODUCT_CONSTITUENT = 26,
+
+		// Trade (execution)
+		TRADE = 27,
 	};
 }
 
