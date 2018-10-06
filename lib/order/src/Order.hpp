@@ -36,14 +36,14 @@ namespace mm
 		// tradePublisher : The publisher for trade.
 		// exchange : The exchange.
 		//
-		Order(SummaryPool& summarPool,
+		Order(ExchangeInterface& exchange,
+				SummaryPool& summarPool,
 				TradePool& tradePool,
-				ExchangeInterface& exchange,
 				IPublisher<OrderSummaryMessage>& publisher,
 				IPublisher<TradeMessage>& tradePublisher) :
+			exchange(exchange),
 			summaryPool(summaryPool),
 			tradePool(tradePool),
-			exchange(exchange),
 			publisher(publisher),
 			tradePublisher(tradePublisher),
 			orderId(0),
@@ -273,14 +273,14 @@ namespace mm
 		// Logger of the class.
 		static Logger logger;
 
+		// The exchange.
+		ExchangeInterface& exchange;
+
 		// The message pool.
 		SummaryPool& summaryPool;
 
 		// The trade message pool.
 		TradePool& tradePool;
-
-		// The exchange.
-		ExchangeInterface& exchange;
 
 		// The publisher.
 		IPublisher<OrderSummaryMessage>& publisher;

@@ -43,7 +43,9 @@ namespace mm
 		// publisher : The publisher.
 		// exchange : The exchange interface.
 		//
-		OrderManager(const std::shared_ptr<Dispatcher> dispatcher, ExchangeInterface const* exchange) :
+		OrderManager(
+				Dispatcher& dispatcher,
+				ExchangeInterface& exchange) :
 			PublisherAdapter<OrderSummaryMessage> (dispatcher),
 			PublisherAdapter<TradeMessage> (dispatcher),
 			exchange(exchange)
