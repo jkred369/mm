@@ -37,19 +37,36 @@ namespace mm
 		// The exchange order type.
 		typedef Order<ExchangeInterface, Pool, Pool> ExchangeOrder;
 
+		// The default pool size.
+		static constexpr std::size_t POOL_SIZE = 1000;
+
 		//
 		// Constructor.
 		//
+		// dispatchKey : The dispatch key.
 		// publisher : The publisher.
 		// exchange : The exchange interface.
 		//
 		OrderManager(
+				KeyType dispatchKey,
 				Dispatcher& dispatcher,
 				ExchangeInterface& exchange) :
 			PublisherAdapter<OrderSummaryMessage> (dispatcher),
 			PublisherAdapter<TradeMessage> (dispatcher),
-			exchange(exchange)
+			dispatchKey(dispatchKey),
+			exchange(exchange),
+			orderPool(POOL_SIZE),
+			summaryPool(POOL_SIZE),
+			tradePool(POOL_SIZE)
 		{
+		}
+
+		//
+		// Get the dispatch key for the order manager.
+		//
+		virtual const KeyType getKey() const override
+		{
+			return dispatchKey;
 		}
 
 		//
@@ -61,24 +78,30 @@ namespace mm
 		{
 			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
-				const std::shared_Ptr<ExchangeOrder> order(new Order(this, this, exchange));
-				liveCache.addOrder(pool.get(publisher, exchange));
+				const std::shared_Ptr<ExchangeOrder> order(new Order(exchange, summaryPool, tradePool, this, this));
+				liveCache.addOrder(orderPool.get(publisher, exchange));
 			}
 
-			// the above add make sure there is no nullptr concern
-			liveCache.getOrder(message->instrumentId, message->orderId)->consume(message);
+			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
+			if (UNLIKELY(!order))
+			{
+				LOGERR("Error getting live order with instrument ID: {}, order ID: {}", message->instrumentId, message->orderId);
+				return;
+			}
+
+			order->consume(message);
 		}
 
 		//
 		// consumer an execution message.
+		// TODO: review the design. should we consume raw pointer? or template the consumer pointer type?
 		//
 		// message : The execution message.
 		//
 		virtual void consume(const std::shared_ptr<const ExecutionReportMessage>& message) override
 		{
 			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
-
-			if (order.get() == nullptr)
+			if (UNLIKELY(!order))
 			{
 				LOGERR("Error getting order with ID: {}, instrument ID: {}", message->orderId, message->instrumentId);
 				return;
@@ -87,23 +110,22 @@ namespace mm
 			order->consume(message);
 		}
 
-		//
-		// This is the exchange call back on any execution report.
-		// TODO: review the design. should we consume raw pointer? or template the consumer pointer type?
-		//
-		// message : The execution report message.
-		//
-		void onExecutionReport(const ExecutionReportMessage& message)
-		{
-		}
-
 	private:
 
-		// The object pool for orders.
-		static Pool<ExchangeOrder, 1000> pool;
+		// The dispatch key.
+		const KeyType dispatchKey;
 
 		// The exchange interface.
-		ExchangeInterface const* exchange;
+		ExchangeInterface& exchange;
+
+		// The object pool for orders.
+		Pool<ExchangeOrder> orderPool;
+
+		// the object pool for order summary messages.
+		Pool<OrderSummaryMessage> summaryPool;
+
+		// The object pool for trade messages.
+		Pool<TradeMessage> tradePool;
 
 		// The live orders.
 		OrderCache<ExchangeOrder> liveCache;
