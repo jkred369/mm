@@ -79,17 +79,21 @@ namespace mm
 		//
 		virtual void consume(const std::shared_ptr<const OrderMessage>& message) override
 		{
+			ExchangeOrder* order = nullptr;
+
 			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
-				ExchangeOrder* order = orderPool.get(&exchange, &summaryPool, &tradePool, this, this);
+				order = orderPool.get(&exchange, &summaryPool, &tradePool, this, this);
 				liveCache.addOrder(order);
 			}
-
-			ExchangeOrder* order = liveCache.getOrder(message->instrumentId, message->orderId);
-			if (UNLIKELY(!order))
+			else
 			{
-				LOGERR("Error getting live order with instrument ID: {}, order ID: {}", message->instrumentId, message->orderId);
-				return;
+				order = liveCache.getOrder(message->instrumentId, message->orderId);
+				if (UNLIKELY(!order))
+				{
+					LOGERR("Error getting live order with instrument ID: {}, order ID: {}", message->instrumentId, message->orderId);
+					return;
+				}
 			}
 
 			order->consume(message);
