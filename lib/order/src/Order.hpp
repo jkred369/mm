@@ -148,17 +148,17 @@ namespace mm
 			// if there is a trade - publish the trade as well
 			if (message->hasTrade())
 			{
-				std::shared_ptr<TradeMessage> trade = tradePool.getShared();
+				TradeMessage trade;
 
-				trade->orderId = orderId;
-				trade->instrumentId = instrumentId;
-				trade->executionId = message->executionId;
-				trade->side = side;
-				trade->qty = message->execQty;
-				trade->price = message->execPrice;
+				trade.orderId = orderId;
+				trade.instrumentId = instrumentId;
+				trade.executionId = message->executionId;
+				trade.side = side;
+				trade.qty = message->execQty;
+				trade.price = message->execPrice;
 
-				const Subscription sub = {SourceType::ALL, DataType::TRADE, trade->executionId};
-				tradePublisher.publish(sub, trade);
+				const Subscription sub = {SourceType::ALL, DataType::TRADE, trade.executionId};
+				tradePublisher.publish(sub, &trade);
 			}
 		}
 
@@ -173,19 +173,19 @@ namespace mm
 				return;
 			}
 
-			std::shared_ptr<OrderSummaryMessage> message = summaryPool.getShared();
+			OrderSummaryMessage message;
 
-			message->orderId = orderId;
-			message->instrumentId = instrumentId;
-			message->side = side;
-			message->totalQty = totalQty;
-			message->tradedQty = tradedQty;
-			message->price = price;
-			message->avgTradedPrice = avgTradedPrice;
-			message->status = status;
+			message.orderId = orderId;
+			message.instrumentId = instrumentId;
+			message.side = side;
+			message.totalQty = totalQty;
+			message.tradedQty = tradedQty;
+			message.price = price;
+			message.avgTradedPrice = avgTradedPrice;
+			message.status = status;
 
 			const Subscription subscription = {SourceType::ALL, DataType::ORDER_SUMMARY, orderId};
-			publisher.publish(subscription, message);
+			publisher.publish(subscription, &message);
 		}
 
 		//

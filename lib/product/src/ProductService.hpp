@@ -71,8 +71,8 @@ namespace mm
 		//
 		// The consumer interface.
 		//
-		virtual void consume(const std::shared_ptr<const ProductMessage>& message) override;
-		virtual void consume(const std::shared_ptr<const ProductConstituentMessage>& message) override;
+		virtual void consume(const ProductMessage* message) override;
+		virtual void consume(const ProductConstituentMessage* message) override;
 
 		//
 		// Temporary function to visit all products in static way. Can only be called before started.
@@ -105,6 +105,9 @@ namespace mm
 
 		// Logger of the class.
 		static Logger logger;
+
+		// Object pool used.
+		QueueBasedObjectPool<Product> pool;
 
 		// The product map where key is the instrument ID and value is the product object.
 		std::unordered_map<std::int64_t, std::shared_ptr<Product> > productMap;

@@ -17,10 +17,10 @@ mm::Logger mm::RandomMarketDataSession::logger;
 namespace mm
 {
 	RandomMarketDataSession::RandomMarketDataSession(KeyType dispatchKey, ServiceContext& serviceContext, const std::string& productServiceName) :
-		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
+		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher(), pool),
 		dispatchKey(dispatchKey),
 		scheduler(serviceContext.getScheduler()),
-		pool(100),
+		pool(10000),
 		distribution(-1, 1)
 	{
 		static_assert(BID >= 0, "Bid index must be positive.");
@@ -95,8 +95,7 @@ namespace mm
 
 		scheduler.scheduleAtFixedRate(dispatchKey, [this, id, initValue, &timer] () {
 
-			std::shared_ptr<MarketDataMessage> messagePtr = pool.getShared();
-			MarketDataMessage& message = *messagePtr;
+			MarketDataMessage message;
 
 			message.last = std::round(initValue * (1 + distribution(randSeed)));
 			message.lowLimit = std::round(initValue * 0.5);
@@ -123,7 +122,7 @@ namespace mm
 			}
 
 			const Subscription subscription = {SourceType::ALL, DataType::MARKET_DATA, id};
-			this->publish(subscription, messagePtr);
+			this->publish(subscription, &message);
 
 		}, std::chrono::milliseconds(1000), std::chrono::milliseconds(1));
 
@@ -136,7 +135,7 @@ namespace mm
 		PublisherAdapter<MarketDataMessage>::unsubscribe(subscription, consumer);
 	}
 
-	void RandomMarketDataSession::consume(const std::shared_ptr<const Product>& message)
+	void RandomMarketDataSession::consume(const Product* message)
 	{
 		supportedSet.insert(message->getContent().id);
 	}

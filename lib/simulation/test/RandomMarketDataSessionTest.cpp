@@ -97,7 +97,7 @@ namespace mm
 			DispatchableService::stop();
 		}
 
-		virtual void consume(const std::shared_ptr<const MarketDataMessage>& message) override
+		virtual void consume(const MarketDataMessage* message) override
 		{
 			RdtscTimer timer;
 
@@ -110,7 +110,7 @@ namespace mm
 			}
 		}
 
-		virtual void consume(const std::shared_ptr<const Product>& message) override
+		virtual void consume(const Product* message) override
 		{
 			std::cout << "Product received." << std::endl;
 		}

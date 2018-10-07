@@ -24,6 +24,7 @@
 #include <NullObjectPool.hpp>
 #include <Product.hpp>
 #include <PublisherAdapter.hpp>
+#include <QueueBasedObjectPool.hpp>
 #include <ServiceContext.hpp>
 #include <Scheduler.hpp>
 
@@ -72,7 +73,7 @@ namespace mm
 		//
 		// consumer functionality.
 		//
-		virtual void consume(const std::shared_ptr<const Product>& message) override;
+		virtual void consume(const Product* message) override;
 
 	private:
 
@@ -92,7 +93,7 @@ namespace mm
 		Scheduler& scheduler;
 
 		// The pool used.
-		NullObjectPool<MarketDataMessage> pool;
+		QueueBasedObjectPool<MarketDataMessage> pool;
 
 		// The random seed.
 		std::mt19937 randSeed;

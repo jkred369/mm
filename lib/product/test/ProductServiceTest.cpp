@@ -50,12 +50,12 @@ namespace mm
 			return 2;
 		}
 
-		virtual void consume(const std::shared_ptr<const Product>& message) override
+		virtual void consume(const Product* message) override
 		{
 			product = message;
 		}
 
-		std::shared_ptr<const Product> product;
+		const Product* product;
 	};
 
 	class DummyServiceContext : public ServiceContext
@@ -119,7 +119,7 @@ namespace mm
 		ASSERT_TRUE(service->subscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
-		ASSERT_TRUE(consumer.product.get());
+		ASSERT_TRUE(consumer.product);
 
 		const ProductMessage& content = consumer.product->getContent();
 		ASSERT_TRUE(content.id == 1);
@@ -181,7 +181,7 @@ namespace mm
 		ASSERT_TRUE(service->subscribe(Subscription(SourceType::PRODUCT_SERVICE, DataType::PRODUCT, 1), &consumer));
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(2));
-		ASSERT_TRUE(consumer.product.get());
+		ASSERT_TRUE(consumer.product);
 
 		{
 			const ProductMessage& content = consumer.product->getContent();

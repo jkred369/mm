@@ -19,9 +19,9 @@ namespace mm
 {
 	struct DummyPublisher : PublisherAdapter<OrderSummaryMessage>, PublisherAdapter<TradeMessage>
 	{
-		DummyPublisher(Dispatcher& dispatcher) :
-			PublisherAdapter<OrderSummaryMessage> (dispatcher),
-			PublisherAdapter<TradeMessage> (dispatcher)
+		DummyPublisher(Dispatcher& dispatcher, QueueBasedObjectPool<OrderSummaryMessage>& summaryPool, QueueBasedObjectPool<TradeMessage>& tradePool) :
+			PublisherAdapter<OrderSummaryMessage> (dispatcher, summaryPool),
+			PublisherAdapter<TradeMessage> (dispatcher, tradePool)
 		{
 		}
 
@@ -30,21 +30,21 @@ namespace mm
 			return DispatchKey::ORDER;
 		}
 
-		virtual void publish(const Subscription& subscription, const std::shared_ptr<const OrderSummaryMessage>& message) override
+		virtual void publish(const Subscription& subscription, const OrderSummaryMessage* message) override
 		{
-			messageMap[subscription] = message;
+			messageMap[subscription] = *message;
 			PublisherAdapter<OrderSummaryMessage>::publish(subscription, message);
 		}
 
-		virtual void publish(const Subscription& subscription, const std::shared_ptr<const TradeMessage>& message) override
+		virtual void publish(const Subscription& subscription, const TradeMessage* message) override
 		{
-			tradeMap[subscription] = message;
+			tradeMap[subscription] = *message;
 			PublisherAdapter<TradeMessage>::publish(subscription, message);
 		}
 
-		std::unordered_map<Subscription, std::shared_ptr<const OrderSummaryMessage> > messageMap;
+		std::unordered_map<Subscription, OrderSummaryMessage> messageMap;
 
-		std::unordered_map<Subscription, std::shared_ptr<const TradeMessage> > tradeMap;
+		std::unordered_map<Subscription, TradeMessage> tradeMap;
 	};
 
 	struct DummyExchange
@@ -65,15 +65,15 @@ namespace mm
 		std::unordered_map<std::int64_t, OrderStatus> statusMap;
 	};
 
-	typedef Order<DummyExchange, NullObjectPool<OrderSummaryMessage>, NullObjectPool<TradeMessage> > TestOrder;
+	typedef Order<DummyExchange, QueueBasedObjectPool<OrderSummaryMessage>, QueueBasedObjectPool<TradeMessage> > TestOrder;
 
 	TEST(OrderTest, SendCase)
 	{
-		NullObjectPool<OrderSummaryMessage> summaryPool(10);
-		NullObjectPool<TradeMessage> tradePool(10);
+		QueueBasedObjectPool<OrderSummaryMessage> summaryPool(10);
+		QueueBasedObjectPool<TradeMessage> tradePool(10);
 
 		Dispatcher dispatcher(2);
-		DummyPublisher publisher(dispatcher);
+		DummyPublisher publisher(dispatcher, summaryPool, tradePool);
 		DummyExchange exchange;
 
 		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
@@ -107,10 +107,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
-				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
-				ASSERT_TRUE(summaryPtr);
-
-				const OrderSummaryMessage& summary = *summaryPtr;
+				const OrderSummaryMessage& summary = publisher.messageMap[sub];
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
 				ASSERT_TRUE(summary.price == message.price);
@@ -123,11 +120,11 @@ namespace mm
 
 	TEST(OrderTest, SendThenCancelCase)
 	{
-		NullObjectPool<OrderSummaryMessage> summaryPool(10);
-		NullObjectPool<TradeMessage> tradePool(10);
+		QueueBasedObjectPool<OrderSummaryMessage> summaryPool(10);
+		QueueBasedObjectPool<TradeMessage> tradePool(10);
 
 		Dispatcher dispatcher(2);
-		DummyPublisher publisher(dispatcher);
+		DummyPublisher publisher(dispatcher, summaryPool, tradePool);
 		DummyExchange exchange;
 
 		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
@@ -163,10 +160,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
-				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
-				ASSERT_TRUE(summaryPtr);
-
-				const OrderSummaryMessage& summary = *summaryPtr;
+				const OrderSummaryMessage& summary = publisher.messageMap[sub];
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
 				ASSERT_TRUE(summary.price == message.price);
@@ -196,10 +190,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
-				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
-				ASSERT_TRUE(summaryPtr);
-
-				const OrderSummaryMessage& summary = *summaryPtr;
+				const OrderSummaryMessage& summary = publisher.messageMap[sub];
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == 2);
 				ASSERT_TRUE(summary.price == 20000.0);
@@ -212,11 +203,11 @@ namespace mm
 
 	TEST(OrderTest, SendLiveTradeCase)
 	{
-		NullObjectPool<OrderSummaryMessage> summaryPool(10);
-		NullObjectPool<TradeMessage> tradePool(10);
+		QueueBasedObjectPool<OrderSummaryMessage> summaryPool(10);
+		QueueBasedObjectPool<TradeMessage> tradePool(10);
 
 		Dispatcher dispatcher(2);
-		DummyPublisher publisher(dispatcher);
+		DummyPublisher publisher(dispatcher, summaryPool, tradePool);
 		DummyExchange exchange;
 
 		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
@@ -252,10 +243,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
-				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
-				ASSERT_TRUE(summaryPtr);
-
-				const OrderSummaryMessage& summary = *summaryPtr;
+				const OrderSummaryMessage& summary = publisher.messageMap[sub];
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
 				ASSERT_TRUE(summary.price == message.price);
@@ -288,10 +276,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
-				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
-				ASSERT_TRUE(summaryPtr);
-
-				const OrderSummaryMessage& summary = *summaryPtr;
+				const OrderSummaryMessage& summary = publisher.messageMap[sub];
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == 2);
 				ASSERT_TRUE(summary.price == 20000.0);
@@ -331,10 +316,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
-				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
-				ASSERT_TRUE(summaryPtr);
-
-				const OrderSummaryMessage& summary = *summaryPtr;
+				const OrderSummaryMessage& summary = publisher.messageMap[sub];
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == 2);
 				ASSERT_TRUE(summary.price == 20000.0);
@@ -349,10 +331,7 @@ namespace mm
 				Subscription sub = {SourceType::ALL, DataType::TRADE, message.executionId};
 				ASSERT_TRUE(publisher.tradeMap.find(sub) != publisher.tradeMap.end());
 
-				std::shared_ptr<const TradeMessage> tradePtr = publisher.tradeMap[sub];
-				ASSERT_TRUE(tradePtr);
-
-				const TradeMessage& trade = *tradePtr;
+				const TradeMessage& trade = publisher.tradeMap[sub];
 				ASSERT_TRUE(trade.orderId == message.orderId);
 				ASSERT_TRUE(trade.instrumentId == 2);
 				ASSERT_TRUE(trade.qty == 1);

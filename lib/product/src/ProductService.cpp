@@ -20,7 +20,8 @@ namespace mm
 			ServiceContext& serviceContext,
 			std::istream& is) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
-		PublisherAdapter<Product>(serviceContext.getDispatcher()),
+		PublisherAdapter<Product>(serviceContext.getDispatcher(), pool),
+		pool(1000),
 		startFlag(false)
 	{
 		try
@@ -42,7 +43,7 @@ namespace mm
 					continue;
 				}
 
-				consume(product);
+				consume(product.get());
 			}
 		}
 		catch (std::exception& e)
@@ -92,7 +93,7 @@ namespace mm
 
 		for (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair : productMap)
 		{
-			consumer->consume(pair.second);
+			consumer->consume(pair.second.get());
 		}
 
 		return productMap.size();
@@ -116,13 +117,13 @@ namespace mm
 
 		if (it != productMap.end())
 		{
-			publishTo(consumer->getKey(), consumer, it->second);
+			publishTo(consumer->getKey(), consumer, it->second.get(), [] (Product* product) {});
 		}
 
 		return true;
 	}
 
-	void ProductService::consume(const std::shared_ptr<const ProductMessage>& message)
+	void ProductService::consume(const ProductMessage* message)
 	{
 		const std::int64_t id = message->id;
 
@@ -181,7 +182,7 @@ namespace mm
 		}
 	}
 
-	void ProductService::consume(const std::shared_ptr<const ProductConstituentMessage>& message)
+	void ProductService::consume(const ProductConstituentMessage* message)
 	{
 		// TODO: Provide support for constituent products like basket or indices.
 	}
@@ -194,7 +195,7 @@ namespace mm
 		const Subscription subscription = {SourceType::PRODUCT_SERVICE, DataType::PRODUCT, id};
 		if (getConsumerCount(subscription) > 0)
 		{
-			publish(subscription, product);
+			publish(subscription, product.get());
 		}
 
 		// update all the derivatives of the product recursively

@@ -26,12 +26,17 @@ namespace mm
 		{
 		}
 
+		DummyMessage(const DummyMessage& message)
+		{
+			counter.store(message.counter.load());
+		}
+
 		std::atomic<int> counter;
 	};
 
 	struct DummyPublisherAdapter : PublisherAdapter<DummyMessage>
 	{
-		DummyPublisherAdapter(Dispatcher& dispatcher) : PublisherAdapter<DummyMessage>(dispatcher)
+		DummyPublisherAdapter(Dispatcher& dispatcher, QueueBasedObjectPool<DummyMessage>& pool) : PublisherAdapter<DummyMessage>(dispatcher, pool)
 		{
 		}
 
@@ -43,7 +48,7 @@ namespace mm
 
 	struct DummyConsumer : IConsumer<DummyMessage>
 	{
-		virtual void consume(const std::shared_ptr<const DummyMessage>& message) override
+		virtual void consume(const DummyMessage* message) override
 		{
 			++counter;
 		}
@@ -54,11 +59,14 @@ namespace mm
 	TEST(PublisherAdapterTest, DummyCase)
 	{
 		Dispatcher dispatcher;
+		QueueBasedObjectPool<DummyMessage> pool(10);
 
-		DummyPublisherAdapter adapter(dispatcher);
+		DummyPublisherAdapter adapter(dispatcher, pool);
 
 		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, 1};
-		adapter.publish(subscription, std::make_shared<DummyMessage>());
+
+		DummyMessage message;
+		adapter.publish(subscription, &message);
 	}
 
 }

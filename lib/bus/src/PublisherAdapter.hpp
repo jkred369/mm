@@ -18,6 +18,8 @@
 #include <IPublisher.hpp>
 #include <Logger.hpp>
 #include <NativeDefinition.hpp>
+#include <NullObjectPool.hpp>
+#include <QueueBasedObjectPool.hpp>
 #include <SpinLockGuard.hpp>
 #include <Subscription.hpp>
 
@@ -26,7 +28,7 @@ namespace mm
 	//
 	// This class provides basic implementation for publisher.
 	//
-	template<typename Message> class PublisherAdapter : public IPublisher<Message>
+	template<typename Message, typename Pool = QueueBasedObjectPool<Message> > class PublisherAdapter : public IPublisher<Message>
 	{
 	public:
 
@@ -35,7 +37,7 @@ namespace mm
 		//
 		// dispatcher : The dispatcher used.
 		//
-		PublisherAdapter(Dispatcher& dispatcher) : dispatcher(dispatcher), count(0)
+		PublisherAdapter(Dispatcher& dispatcher, Pool& pool) : dispatcher(dispatcher), pool(pool), count(0)
 		{
 		}
 
@@ -51,7 +53,7 @@ namespace mm
 			return 0;
 		}
 
-		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
+		virtual void publish(const Subscription& subscription, const Message* message) override
 		{
 			auto it = consumerMap.find(subscription);
 			if (UNLIKELY(it == consumerMap.end()))
@@ -63,7 +65,10 @@ namespace mm
 
 			for (const ConsumerDetail& detail : it->second)
 			{
-				publishTo(detail.dispatchKey, detail.consumer, message);
+				Message* copy = pool.get(*message);
+				publishTo(detail.dispatchKey, detail.consumer, copy, [&] (Message* message) {
+					pool.release(message);
+				});
 			}
 		}
 
@@ -145,11 +150,11 @@ namespace mm
 		// consumer : The consumer.
 		// message : The message to publish.
 		//
-		inline void publishTo(KeyType dispatchKey, IConsumer<Message>* consumer, const std::shared_ptr<const Message>& message)
+		template<typename Deleter> inline void publishTo(KeyType dispatchKey, IConsumer<Message>* consumer, Message* message, Deleter deleter)
 		{
-			// TODO: this piece of code needs to be reviewed for performance.
-			dispatcher.submit(dispatchKey, [consumer, message] () {
+			dispatcher.submit(dispatchKey, [consumer, message, deleter] () {
 				consumer->consume(message);
+				deleter(message);
 			});
 		}
 
@@ -183,6 +188,9 @@ namespace mm
 		// The dispatcher.
 		Dispatcher& dispatcher;
 
+		// The pool.
+		Pool& pool;
+
 		// The map where key is the subscription object and value is the consumer(s) subscribing to it.
 		std::unordered_map<Subscription, std::vector<ConsumerDetail> > consumerMap;
 
@@ -191,7 +199,7 @@ namespace mm
 	};
 }
 
-template<typename Message> mm::Logger mm::PublisherAdapter<Message>::logger;
+template<typename Message, typename Pool> mm::Logger mm::PublisherAdapter<Message, Pool>::logger;
 
 
 #endif /* LIB_BUS_SRC_PUBLISHERADAPTER_HPP_ */
