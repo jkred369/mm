@@ -85,6 +85,7 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
+			message.strategyId = 5;
 			message.price = 20000.0;
 			message.totalQty = 1;
 			message.side = Side::BID;
@@ -94,6 +95,7 @@ namespace mm
 
 			ASSERT_TRUE(order.getOrderId() == message.orderId);
 			ASSERT_TRUE(order.getInstrumentId() == message.instrumentId);
+			ASSERT_TRUE(order.getStrategyId() == message.strategyId);
 			ASSERT_TRUE(order.getPrice() == message.price);
 			ASSERT_TRUE(order.getTotalQty() == message.totalQty);
 			ASSERT_TRUE(order.getSide() == message.side);
@@ -105,7 +107,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.strategyId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -159,6 +161,7 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
+			message.strategyId = 5;
 			message.price = 20000.0;
 			message.totalQty = 1;
 			message.side = Side::BID;
@@ -168,6 +171,7 @@ namespace mm
 
 			ASSERT_TRUE(order.getOrderId() == message.orderId);
 			ASSERT_TRUE(order.getInstrumentId() == message.instrumentId);
+			ASSERT_TRUE(order.getStrategyId() == message.strategyId);
 			ASSERT_TRUE(order.getPrice() == message.price);
 			ASSERT_TRUE(order.getTotalQty() == message.totalQty);
 			ASSERT_TRUE(order.getSide() == message.side);
@@ -179,7 +183,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.strategyId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -205,8 +209,9 @@ namespace mm
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
 				OrderMessage& message = *ptr;
 
-				message.orderId = 1;
+				message.orderId = 2;
 				message.instrumentId = 2;
+				message.strategyId = 5;
 				message.price = 20000.0;
 				message.totalQty = 1;
 				message.side = Side::ASK;
@@ -225,8 +230,9 @@ namespace mm
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
 				OrderMessage& message = *ptr;
 
-				message.orderId = 1;
+				message.orderId = 3;
 				message.instrumentId = 2;
+				message.strategyId = 5;
 				message.price = 19999.0;
 				message.totalQty = 1;
 				message.side = Side::ASK;
@@ -265,8 +271,9 @@ namespace mm
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
 				OrderMessage& message = *ptr;
 
-				message.orderId = 1;
+				message.orderId = 4;
 				message.instrumentId = 2;
+				message.strategyId = 5;
 				message.price = 20001.0;
 				message.totalQty = 1;
 				message.side = Side::BID;

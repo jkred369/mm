@@ -48,6 +48,7 @@ namespace mm
 			tradePublisher(*tradePublisher),
 			orderId(0),
 			instrumentId(0),
+			strategyId(0),
 			side(Side::BID),
 			totalQty(0),
 			tradedQty(0),
@@ -83,6 +84,7 @@ namespace mm
 					{
 						orderId = message->orderId;
 						instrumentId = message->instrumentId;
+						strategyId = message->strategyId;
 						side = message->side;
 						totalQty = message->totalQty;
 						price = message->price;
@@ -152,12 +154,13 @@ namespace mm
 
 				trade->orderId = orderId;
 				trade->instrumentId = instrumentId;
+				trade->strategyId = strategyId;
 				trade->executionId = message->executionId;
 				trade->side = side;
 				trade->qty = message->execQty;
 				trade->price = message->execPrice;
 
-				const Subscription sub = {SourceType::ALL, DataType::TRADE, trade->executionId};
+				const Subscription sub = {SourceType::ALL, DataType::TRADE, strategyId};
 				tradePublisher.publish(sub, trade);
 			}
 		}
@@ -177,6 +180,7 @@ namespace mm
 
 			message->orderId = orderId;
 			message->instrumentId = instrumentId;
+			message->strategyId = strategyId;
 			message->side = side;
 			message->totalQty = totalQty;
 			message->tradedQty = tradedQty;
@@ -184,7 +188,7 @@ namespace mm
 			message->avgTradedPrice = avgTradedPrice;
 			message->status = status;
 
-			const Subscription subscription = {SourceType::ALL, DataType::ORDER_SUMMARY, orderId};
+			const Subscription subscription = {SourceType::ALL, DataType::ORDER_SUMMARY, strategyId};
 			publisher.publish(subscription, message);
 		}
 
@@ -206,6 +210,16 @@ namespace mm
 		inline std::int64_t getInstrumentId() const
 		{
 			return instrumentId;
+		}
+
+		//
+		// Get the strategy ID.
+		//
+		// return : strategy ID.
+		//
+		inline std::int64_t getStrategyId() const
+		{
+			return strategyId;
 		}
 
 		//
@@ -293,6 +307,9 @@ namespace mm
 
 		// The instrument ID.
 		std::int64_t instrumentId;
+
+		// The strategy ID.
+		std::int64_t strategyId;
 
 		// The order side.
 		Side side;

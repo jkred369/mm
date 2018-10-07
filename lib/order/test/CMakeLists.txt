@@ -10,6 +10,7 @@ target_include_directories(OrderTest PUBLIC
 	${Common_INCLUDES}
 	${Bus_INCLUDES}
 	${Messaging_INCLUDES}
+	${Threading_INCLUDES}
 	${Service_INCLUDES}
 	${Order_INCLUDES}
 )
@@ -21,6 +22,7 @@ target_link_libraries(OrderTest
 	${GTEST_LIBS}
 	Common
 	Messaging
+	Threading
 	Service
 )
 

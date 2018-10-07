@@ -52,7 +52,7 @@ namespace mm
 				return false;
 			}
 
-			buffer << orderId << instrumentId << side << totalQty << price << avgTradedPrice << status;
+			buffer << orderId << instrumentId << strategyId << side << totalQty << price << avgTradedPrice << status;
 			return buffer.getError();
 		}
 
@@ -71,7 +71,7 @@ namespace mm
 				return false;
 			}
 
-			buffer >> orderId >> instrumentId >> side >> totalQty >> price >> avgTradedPrice >> status;
+			buffer >> orderId >> instrumentId >> strategyId >> side >> totalQty >> price >> avgTradedPrice >> status;
 			return buffer.getError();
 		}
 
@@ -90,6 +90,9 @@ namespace mm
 
 		// The instrument ID.
 		std::int64_t instrumentId;
+
+		// The strategy ID.
+		std::int64_t strategyId;
 
 		// The ordr side.
 		Side side;

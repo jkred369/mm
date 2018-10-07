@@ -79,12 +79,12 @@ namespace mm
 			}
 
 			{
-				const Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, instrumentId};
+				const Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, strategyId};
 				serviceContext.subscribe(sub, dynamic_cast<IConsumer<OrderSummaryMessage>*> (this));
 			}
 
 			{
-				const Subscription sub = {SourceType::ALL, DataType::TRADE, instrumentId};
+				const Subscription sub = {SourceType::ALL, DataType::TRADE, strategyId};
 				serviceContext.subscribe(sub, dynamic_cast<IConsumer<TradeMessage>*> (this));
 			}
 
@@ -94,12 +94,12 @@ namespace mm
 		virtual void stop() override
 		{
 			{
-				const Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, instrumentId};
+				const Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, strategyId};
 				serviceContext.unsubscribe(sub, dynamic_cast<IConsumer<OrderSummaryMessage>*> (this));
 			}
 
 			{
-				const Subscription sub = {SourceType::ALL, DataType::TRADE, instrumentId};
+				const Subscription sub = {SourceType::ALL, DataType::TRADE, strategyId};
 				serviceContext.unsubscribe(sub, dynamic_cast<IConsumer<TradeMessage>*> (this));
 			}
 
@@ -119,6 +119,8 @@ namespace mm
 		std::unordered_map<std::int64_t, std::shared_ptr<const OrderSummaryMessage> > summaryMap;
 
 	private:
+
+		static constexpr std::int64_t strategyId = 7;
 
 		const std::int64_t instrumentId;
 
@@ -148,11 +150,11 @@ namespace mm
 		DummyFactory factory;
 		DummyServiceContext serviceContext(std::stringstream(""), factory);
 
-		std::shared_ptr<DummyAlgo> dummyAlgo(new DummyAlgo(DispatchKey::ALGO, "DummyAlgo", serviceContext, 2));
-		serviceContext.setService("DummyAlgo", dummyAlgo);
-
 		std::shared_ptr<TestOrderManager> orderManager(new TestOrderManager(DispatchKey::ORDER, "OrderManager", serviceContext, exchange));
 		serviceContext.setService("OrderManager", orderManager);
+
+		std::shared_ptr<DummyAlgo> dummyAlgo(new DummyAlgo(DispatchKey::ALGO, "DummyAlgo", serviceContext, 2));
+		serviceContext.setService("DummyAlgo", dummyAlgo);
 
 		serviceContext.start();
 
@@ -163,12 +165,18 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
+			message.strategyId = 7;
 			message.price = 20000.0;
 			message.totalQty = 1;
 			message.side = Side::BID;
 			message.status = OrderStatus::LIVE;
 
-			orderManager->consume(ptr);
+			// subscribe from order channel to avoid sync issue
+			const KeyType key = DispatchKey::ORDER;
+			serviceContext.getDispatcher().submit(key, [ptr, orderManager] () {
+				orderManager->consume(ptr);
+			});
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 			ASSERT_TRUE(!exchange.statusMap.empty());
@@ -185,6 +193,7 @@ namespace mm
 				const OrderSummaryMessage& summary = *summaryPtr;
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
+				ASSERT_TRUE(summary.strategyId == message.strategyId);
 				ASSERT_TRUE(summary.price == message.price);
 				ASSERT_TRUE(summary.totalQty == message.totalQty);
 				ASSERT_TRUE(summary.side == message.side);

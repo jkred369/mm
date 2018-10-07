@@ -54,7 +54,7 @@ namespace mm
 				return false;
 			}
 
-			buffer << orderId << instrumentId << side << totalQty << price << status << type << offsetType;
+			buffer << orderId << instrumentId << strategyId << side << totalQty << price << status << type << offsetType;
 			return buffer.getError();
 		}
 
@@ -73,7 +73,7 @@ namespace mm
 				return false;
 			}
 
-			buffer >> orderId >> instrumentId >> side >> totalQty >> price >> status >> type >> offsetType;
+			buffer >> orderId >> instrumentId >> strategyId >> side >> totalQty >> price >> status >> type >> offsetType;
 			return buffer.getError();
 		}
 
@@ -82,6 +82,9 @@ namespace mm
 
 		// The instrument ID.
 		std::int64_t instrumentId;
+
+		// The strategy pushing this order.
+		std::int64_t strategyId;
 
 		// The order side.
 		Side side;

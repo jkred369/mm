@@ -84,6 +84,7 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
+			message.strategyId = 5;
 			message.price = 20000.0;
 			message.totalQty = 1;
 			message.side = Side::BID;
@@ -104,7 +105,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.strategyId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -139,6 +140,7 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
+			message.strategyId = 5;
 			message.price = 20000.0;
 			message.totalQty = 1;
 			message.side = Side::BID;
@@ -160,7 +162,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.strategyId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -169,6 +171,7 @@ namespace mm
 				const OrderSummaryMessage& summary = *summaryPtr;
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
+				ASSERT_TRUE(summary.strategyId == message.strategyId);
 				ASSERT_TRUE(summary.price == message.price);
 				ASSERT_TRUE(summary.totalQty == message.totalQty);
 				ASSERT_TRUE(summary.side == message.side);
@@ -182,6 +185,7 @@ namespace mm
 			OrderMessage& message = *ptr;
 
 			message.orderId = 1;
+			message.strategyId = 5;
 			message.status = OrderStatus::CANCELLED;
 
 			order.consume(ptr);
@@ -193,7 +197,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.strategyId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -202,6 +206,7 @@ namespace mm
 				const OrderSummaryMessage& summary = *summaryPtr;
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == 2);
+				ASSERT_TRUE(summary.strategyId == 5);
 				ASSERT_TRUE(summary.price == 20000.0);
 				ASSERT_TRUE(summary.totalQty == 1);
 				ASSERT_TRUE(summary.side == Side::BID);
@@ -228,6 +233,7 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
+			message.strategyId = 5;
 			message.price = 20000.0;
 			message.totalQty = 1;
 			message.side = Side::BID;
@@ -237,6 +243,7 @@ namespace mm
 
 			ASSERT_TRUE(order.getOrderId() == message.orderId);
 			ASSERT_TRUE(order.getInstrumentId() == message.instrumentId);
+			ASSERT_TRUE(order.getStrategyId() == message.strategyId);
 			ASSERT_TRUE(order.getPrice() == message.price);
 			ASSERT_TRUE(order.getTotalQty() == message.totalQty);
 			ASSERT_TRUE(order.getSide() == message.side);
@@ -249,7 +256,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.strategyId};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -258,6 +265,7 @@ namespace mm
 				const OrderSummaryMessage& summary = *summaryPtr;
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == message.instrumentId);
+				ASSERT_TRUE(summary.strategyId == message.strategyId);
 				ASSERT_TRUE(summary.price == message.price);
 				ASSERT_TRUE(summary.totalQty == message.totalQty);
 				ASSERT_TRUE(summary.side == message.side);
@@ -285,7 +293,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, 5};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -294,6 +302,7 @@ namespace mm
 				const OrderSummaryMessage& summary = *summaryPtr;
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == 2);
+				ASSERT_TRUE(summary.strategyId == 5);
 				ASSERT_TRUE(summary.price == 20000.0);
 				ASSERT_TRUE(summary.totalQty == 1);
 				ASSERT_TRUE(summary.side == Side::BID);
@@ -328,7 +337,7 @@ namespace mm
 			ASSERT_TRUE(!publisher.messageMap.empty());
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, message.orderId};
+				Subscription sub = {SourceType::ALL, DataType::ORDER_SUMMARY, 5};
 				ASSERT_TRUE(publisher.messageMap.find(sub) != publisher.messageMap.end());
 
 				std::shared_ptr<const OrderSummaryMessage> summaryPtr = publisher.messageMap[sub];
@@ -337,6 +346,7 @@ namespace mm
 				const OrderSummaryMessage& summary = *summaryPtr;
 				ASSERT_TRUE(summary.orderId == message.orderId);
 				ASSERT_TRUE(summary.instrumentId == 2);
+				ASSERT_TRUE(summary.strategyId == 5);
 				ASSERT_TRUE(summary.price == 20000.0);
 				ASSERT_TRUE(summary.totalQty == 1);
 				ASSERT_TRUE(summary.tradedQty == 1);
@@ -346,7 +356,7 @@ namespace mm
 			}
 
 			{
-				Subscription sub = {SourceType::ALL, DataType::TRADE, message.executionId};
+				Subscription sub = {SourceType::ALL, DataType::TRADE, 5};
 				ASSERT_TRUE(publisher.tradeMap.find(sub) != publisher.tradeMap.end());
 
 				std::shared_ptr<const TradeMessage> tradePtr = publisher.tradeMap[sub];
@@ -355,6 +365,7 @@ namespace mm
 				const TradeMessage& trade = *tradePtr;
 				ASSERT_TRUE(trade.orderId == message.orderId);
 				ASSERT_TRUE(trade.instrumentId == 2);
+				ASSERT_TRUE(trade.strategyId == 5);
 				ASSERT_TRUE(trade.qty == 1);
 				ASSERT_TRUE(trade.price == 19999.0);
 				ASSERT_TRUE(trade.side == Side::BID);

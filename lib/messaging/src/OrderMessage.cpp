@@ -12,6 +12,7 @@ namespace mm
 	OrderMessage::OrderMessage() :
 		orderId(0),
 		instrumentId(0),
+		strategyId(0),
 		side(Side::BID),
 		totalQty(0),
 		price(0.0),
@@ -25,6 +26,7 @@ namespace mm
 	{
 		return orderId == rhs.orderId &&
 				instrumentId == rhs.instrumentId &&
+				strategyId == rhs.strategyId &&
 				side == rhs.side &&
 				totalQty == rhs.totalQty &&
 				price == rhs.price &&
