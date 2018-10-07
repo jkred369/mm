@@ -8,8 +8,12 @@
 #ifndef LIB_ORDER_SRC_TICKLADDER_HPP_
 #define LIB_ORDER_SRC_TICKLADDER_HPP_
 
+#include <algorithm>
 #include <cstdint>
+#include <stdexcept>
 #include <vector>
+
+#include <Logger.hpp>
 
 namespace mm
 {
@@ -55,7 +59,30 @@ namespace mm
 			{
 				ticks.push_back(*i);
 			}
+
+			if (ticks.empty())
+			{
+				throw std::invalid_argument("Empty tick band is not allowed.");
+			}
+
+			std::sort(ticks.begin(), ticks.end(), [] (const TickBand& lhs, const TickBand& rhs) {
+				return lhs.lowerBound < rhs.lowerBound;
+			});
+
+			if (ticks[0].lowerBound != 0)
+			{
+				throw std::invalid_argument("Lowest tick band must have lower bound = 0.");
+			}
 		}
+
+		//
+		// Round the price to nearest tick.
+		//
+		// price : The price to round.
+		//
+		// return : The nearest tick price from price.
+		//
+		double roundToTick(double price) const;
 
 		//
 		// Tick up the given price.
@@ -86,6 +113,9 @@ namespace mm
 		double tickMove(double price, std::int64_t tickCount) const;
 
 	private:
+
+		// Logger of the class.
+		static Logger logger;
 
 		// The tick bands.
 		std::vector<TickBand> ticks;
