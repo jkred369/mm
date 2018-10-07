@@ -26,16 +26,17 @@ namespace mm
 	//
 	// This class is the generic order manager implementing OrderListener concept.
 	//
-	template<typename ExchangeInterface, typename Pool> class OrderManager :
+	template<typename ExchangeInterface, template<typename> class Pool> class OrderManager :
 			public DispatchableService,
 			public IConsumer<OrderMessage>,
+			public IConsumer<ExecutionReportMessage>,
 			public PublisherAdapter<OrderSummaryMessage>,
 			public PublisherAdapter<TradeMessage>
 	{
 	public:
 
 		// The exchange order type.
-		typedef Order<ExchangeInterface, Pool, Pool> ExchangeOrder;
+		typedef Order<ExchangeInterface, Pool<OrderSummaryMessage>, Pool<TradeMessage> > ExchangeOrder;
 
 		// The default pool size.
 		static constexpr std::size_t POOL_SIZE = 1000;
@@ -48,11 +49,13 @@ namespace mm
 		// exchange : The exchange interface.
 		//
 		OrderManager(
-				KeyType dispatchKey,
-				Dispatcher& dispatcher,
+				const KeyType dispatchKey,
+				const std::string serviceName,
+				ServiceContext& serviceContext,
 				ExchangeInterface& exchange) :
-			PublisherAdapter<OrderSummaryMessage> (dispatcher),
-			PublisherAdapter<TradeMessage> (dispatcher),
+			DispatchableService(dispatchKey, serviceName, serviceContext),
+			PublisherAdapter<OrderSummaryMessage> (serviceContext.getDispatcher()),
+			PublisherAdapter<TradeMessage> (serviceContext.getDispatcher()),
 			dispatchKey(dispatchKey),
 			exchange(exchange),
 			orderPool(POOL_SIZE),
@@ -78,11 +81,11 @@ namespace mm
 		{
 			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
-				const std::shared_Ptr<ExchangeOrder> order(new Order(exchange, summaryPool, tradePool, this, this));
-				liveCache.addOrder(orderPool.get(publisher, exchange));
+				ExchangeOrder* order = orderPool.get(exchange, summaryPool, tradePool, this, this);
+				liveCache.addOrder(order);
 			}
 
-			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
+			ExchangeOrder* order = liveCache.getOrder(message->instrumentId, message->orderId);
 			if (UNLIKELY(!order))
 			{
 				LOGERR("Error getting live order with instrument ID: {}, order ID: {}", message->instrumentId, message->orderId);
@@ -100,7 +103,7 @@ namespace mm
 		//
 		virtual void consume(const std::shared_ptr<const ExecutionReportMessage>& message) override
 		{
-			const std::shared_ptr<Order>& order = liveCache.getOrder(message->instrumentId, message->orderId);
+			ExchangeOrder* order = liveCache.getOrder(message->instrumentId, message->orderId);
 			if (UNLIKELY(!order))
 			{
 				LOGERR("Error getting order with ID: {}, instrument ID: {}", message->orderId, message->instrumentId);
@@ -111,6 +114,9 @@ namespace mm
 		}
 
 	private:
+
+		// Logger of the class.
+		static Logger logger;
 
 		// The dispatch key.
 		const KeyType dispatchKey;
@@ -134,5 +140,7 @@ namespace mm
 		OrderCache<ExchangeOrder> completedCache;
 	};
 }
+
+template<typename ExchangeInterface, template<typename> class Pool> mm::Logger mm::OrderManager<ExchangeInterface, Pool>::logger;
 
 #endif /* LIB_ORDER_SRC_ORDERMANAGER_HPP_ */

@@ -133,12 +133,16 @@ namespace mm
 			const long maxCount = std::lround((upperBound - ticks[i].lowerBound) * ticks[i].tickInverse);
 			const long actualCount = std::min(count, maxCount);
 
-			result += actualCount * ticks[i].tickSize;
+			result += actualCount * ticks[i].tickSize * direction;
 			count -= actualCount;
 
-			if (result <= ticks[i].lowerBound)
+			if (direction < 0 && result <= ticks[i].lowerBound)
 			{
 				--i;
+			}
+			else if (direction > 0 && result >= ticks[i + 1].lowerBound)
+			{
+				++i;
 			}
 		}
 
