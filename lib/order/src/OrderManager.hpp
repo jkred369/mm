@@ -81,7 +81,7 @@ namespace mm
 		{
 			if (message->status == OrderStatus::NEW || message->status == OrderStatus::LIVE)
 			{
-				ExchangeOrder* order = orderPool.get(exchange, summaryPool, tradePool, this, this);
+				ExchangeOrder* order = orderPool.get(&exchange, &summaryPool, &tradePool, this, this);
 				liveCache.addOrder(order);
 			}
 
@@ -97,7 +97,6 @@ namespace mm
 
 		//
 		// consumer an execution message.
-		// TODO: review the design. should we consume raw pointer? or template the consumer pointer type?
 		//
 		// message : The execution message.
 		//

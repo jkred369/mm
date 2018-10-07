@@ -77,7 +77,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
+		TestOrder order(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 		{
 			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -151,7 +151,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
+		TestOrder order(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 		{
 			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -199,7 +199,7 @@ namespace mm
 		cache.addOrder(&order);
 
 		{
-			TestOrder order2(exchange, summaryPool, tradePool, publisher, publisher);
+			TestOrder order2(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 			{
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -219,7 +219,7 @@ namespace mm
 		}
 
 		{
-			TestOrder order2(exchange, summaryPool, tradePool, publisher, publisher);
+			TestOrder order2(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 			{
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -239,7 +239,7 @@ namespace mm
 		}
 
 		{
-			TestOrder order2(exchange, summaryPool, tradePool, publisher, publisher);
+			TestOrder order2(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 			{
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -259,7 +259,7 @@ namespace mm
 		}
 
 		{
-			TestOrder order2(exchange, summaryPool, tradePool, publisher, publisher);
+			TestOrder order2(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 			{
 				std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();

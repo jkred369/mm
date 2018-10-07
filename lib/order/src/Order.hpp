@@ -36,16 +36,16 @@ namespace mm
 		// tradePublisher : The publisher for trade.
 		// exchange : The exchange.
 		//
-		Order(ExchangeInterface& exchange,
-				SummaryPool& summarPool,
-				TradePool& tradePool,
-				IPublisher<OrderSummaryMessage>& publisher,
-				IPublisher<TradeMessage>& tradePublisher) :
-			exchange(exchange),
-			summaryPool(summaryPool),
-			tradePool(tradePool),
-			publisher(publisher),
-			tradePublisher(tradePublisher),
+		Order(ExchangeInterface* exchange,
+				SummaryPool* summaryPool,
+				TradePool* tradePool,
+				IPublisher<OrderSummaryMessage>* publisher,
+				IPublisher<TradeMessage>* tradePublisher) :
+			exchange(*exchange),
+			summaryPool(*summaryPool),
+			tradePool(*tradePool),
+			publisher(*publisher),
+			tradePublisher(*tradePublisher),
 			orderId(0),
 			instrumentId(0),
 			side(Side::BID),

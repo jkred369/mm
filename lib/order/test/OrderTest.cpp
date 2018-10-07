@@ -76,7 +76,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
+		TestOrder order(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 		{
 			std::shared_ptr<OrderMessage> ptr = std::make_shared<OrderMessage> ();
@@ -130,7 +130,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
+		TestOrder order(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 		// send
 		{
@@ -219,7 +219,7 @@ namespace mm
 		DummyPublisher publisher(dispatcher);
 		DummyExchange exchange;
 
-		TestOrder order(exchange, summaryPool, tradePool, publisher, publisher);
+		TestOrder order(&exchange, &summaryPool, &tradePool, &publisher, &publisher);
 
 		// send
 		{
