@@ -5,13 +5,22 @@
  *      Author: suoalex
  */
 
+#include <ProductService.hpp>
+
 #include "RandomOrderSession.hpp"
 
 mm::Logger mm::RandomOrderSession::logger;
 
 namespace mm
 {
-	RandomOrderSession::RandomOrderSession(ServiceContext& serviceContext, const std::string productServiceName)
+	RandomOrderSession::RandomOrderSession(
+			const KeyType dispatchKey,
+			const std::string serviceName,
+			ServiceContext& serviceContext,
+			const std::string productServiceName) :
+		OrderManager<RandomOrderSession, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
+		scheduler(serviceContext.getScheduler()),
+		executionReportPool(1000)
 	{
 		static_assert(BID >= 0, "Bid index must be positive.");
 		static_assert(ASK >= 0, "Ask index must be positive.");
@@ -39,20 +48,19 @@ namespace mm
 		supportedSet.insert(message->getContent().id);
 	}
 
-	void RandomOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
+	void RandomOrderSession::sendOrder(const std::shared_ptr<const OrderMessage>& message)
 	{
-		if (liveOrderMap.find(message->id) != liveOrderMap.end())
+		if (liveOrderMap.find(message->orderId) != liveOrderMap.end())
 		{
 			LOGERR("Failed to operate on order with id: {}, requested status: {}", message->orderId, toValue(message->status));
 			return;
 		}
 
-		RdtscTimer timer;
 		const OrderMessage copy = *message;
 
-		scheduler.schedule(dispatchKey, [this, copy] () {
+		scheduler.schedule(getKey(), [this, copy] () {
 
-			std::shared_ptr<ExecutionReportMessage> reportPtr = executionReportPool.getShared();
+			const std::shared_ptr<ExecutionReportMessage> reportPtr = executionReportPool.getShared();
 			ExecutionReportMessage& report = *reportPtr;
 
 			report.orderId = copy.orderId;
@@ -62,40 +70,33 @@ namespace mm
 			report.side = copy.side;
 			report.status = OrderStatus::LIVE;
 
-			const Subscription subscription = {SourceType::ALL, DataType::EXEC_REPORT, copy.strategyId};
-			this->publish(subscription, reportPtr);
+			OrderManager<RandomOrderSession, NullObjectPool>::consume(reportPtr);
 
 		}, std::chrono::milliseconds(2));
-
-		return true;
 	}
 
-	void RandomOrderSession::cancel(const std::shared_ptr<OrderMessage>& message)
+	void RandomOrderSession::cancel(const std::shared_ptr<const OrderMessage>& message)
 	{
-		if (liveOrderMap.find(message->id) == liveOrderMap.end())
+		if (liveOrderMap.find(message->orderId) == liveOrderMap.end())
 		{
 			LOGERR("Failed to find order with id: {}, requested status: {}", message->orderId, toValue(message->status));
 			return;
 		}
 
-		RdtscTimer timer;
 		const OrderMessage copy = *message;
 
-		scheduler.schedule(dispatchKey, [this, copy, status] () {
+		scheduler.schedule(getKey(), [this, copy] () {
 
-			std::shared_ptr<ExecutionReportMessage> reportPtr = executionReportPool.getShared();
+			const std::shared_ptr<ExecutionReportMessage> reportPtr = executionReportPool.getShared();
 			ExecutionReportMessage& report = *reportPtr;
 
 			report.orderId = copy.orderId;
 			report.instrumentId = copy.instrumentId;
 			report.status = OrderStatus::CANCELLED;
 
-			const Subscription subscription = {SourceType::ALL, DataType::EXEC_REPORT, copy.strategyId};
-			this->publish(subscription, reportPtr);
+			OrderManager<RandomOrderSession, NullObjectPool>::consume(reportPtr);
 
 		}, std::chrono::milliseconds(2));
-
-		return true;
 	}
 
 }

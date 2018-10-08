@@ -13,6 +13,7 @@ target_include_directories(Simulation PUBLIC
 	${Service_INCLUDES}
 	${Threading_INCLUDES}
 	${Product_INCLUDES}
+	${Order_INCLUDES}
 )
 
 target_link_libraries(Simulation 
@@ -25,4 +26,5 @@ target_link_libraries(Simulation
 	Service
 	Threading
 	Product
+	Order
 )

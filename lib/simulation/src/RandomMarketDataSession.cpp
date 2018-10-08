@@ -32,7 +32,7 @@ namespace mm
 			if (!serviceContext.getService(productServiceName, productService))
 			{
 				LOGERR("Market data session failed to get product service from service context");
-				throw std::runtime_error("Failed to create Femas market data session. Cannot find product service with name: " + productServiceName);
+				throw std::runtime_error("Failed to create Random market data session. Cannot find product service with name: " + productServiceName);
 			}
 
 			productService->initSnapshot(this);

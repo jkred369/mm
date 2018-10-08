@@ -116,6 +116,34 @@ namespace mm
 			order->consume(message);
 		}
 
+		//
+		// override to check the data type.
+		//
+		virtual bool subscribe(const Subscription& subscription, IConsumer<OrderSummaryMessage>* consumer) override
+		{
+			if (subscription.dataType != DataType::ORDER_SUMMARY)
+			{
+				LOGERR("Error subscribing to order summary message with invalid data type: {}", toValue(subscription.dataType));
+				return false;
+			}
+
+			return PublisherAdapter<OrderSummaryMessage>::subscribe(subscription, consumer);
+		}
+
+		//
+		// override to check the data type.
+		//
+		virtual bool subscribe(const Subscription& subscription, IConsumer<TradeMessage>* consumer) override
+		{
+			if (subscription.dataType != DataType::TRADE)
+			{
+				LOGERR("Error subscribing to trade message with invalid data type: {}", toValue(subscription.dataType));
+				return false;
+			}
+
+			return PublisherAdapter<TradeMessage>::subscribe(subscription, consumer);
+		}
+
 	private:
 
 		// Logger of the class.
