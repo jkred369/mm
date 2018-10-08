@@ -24,6 +24,7 @@ namespace mm
 		OrderManager<FemasOrderSession, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
 		userDetail(userDetail),
 		orderDetail(orderDetail),
+		dispatcher(serviceContext.getDispatcher()),
 		executionReportPool(POOL_SIZE),
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
 		stopFlag(false),
@@ -369,8 +370,12 @@ namespace mm
 	{
 		if (info->ErrorID == 0)
 		{
-			investorId = userInvestor->InvestorID;
-			LOGINFO("Investor ID set to {}", investorId);
+			const std::string femasInvestorId = userInvestor->InvestorID;
+
+			dispatcher.submit(dispatchKey, [this, femasInvestorId] () {
+				investorId = femasInvestorId;
+				LOGINFO("Investor ID set to: {}", investorId);
+			});
 		}
 		else
 		{
@@ -396,7 +401,12 @@ namespace mm
 	{
 		if (info->ErrorID == 0)
 		{
-			exchangeId = exchange->ExchangeID;
+			const std::string femasExchangeId = exchange->ExchangeID;
+
+			dispatcher.submit(dispatchKey, [this, femasExchangeId] () {
+				exchangeId = femasExchangeId;
+				LOGINFO("Exchange ID set to: {}", exchangeId);
+			});
 		}
 		else
 		{

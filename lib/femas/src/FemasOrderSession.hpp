@@ -403,6 +403,9 @@ namespace mm
 		// The order session detail.
 		const FemasOrderDetail orderDetail;
 
+		// The dispatcher.
+		Dispatcher& dispatcher;
+
 		// The execution report pool.
 		NullObjectPool<ExecutionReportMessage> executionReportPool;
 

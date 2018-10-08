@@ -144,13 +144,15 @@ namespace mm
 			return PublisherAdapter<TradeMessage>::subscribe(subscription, consumer);
 		}
 
+	protected:
+
+		// The dispatch key.
+		const KeyType dispatchKey;
+
 	private:
 
 		// Logger of the class.
 		static Logger logger;
-
-		// The dispatch key.
-		const KeyType dispatchKey;
 
 		// The exchange interface.
 		ExchangeInterface& exchange;
