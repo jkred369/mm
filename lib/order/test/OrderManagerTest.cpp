@@ -11,7 +11,7 @@
 
 #include <gtest/gtest.h>
 
-#include <NullObjectPool.hpp>
+#include <ObjectPool.hpp>
 #include <OrderManager.hpp>
 
 namespace mm

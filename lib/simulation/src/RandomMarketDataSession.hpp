@@ -21,7 +21,7 @@
 #include <Logger.hpp>
 #include <MarketDataMessage.hpp>
 #include <NativeDefinition.hpp>
-#include <NullObjectPool.hpp>
+#include <ObjectPool.hpp>
 #include <Product.hpp>
 #include <PublisherAdapter.hpp>
 #include <ServiceContext.hpp>

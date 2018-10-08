@@ -9,7 +9,7 @@
 
 #include <gtest/gtest.h>
 
-#include <NullObjectPool.hpp>
+#include <ObjectPool.hpp>
 #include <Order.hpp>
 #include <OrderCache.hpp>
 #include <OrderMessage.hpp>

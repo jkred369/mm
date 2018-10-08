@@ -8,14 +8,14 @@
 
 #include <gtest/gtest.h>
 
-#include "ObjectPool.hpp"
+#include "LockFreeObjectPool.hpp"
 #include "Timer.hpp"
 
 namespace mm
 {
-	TEST(ObjectPoolTest, PrimitiveCase)
+	TEST(LockFreeObjectPoolTest, PrimitiveCase)
 	{
-		ObjectPool<std::int64_t> pool(1, false);
+		LockFreeObjectPool<std::int64_t> pool(1, false);
 		ASSERT_TRUE(!pool.empty());
 
 		{
@@ -43,9 +43,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, ConstructorCase)
+	TEST(LockFreeObjectPoolTest, ConstructorCase)
 	{
-		ObjectPool<std::int64_t> pool(1, false);
+		LockFreeObjectPool<std::int64_t> pool(1, false);
 		ASSERT_TRUE(!pool.empty());
 
 		{
@@ -61,9 +61,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, MultipleCase)
+	TEST(LockFreeObjectPoolTest, MultipleCase)
 	{
-		ObjectPool<std::int64_t> pool(4, false);
+		LockFreeObjectPool<std::int64_t> pool(4, false);
 		ASSERT_TRUE(!pool.empty());
 
 		std::int64_t* value1 = nullptr;
@@ -138,9 +138,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, SharedPtrCase)
+	TEST(LockFreeObjectPoolTest, SharedPtrCase)
 	{
-		ObjectPool<std::int64_t> pool(1, false);
+		LockFreeObjectPool<std::int64_t> pool(1, false);
 		ASSERT_TRUE(!pool.empty());
 
 		{
@@ -170,9 +170,9 @@ namespace mm
 		}
 	}
 
-	TEST(ObjectPoolTest, SmallObjectPerformanceCase)
+	TEST(LockFreeObjectPoolTest, SmallObjectPerformanceCase)
 	{
-		ObjectPool<double> pool(10, false);
+		LockFreeObjectPool<double> pool(10, false);
 		ASSERT_TRUE(!pool.empty());
 
 		HighResTimer timer;
@@ -230,14 +230,14 @@ namespace mm
 
 	}
 
-	TEST(ObjectPoolTest, BigObjectPerformanceCase)
+	TEST(LockFreeObjectPoolTest, BigObjectPerformanceCase)
 	{
 		struct BigObject
 		{
 			std::array<double, 30> fields;
 		};
 
-		ObjectPool<BigObject> pool(100, false);
+		LockFreeObjectPool<BigObject> pool(100, false);
 		ASSERT_TRUE(!pool.empty());
 
 		HighResTimer timer;

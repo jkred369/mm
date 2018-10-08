@@ -13,6 +13,7 @@ target_include_directories(Femas PUBLIC
 	${Service_INCLUDES}
 	${Threading_INCLUDES}
 	${Product_INCLUDES}
+	${Order_INCLUDES}
 )
 
 target_link_libraries(Femas 
@@ -25,4 +26,5 @@ target_link_libraries(Femas
 	Service
 	Threading
 	Product
+	Order
 )

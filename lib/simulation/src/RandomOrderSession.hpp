@@ -18,7 +18,7 @@
 #include <IConsumer.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
-#include <NullObjectPool.hpp>
+#include <ObjectPool.hpp>
 #include <OrderManager.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>

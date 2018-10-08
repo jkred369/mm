@@ -10,7 +10,7 @@
 
 #include <mutex>
 
-#include "ObjectPool.hpp"
+#include "LockFreeObjectPool.hpp"
 
 namespace mm
 {
@@ -22,7 +22,7 @@ namespace mm
 	public:
 
 		// Type for the object pool node.
-		typedef typename ObjectPool<ObjectType, Mutex>::Node Node;
+		typedef typename LockFreeObjectPool<ObjectType, Mutex>::Node Node;
 
 		// Constructor - initialize the ref count.
 		Recyclable()

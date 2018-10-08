@@ -14,8 +14,17 @@ mm::Logger mm::FemasOrderSession::logger;
 
 namespace mm
 {
-	FemasOrderSession::FemasOrderSession(const FemasUserDetail& detail) :
-		userDetail(detail),
+	FemasOrderSession::FemasOrderSession(
+			const KeyType dispatchKey,
+			const std::string serviceName,
+			ServiceContext& serviceContext,
+			const std::string productServiceName,
+			const FemasUserDetail& userDetail,
+			const FemasOrderDetail& orderDetail) :
+		OrderManager<FemasOrderSession, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
+		userDetail(userDetail),
+		orderDetail(orderDetail),
+		executionReportPool(POOL_SIZE),
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
 		stopFlag(false),
 		requestId(0)
@@ -58,6 +67,11 @@ namespace mm
 
 	bool FemasOrderSession::start()
 	{
+		if (!OrderManager<FemasOrderSession, NullObjectPool>::start())
+		{
+			return false;
+		}
+
 		// login attempt
 		CUstpFtdcReqUserLoginField field;
 		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
@@ -118,9 +132,12 @@ namespace mm
 		session->RegisterSpi(nullptr);
 		session->Release();
 		session = nullptr;
+
+		// delegate
+		OrderManager<FemasOrderSession, NullObjectPool>::stop();
 	}
 
-	void FemasOrderSession::sendOrder(const std::shared_ptr<OrderMessage>& message)
+	void FemasOrderSession::sendOrder(const std::shared_ptr<const OrderMessage>& message)
 	{
 		// fixed values to prevent if blocks
 		constexpr TUstpFtdcDirectionType direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
@@ -168,7 +185,7 @@ namespace mm
 		}
 	}
 
-	void FemasOrderSession::cancel(const std::shared_ptr<OrderMessage>& message)
+	void FemasOrderSession::cancel(const std::shared_ptr<const OrderMessage>& message)
 	{
 		CUstpFtdcOrderActionField action;
 		std::memset(&action, 0, sizeof(action));

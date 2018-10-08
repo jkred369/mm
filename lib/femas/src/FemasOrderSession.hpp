@@ -18,8 +18,11 @@
 #include <EnumType.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
+#include <ObjectPool.hpp>
+#include <OrderManager.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>
+#include <Product.hpp>
 #include <PublisherAdapter.hpp>
 
 #include "FemasOrderDetail.hpp"
@@ -31,7 +34,8 @@ namespace mm
 	// This class defines an order session on femas modeling ExchangeInterface concept.
 	//
 	class FemasOrderSession :
-			public IService,
+			public OrderManager<FemasOrderSession, NullObjectPool>,
+			public IConsumer<Product>,
 			public CUstpFtdcTraderSpi
 	{
 	public:
@@ -39,9 +43,20 @@ namespace mm
 		//
 		// Constructor.
 		//
+		// dispatchKey : The dispatch key for order dispatching.
+		// serviceName : The service name in context.
+		// serviceContext : The service context.
+		// productServiceName : The product service name.
 		// userDetail : The configuration details.
+		// orderDetail : The order configuration details.
 		//
-		FemasOrderSession(const FemasUserDetail& detail);
+		FemasOrderSession(
+				const KeyType dispatchKey,
+				const std::string serviceName,
+				ServiceContext& serviceContext,
+				const std::string productServiceName,
+				const FemasUserDetail& userDetail,
+				const FemasOrderDetail& orderDetail);
 
 		// virtual destructor.
 		virtual ~FemasOrderSession();
@@ -53,18 +68,23 @@ namespace mm
 		virtual void stop() override;
 
 		//
+		// consumer interface.
+		//
+		virtual void consume(const std::shared_ptr<const Product>& message) override;
+
+		//
 		// Send new order to exchange.
 		//
 		// message : The message representing new order.
 		//
-		void sendOrder(const std::shared_ptr<OrderMessage>& message);
+		void sendOrder(const std::shared_ptr<const OrderMessage>& message);
 
 		//
 		// Cancel order.
 		//
 		// message : The message representing order to cancel.
 		//
-		void cancel(const std::shared_ptr<OrderMessage>& message);
+		void cancel(const std::shared_ptr<const OrderMessage>& message);
 
 		//
 		// Fired when the session is connected.
@@ -343,11 +363,6 @@ namespace mm
 
 	private:
 
-		inline std::shared_ptr<OrderSummaryMessage> getMessage()
-		{
-			return std::make_shared<OrderSummaryMessage>();
-		}
-
 		//
 		// Get the exchange order ID from the client order ID.
 		//
@@ -376,6 +391,9 @@ namespace mm
 		// The int value for ask
 		static constexpr int ASK = toValue(Side::ASK);
 
+		// The pool size for the execution report.
+		static constexpr std::size_t POOL_SIZE = 1000;
+
 		// The logger for this class.
 		static Logger logger;
 
@@ -384,6 +402,9 @@ namespace mm
 
 		// The order session detail.
 		const FemasOrderDetail orderDetail;
+
+		// The execution report pool.
+		NullObjectPool<ExecutionReportMessage> executionReportPool;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.

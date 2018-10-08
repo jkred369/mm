@@ -7,8 +7,8 @@
 
 #include <gtest/gtest.h>
 
-#include "ObjectPool.hpp"
 #include "Recyclable.hpp"
+#include "LockFreeObjectPool.hpp"
 
 namespace mm
 {
@@ -25,7 +25,7 @@ namespace mm
 	TEST(RecyclableTest, ClassCase)
 	{
 		std::atomic<std::int64_t> counter(0);
-		ObjectPool<TestClass> pool(2, false);
+		LockFreeObjectPool<TestClass> pool(2, false);
 		ASSERT_TRUE(!pool.empty());
 
 		TestClass* value1 = nullptr;
