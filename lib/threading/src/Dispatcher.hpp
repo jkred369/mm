@@ -60,6 +60,9 @@ namespace mm
 		{
 		}
 
+		// Disable copy constructor.
+		TaskRunner(const TaskRunner&) = delete;
+
 		//
 		// Destructor.
 		//
@@ -179,9 +182,15 @@ namespace mm
 		//
 		// threadCount : number of threads in the dispatcher.
 		// startOnCreate : Flag if to start at creation.
+		// waitOnEmpty : Flag if the task runners should wait when queue is empty.
 		//
-		HashDispatcher(size_t threadCount = 4, bool startOnCreate = true) : runners(threadCount), runningFlag(false)
+		HashDispatcher(size_t threadCount = 4, bool startOnCreate = true, bool waitOnEmpty = true) : runners(threadCount), runningFlag(false)
 		{
+			for (std::size_t i = 0; i < threadCount; ++i)
+			{
+				runners[i].reset(new TaskRunner<Mutex> (waitOnEmpty));
+			}
+
 			if (startOnCreate)
 			{
 				start();
@@ -205,9 +214,9 @@ namespace mm
 
 			if (runningFlag.compare_exchange_strong(expected, true))
 			{
-				for (TaskRunner<Mutex>& runner : runners)
+				for (std::shared_ptr<TaskRunner<Mutex> >& runner : runners)
 				{
-					runner.start();
+					runner->start();
 				}
 			}
 		}
@@ -221,9 +230,9 @@ namespace mm
 
 			if (runningFlag.compare_exchange_strong(expected, false))
 			{
-				for (TaskRunner<Mutex>& runner : runners)
+				for (std::shared_ptr<TaskRunner<Mutex> >& runner : runners)
 				{
-					runner.stop();
+					runner->stop();
 				}
 			}
 		}
@@ -236,7 +245,7 @@ namespace mm
 		//
 		void submit(const Key& key, const Runnable& runnable)
 		{
-			runners[hash(key) % runners.size()].submit(runnable);
+			runners[hash(key) % runners.size()]->submit(runnable);
 		}
 
 	private:
@@ -245,7 +254,7 @@ namespace mm
 		Hash hash;
 
 		// The task runners.
-		std::vector<TaskRunner<Mutex> > runners;
+		std::vector<std::shared_ptr<TaskRunner<Mutex> > > runners;
 
 		// Flag if the dispatcher is running.
 		std::atomic<bool> runningFlag;
