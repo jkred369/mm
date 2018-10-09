@@ -37,6 +37,9 @@ namespace mm
 		// The thread count.
 		static const std::string THREAD_COUNT;
 
+		// Flag if to wait on queue empty
+		static const std::string WAIT_ON_EMPTY;
+
 		// The CPU affinity for threads.
 		static const std::string CPU_AFFINITY;
 	};

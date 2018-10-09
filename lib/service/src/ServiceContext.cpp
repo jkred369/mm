@@ -61,6 +61,7 @@ namespace mm
 			std::shared_ptr<IConfig> dispatcherConfig = config->getSubConfig(DispatcherConfig::DISPATCHER_CONFIG);
 
 			const int threadCount = dispatcherConfig.get() ? dispatcherConfig->getInt64(DispatcherConfig::THREAD_COUNT) : 1;
+			const bool waitOnEmpty = dispatcherConfig.get() ? dispatcherConfig->getBool(DispatcherConfig::WAIT_ON_EMPTY, false) : false;
 			if (!dispatcherConfig.get())
 			{
 				LOGWARN("No dispatcher defined in config. Using default dispatch count = {}", threadCount);
@@ -71,8 +72,8 @@ namespace mm
 				LOGERR("Invalid thread count for dispatcher: {}", threadCount);
 			}
 
-			dispatcher.reset(new Dispatcher(threadCount, false));
-			LOGINFO("Dispatcher created with {} threads.", threadCount);
+			dispatcher.reset(new Dispatcher(threadCount, false, waitOnEmpty));
+			LOGINFO("Dispatcher created with {} threads. WaitOnEmpty = {}", threadCount, waitOnEmpty);
 		}
 
 		// scheduler
