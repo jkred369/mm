@@ -21,6 +21,9 @@
 
 #include <Poco/Hash.h>
 
+#include <Logger.hpp>
+#include <ThreadUtil.hpp>
+
 #include "Runnable.hpp"
 #include "DispatchKey.hpp"
 
@@ -54,12 +57,15 @@ namespace mm
 	{
 	public:
 
+		// Flag the CPU affinity ID isn't set.
+		static constexpr int CPU_ID_NOT_SET = -1;
+
 		//
 		// Constructor.
 		//
 		// waitOnEmpty : Flag if thread should enter passive wait when queue is empty.
 		//
-		TaskRunner(bool waitOnEmpty = true) : waitOnEmpty(waitOnEmpty), stopRequested(false), thread(nullptr)
+		TaskRunner(bool waitOnEmpty = true, int cpuId = CPU_ID_NOT_SET) : waitOnEmpty(waitOnEmpty), cpuId(cpuId), stopRequested(false), thread(nullptr)
 		{
 		}
 
@@ -76,12 +82,12 @@ namespace mm
 		//
 		// Start execution of the tasks.
 		//
-		void start()
+		bool start()
 		{
 			// sanity check
 			if (thread.get() != nullptr)
 			{
-				return;
+				return false;
 			}
 
 			thread.reset(new std::thread([this] ()
@@ -105,6 +111,20 @@ namespace mm
 					}
 				}
 			}));
+
+			// set the CPU affinity where needed
+			if (cpuId != CPU_ID_NOT_SET)
+			{
+				if (!ThreadUtil::setAffinity(thread->native_handle(), cpuId))
+				{
+					LOGFATAL("Thread pin failed to core {}", cpuId);
+					return false;
+				}
+
+				LOGINFO("Thread pinned to core {}", cpuId);
+			}
+
+			return true;
 		}
 
 		//
@@ -147,8 +167,14 @@ namespace mm
 
 	private:
 
+		// Logger of the class.
+		static Logger logger;
+
 		// Flag if the thread should wait when queue is empty.
 		const bool waitOnEmpty;
+
+		// The CPU ID if an affinity is set.
+		const int cpuId;
 
 		// Flag if stop is called.
 		std::atomic<bool> stopRequested;
@@ -186,12 +212,17 @@ namespace mm
 		// threadCount : number of threads in the dispatcher.
 		// startOnCreate : Flag if to start at creation.
 		// waitOnEmpty : Flag if the task runners should wait when queue is empty.
+		// cpuIds : The CPU IDS to set affinity, if any
 		//
-		HashDispatcher(size_t threadCount = 4, bool startOnCreate = true, bool waitOnEmpty = true) : runners(threadCount), runningFlag(false)
+		HashDispatcher(
+				size_t threadCount = 4,
+				bool startOnCreate = true,
+				bool waitOnEmpty = true,
+				std::vector<int> cpuIds = {}) : runners(threadCount), runningFlag(false)
 		{
 			for (std::size_t i = 0; i < threadCount; ++i)
 			{
-				runners[i].reset(new TaskRunner<Mutex> (waitOnEmpty));
+				runners[i].reset(new TaskRunner<Mutex> (waitOnEmpty, cpuIds.empty() ? TaskRunner<Mutex>::CPU_ID_NOT_SET : cpuIds[i]));
 			}
 
 			if (startOnCreate)
@@ -211,7 +242,7 @@ namespace mm
 		//
 		// Start the dispatcher.
 		//
-		void start()
+		bool start()
 		{
 			bool expected = false;
 
@@ -219,9 +250,14 @@ namespace mm
 			{
 				for (std::shared_ptr<TaskRunner<Mutex> >& runner : runners)
 				{
-					runner->start();
+					if (!runner->start())
+					{
+						return false;
+					}
 				}
 			}
+
+			return true;
 		}
 
 		//
@@ -266,5 +302,7 @@ namespace mm
 	// Define the globally used dispatcher type.
 	typedef HashDispatcher<> Dispatcher;
 }
+
+template<typename Mutex> mm::Logger mm::TaskRunner<Mutex>::logger;
 
 #endif /* LIB_THREADING_DISPATCHER_HPP_ */

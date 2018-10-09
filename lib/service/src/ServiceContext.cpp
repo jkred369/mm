@@ -62,6 +62,18 @@ namespace mm
 
 			const int threadCount = dispatcherConfig.get() ? dispatcherConfig->getInt64(DispatcherConfig::THREAD_COUNT) : 1;
 			const bool waitOnEmpty = dispatcherConfig.get() ? dispatcherConfig->getBool(DispatcherConfig::WAIT_ON_EMPTY, false) : false;
+
+			// the CPU affinity list if any
+			std::vector<int> cpuIds;
+			if (dispatcherConfig.get())
+			{
+				const std::vector<std::int64_t>& ids = dispatcherConfig->getInt64List(DispatcherConfig::CPU_AFFINITY);
+				for (const std::int64_t& id : ids)
+				{
+					cpuIds.push_back(id);
+				}
+			}
+
 			if (!dispatcherConfig.get())
 			{
 				LOGWARN("No dispatcher defined in config. Using default dispatch count = {}", threadCount);
@@ -72,7 +84,7 @@ namespace mm
 				LOGERR("Invalid thread count for dispatcher: {}", threadCount);
 			}
 
-			dispatcher.reset(new Dispatcher(threadCount, false, waitOnEmpty));
+			dispatcher.reset(new Dispatcher(threadCount, false, waitOnEmpty, cpuIds));
 			LOGINFO("Dispatcher created with {} threads. WaitOnEmpty = {}", threadCount, waitOnEmpty);
 		}
 
@@ -111,7 +123,12 @@ namespace mm
 
 	bool ServiceContext::start()
 	{
-		dispatcher->start();
+		if (!dispatcher->start())
+		{
+			LOGFATAL("Failed to start dispatcher.");
+			return false;
+		}
+
 		LOGINFO("Dispatcher started.");
 
 		scheduler->start();
