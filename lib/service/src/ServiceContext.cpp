@@ -111,7 +111,7 @@ namespace mm
 				}
 
 				const std::string serviceClass = serviceConfig->getString(ServiceContext::SERVICE_CLASS);
-				if (setService(serviceName, factory.createService(serviceClass, serviceConfig, *this)))
+				if (setService(serviceName, factory.createService(serviceClass, serviceName, serviceConfig, *this)))
 				{
 					LOGINFO("Service {} created successfully.", serviceName);
 				}

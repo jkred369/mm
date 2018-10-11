@@ -27,6 +27,7 @@ namespace mm
 
 		virtual std::shared_ptr<IService> createService(
 				const std::string serviceClass,
+				const std::string serviceName,
 				const std::shared_ptr<IConfig> config,
 				ServiceContext& context) override
 		{
@@ -80,6 +81,7 @@ namespace mm
 
 		virtual std::shared_ptr<IService> createService(
 				const std::string serviceClass,
+				const std::string serviceName,
 				const std::shared_ptr<IConfig> config,
 				ServiceContext& context) override
 		{
@@ -131,6 +133,7 @@ namespace mm
 
 		virtual std::shared_ptr<IService> createService(
 				const std::string serviceClass,
+				const std::string serviceName,
 				const std::shared_ptr<IConfig> config,
 				ServiceContext& context) override
 		{
