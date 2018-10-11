@@ -29,3 +29,5 @@ target_link_libraries(Trader
 	Arb
 	Femas
 )
+
+configure_file("../config/simulation.txt" "${PROJECT_BINARY_DIR}/release/config/simulation.txt" COPYONLY)
