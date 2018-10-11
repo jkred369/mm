@@ -12,6 +12,7 @@ Logger.Pattern=[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v
 # Then set up the dispatcher
 # Set processor affinity where needed
 Dispatcher.ThreadCount=4
+Dispatcher.WaitOnEmpty=1
 Dispatcher.CpuAffinity=0,1,2,3
 
 # Now need to create all the services
