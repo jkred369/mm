@@ -75,9 +75,9 @@ namespace mm
 
 		// login attempt
 		CUstpFtdcReqUserLoginField field;
-		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
 		field.DataCenterID = userDetail.dataCenterId;
 
+		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
 		StringUtil::copy(field.IPAddress, userDetail.ipAddress, sizeof(field.IPAddress));
 		StringUtil::copy(field.InterfaceProductInfo, userDetail.interfaceProductInfo, sizeof(field.InterfaceProductInfo));
 		StringUtil::copy(field.MacAddress, userDetail.macAddress, sizeof(field.MacAddress));
@@ -99,6 +99,18 @@ namespace mm
 			LOGERR("Error loging as user {} with code: {}", userDetail.userId, result);
 			return false;
 		}
+
+		// query the necessary information
+		{
+			CUstpFtdcQryUserInvestorField field;
+			StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+			StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
+
+			session->ReqQryUserInvestor(&field, ++requestId);
+		}
+
+		LOGINFO("Waiting for investor ID querying...");
+		startLatch.wait();
 
 		// TODO: determine if resume is proper here.
 		session->SubscribeUserTopic(USTP_TERT_RESUME);
@@ -406,6 +418,8 @@ namespace mm
 			dispatcher.submit(dispatchKey, [this, femasExchangeId] () {
 				exchangeId = femasExchangeId;
 				LOGINFO("Exchange ID set to: {}", exchangeId);
+
+				startLatch.countDown();
 			});
 		}
 		else

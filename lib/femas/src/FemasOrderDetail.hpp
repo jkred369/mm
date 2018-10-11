@@ -8,6 +8,8 @@
 #ifndef LIB_FEMAS_SRC_FEMASORDERDETAIL_HPP_
 #define LIB_FEMAS_SRC_FEMASORDERDETAIL_HPP_
 
+#include <cstring>
+
 #include <femas/USTPFtdcUserApiDataType.h>
 
 namespace mm
@@ -20,7 +22,7 @@ namespace mm
 		//
 		// Default constructor.
 		//
-		FemasOrderDetail() : hedgeFlag(USTP_FTDC_CHF_Speculation), isAutoSuspend(0)
+		FemasOrderDetail() : hedgeFlag(USTP_FTDC_CHF_Speculation), isAutoSuspend(0), exchangeId("")
 		{
 		}
 
@@ -29,9 +31,20 @@ namespace mm
 		//
 		// hedgeFlag : The hedge flag needed.
 		// isAutoSuspend : Flag if auto suspend is needed.
+		// exchangeId : The exchange to send order to.
 		//
-		FemasOrderDetail(char hedgeFlag, int isAutoSuspend) : hedgeFlag(hedgeFlag), isAutoSuspend(isAutoSuspend)
+		FemasOrderDetail(
+				char hedgeFlag,
+				int isAutoSuspend,
+				const std::string exchangeId) :
+					hedgeFlag(hedgeFlag),
+					isAutoSuspend(isAutoSuspend),
+					exchangeId(exchangeId)
 		{
+			if (exchangeId.size() + 1 > sizeof(TUstpFtdcExchangeIDType))
+			{
+				throw std::invalid_argument("Exchange ID can be at most 11 chars.");
+			}
 		}
 
 		// the hedge flag
@@ -39,6 +52,9 @@ namespace mm
 
 		// flag if order should be auto suspend
 		const TUstpFtdcBoolType isAutoSuspend;
+
+		// the exchange ID
+		const std::string exchangeId;
 	};
 }
 

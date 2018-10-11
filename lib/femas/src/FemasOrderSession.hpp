@@ -15,6 +15,7 @@
 
 #include <femas/USTPFtdcTraderApi.h>
 
+#include <CountDownLatch.hpp>
 #include <EnumType.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
@@ -412,6 +413,9 @@ namespace mm
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.
 		CUstpFtdcTraderApi* session;
+
+		// The start up count down latch.
+		CountDownLatch<> startLatch;
 
 		// Flag if stop is called or in process.
 		std::atomic<bool> stopFlag;

@@ -26,7 +26,7 @@ namespace mm
 		//
 		// count : The total count.
 		//
-		CountDownLatch(std::uint32_t count) : count(count)
+		CountDownLatch(std::uint32_t count = 1) : count(count)
 		{
 		}
 
