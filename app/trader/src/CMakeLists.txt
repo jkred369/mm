@@ -30,4 +30,4 @@ target_link_libraries(Trader
 	Femas
 )
 
-configure_file("../config/simulation.txt" "${PROJECT_BINARY_DIR}/release/config/simulation.txt" COPYONLY)
+configure_file("../config/simulation.txt" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/simulation.txt" COPYONLY)
