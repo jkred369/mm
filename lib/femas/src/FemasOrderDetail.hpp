@@ -9,11 +9,32 @@
 #define LIB_FEMAS_SRC_FEMASORDERDETAIL_HPP_
 
 #include <cstring>
+#include <memory>
+#include <string>
 
 #include <femas/USTPFtdcUserApiDataType.h>
 
+#include <IConfig.hpp>
+
 namespace mm
 {
+
+	//
+	// The config keys for user detail object.
+	//
+	struct FemasOrderDetailConfig
+	{
+		// The hedge flag.
+		static const std::string HEDGE_FLAG;
+
+		// The auto suspend flag.
+		static const std::string IS_AUTO_SUSPEND;
+
+		// The exchange ID.
+		static const std::string EXCHANGE_ID;
+	};
+
+
 	//
 	// This class holds all the order specific detail for the order session to fill in session specific data.
 	//
@@ -25,6 +46,13 @@ namespace mm
 		FemasOrderDetail() : hedgeFlag(USTP_FTDC_CHF_Speculation), isAutoSuspend(0), exchangeId("")
 		{
 		}
+
+		//
+		// Constructor.
+		//
+		// config : The config object.
+		//
+		FemasOrderDetail(const std::shared_ptr<IConfig> config);
 
 		//
 		// Constructor.

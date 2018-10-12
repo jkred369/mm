@@ -9,6 +9,7 @@
 #define LIB_FEMAS_SRC_FEMASUSERDETAIL_HPP_
 
 #include <cstdint>
+#include <memory>
 #include <string>
 
 #include <IConfig.hpp>
