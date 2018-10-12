@@ -15,10 +15,10 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
+#include <DispatchableService.hpp>
 #include <EnumType.hpp>
 #include <FieldDefinition.hpp>
 #include <IConsumer.hpp>
-#include <IService.hpp>
 #include <Logger.hpp>
 #include <MarketDataMessage.hpp>
 #include <NativeDefinition.hpp>
@@ -34,7 +34,7 @@ namespace mm
 	// This class defines a Femas market data session for market data updates.
 	//
 	class FemasMarketDataSession :
-			public IService,
+			public DispatchableService,
 			public CUstpFtdcMduserSpi,
 			public PublisherAdapter<MarketDataMessage>,
 			public IConsumer<Product>
@@ -45,11 +45,17 @@ namespace mm
 		// Constructor.
 		//
 		// dispatchKey : The dispatch key for the session.
+		// serviceName : The service name.
 		// serviceContext : The service context.
 		// productServiceName : The name of the product service.
 		// userDetail : The configuration details.
 		//
-		FemasMarketDataSession(KeyType dispatchKey, ServiceContext& serviceContext, const std::string& productServiceName, const FemasUserDetail& detail);
+		FemasMarketDataSession(
+				KeyType dispatchKey,
+				const std::string serviceName,
+				ServiceContext& serviceContext,
+				const std::string& productServiceName,
+				const FemasUserDetail& detail);
 
 		//
 		// Destructor.

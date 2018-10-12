@@ -11,8 +11,64 @@
 #include <cstdint>
 #include <string>
 
+#include <IConfig.hpp>
+
 namespace mm
 {
+	//
+	// The config keys for user detail object.
+	//
+	struct FemasUserDetailConfig
+	{
+		// The front address.
+		static const std::string FRONT_ADDRESS;
+
+		// The name serveri.
+		static const std::string NAME_SERVER;
+
+		// The cert file name.
+		static const std::string CERT_FILE_NAME;
+
+		// The key file name.
+		static const std::string KEY_FILE_NAME;
+
+		// The CA file name.
+		static const std::string CA_FILE_NAME;
+
+		// The key file password.
+		static const std::string KEY_FILE_PASSWORD;
+
+		// The user ID.
+		static const std::string USER_ID;
+
+		// The data center ID.
+		static const std::string DATA_CENTER_ID;
+
+		// The broker ID.
+		static const std::string BROKER_ID;
+
+		// The trading system name.
+		static const std::string TRADING_SYSTEM_NAME;
+
+		// The mac address.
+		static const std::string MAC_ADDRESS;
+
+		// The IP address.
+		static const std::string IP_ADDRESS;
+
+		// The interface info.
+		static const std::string INTERFACE_PRODUCT_INFO;
+
+		// The user product info.
+		static const std::string USER_PRODUCE_INFO;
+
+		// The password.
+		static const std::string PASSWORD;
+
+		// The protocol info.
+		static const std::string PROTOCOL_INFO;
+	};
+
 	//
 	// This class defines the user login detail fields.
 	//
@@ -21,6 +77,13 @@ namespace mm
 		FemasUserDetail()
 		{
 		}
+
+		//
+		// retrieve the fields from config.
+		//
+		// config : The config object.
+		//
+		FemasUserDetail(const std::shared_ptr<IConfig> config);
 
 		FemasUserDetail(
 				const std::string& frontAddress,

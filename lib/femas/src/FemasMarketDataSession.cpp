@@ -21,9 +21,11 @@ namespace mm
 {
 	FemasMarketDataSession::FemasMarketDataSession(
 			KeyType dispatchKey,
+			const std::string serviceName,
 			ServiceContext& serviceContext,
 			const std::string& productServiceName,
 			const FemasUserDetail& detail) :
+		DispatchableService(dispatchKey, serviceName, serviceContext),
 		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		userDetail(detail),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
