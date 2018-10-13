@@ -39,9 +39,11 @@ namespace mm
 		if (!context->start())
 		{
 			LOGFATAL("Error starting context. Stopping...");
+			shutDownFlag.store(true);
 		}
 
 		// block and shut down
+		while (!shutDownFlag.load())
 		{
 			sigset_t signals;
 			sigemptyset(&signals);
@@ -56,10 +58,7 @@ namespace mm
 			}
 		}
 
-		if (shutDownFlag.load())
-		{
-			shutdown();
-		}
+		shutdown();
 	}
 
 	void ServiceContextManager::shutdown()
