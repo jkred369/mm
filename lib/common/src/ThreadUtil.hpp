@@ -9,6 +9,8 @@
 #define LIB_COMMON_SRC_THREADUTIL_HPP_
 
 #include <sched.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 namespace mm
 {
@@ -17,6 +19,17 @@ namespace mm
 	//
 	struct ThreadUtil
 	{
+		//
+		// Set the current thread to run on the given CPU.
+		//
+		// cpu : THe CPU ID.
+		//
+		static bool setAffinity(int cpu)
+		{
+			const pid_t pid = syscall(SYS_gettid);
+			return setAffinity(pid, cpu);
+		}
+
 		//
 		// Set the given thread to run on the given CPU.
 		//
@@ -29,7 +42,8 @@ namespace mm
 			CPU_ZERO(&set);
 			CPU_SET(cpu, &set);
 
-			return sched_setaffinity(pid, sizeof(set), &set) == 0;
+			const int result = sched_setaffinity(pid, sizeof(set), &set);
+			return result == 0;
 		}
 	};
 }

@@ -92,8 +92,19 @@ namespace mm
 
 			thread.reset(new std::thread([this] ()
 			{
-				Runnable runnable;
+				// set the CPU affinity where needed
+				if (cpuId != CPU_ID_NOT_SET)
+				{
+					if (!ThreadUtil::setAffinity(cpuId))
+					{
+						LOGFATAL("Thread pin failed to core {}", cpuId);
+					}
 
+					LOGINFO("Thread pinned to core {}", cpuId);
+				}
+
+				// start the queue
+				Runnable runnable;
 				while (!stopRequested.load())
 				{
 					if (queue.try_pop(runnable))
@@ -111,18 +122,6 @@ namespace mm
 					}
 				}
 			}));
-
-			// set the CPU affinity where needed
-			if (cpuId != CPU_ID_NOT_SET)
-			{
-				if (!ThreadUtil::setAffinity(thread->native_handle(), cpuId))
-				{
-					LOGFATAL("Thread pin failed to core {}", cpuId);
-					return false;
-				}
-
-				LOGINFO("Thread pinned to core {}", cpuId);
-			}
 
 			return true;
 		}
@@ -143,7 +142,10 @@ namespace mm
 				condition.notify_all();
 			}
 
-			thread->join();
+			if (thread)
+			{
+				thread->join();
+			}
 		}
 
 		//
@@ -271,7 +273,10 @@ namespace mm
 			{
 				for (std::shared_ptr<TaskRunner<Mutex> >& runner : runners)
 				{
-					runner->stop();
+					if (runner)
+					{
+						runner->stop();
+					}
 				}
 			}
 		}
