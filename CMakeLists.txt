@@ -75,8 +75,8 @@ set(CMAKE_CXX_FLAGS "-g -Wall -pipe -pthread -std=c++14 -lboost_thread -lboost_s
 set(BUILD_TESTING ON)
 
 # output
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/release/bin" )
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/release/lib" )
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/release/bin" )
+# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/release/lib" )
 set(CMAKE_CONFIG_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/release/config" )
 set(CMAKE_COMMAND_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/release/script" )
 

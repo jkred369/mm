@@ -8,6 +8,7 @@
 #ifndef LIB_FEMAS_SRC_FEMASMARKETDATASESSIONFACTORY_HPP_
 #define LIB_FEMAS_SRC_FEMASMARKETDATASESSIONFACTORY_HPP_
 
+#include <memory>
 #include <string>
 
 #include <IServiceFactory.hpp>

@@ -10,6 +10,7 @@ target_include_directories(Arb PUBLIC
 	${Bus_INCLUDES}
 	${Threading_INCLUDES}
 	${Service_INCLUDES}
+	${Order_INCLUDES}
 )
 
 target_link_libraries(Arb 
@@ -22,4 +23,5 @@ target_link_libraries(Arb
 	Messaging
 	Threading
 	Service
+	Order
 )
