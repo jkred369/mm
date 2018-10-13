@@ -31,13 +31,13 @@ set(Order_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/order/src")
 file(GLOB_RECURSE Order_HEADERS "${Order_INCLUDES}/*.hpp")
 add_subdirectory(order)
 
+set(Femas_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/femas/src")
+file(GLOB_RECURSE Femas_HEADERS "${Femas_INCLUDES}/*.hpp")
+add_subdirectory(femas)
+
 set(Simulation_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/simulation/src")
 file(GLOB_RECURSE Simulation_HEADERS "${Simulation_INCLUDES}/*.hpp") 
 add_subdirectory(simulation)
-
-set(Femas_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/femas/src")
-file(GLOB_RECURSE Femas_HEADERS "${Femas_INCLUDES}/*.hpp") 
-add_subdirectory(femas)
 
 set(Arb_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/arb/src")
 file(GLOB_RECURSE Arb_HEADERS "${Arb_INCLUDES}/*.hpp") 
