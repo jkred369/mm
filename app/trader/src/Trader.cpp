@@ -8,9 +8,6 @@
 #include <iostream>
 #include <thread>
 
-//TODO: Fix the path.
-//#include "FemasMarketDataSessionFactory.hpp"
-//#include "FemasOrderSessionFactory.hpp"
 #include <FemasMarketDataSessionFactory.hpp>
 #include <FemasOrderSessionFactory.hpp>
 #include <ProductServiceFactory.hpp>
