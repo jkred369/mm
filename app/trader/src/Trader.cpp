@@ -9,12 +9,11 @@
 #include <thread>
 
 //TODO: Fix the path.
-#include "/home/suoalex/workspaces/mm/lib/femas/src/FemasMarketDataSessionFactory.hpp"
-#include "/home/suoalex/workspaces/mm/lib/femas/src/FemasOrderSessionFactory.hpp"
-#include "/home/suoalex/workspaces/mm/lib/product/src/ProductServiceFactory.hpp"
-//#include <FemasMarketDataSessionFactory.hpp>
-//#include <FemasOrderSessionFactory.hpp>
-//#include <ProductServiceFactory.hpp>
+//#include "FemasMarketDataSessionFactory.hpp"
+//#include "FemasOrderSessionFactory.hpp"
+#include <FemasMarketDataSessionFactory.hpp>
+#include <FemasOrderSessionFactory.hpp>
+#include <ProductServiceFactory.hpp>
 #include <ServiceContextManager.hpp>
 
 int main(int argc, char** argv)
@@ -26,7 +25,8 @@ int main(int argc, char** argv)
 	}
 
 	// make sure factory is properly registered
-	if (!mm::FemasMarketDataSessionFactory::registered ||
+	if (
+		!mm::FemasMarketDataSessionFactory::registered ||
 		!mm::FemasOrderSessionFactory::registered ||
 		!mm::ProductServiceFactory::registered)
 	{

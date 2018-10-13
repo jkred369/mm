@@ -3,6 +3,17 @@ file(GLOB_RECURSE Trader_SOURCES "*.cpp")
 
 add_executable(Trader ${Trader_HEADERS} ${Trader_SOURCES})
 
+include_directories(
+	${CMAKE_SOURCE_DIR}/lib/common/src
+	${CMAKE_SOURCE_DIR}/lib/config/src
+	${CMAKE_SOURCE_DIR}/lib/messaging/src
+	${CMAKE_SOURCE_DIR}/lib/threading/src
+	${CMAKE_SOURCE_DIR}/lib/service/src
+	${CMAKE_SOURCE_DIR}/lib/order/src
+	${CMAKE_SOURCE_DIR}/lib/femas/src
+	${CMAKE_SOURCE_DIR}/lib/arb/src
+)
+
 target_include_directories(Trader PUBLIC
 	${Common_INCLUDES}
 	${Config_INCLUDES}
