@@ -12,6 +12,9 @@
 #include "/home/suoalex/workspaces/mm/lib/femas/src/FemasMarketDataSessionFactory.hpp"
 #include "/home/suoalex/workspaces/mm/lib/femas/src/FemasOrderSessionFactory.hpp"
 #include "/home/suoalex/workspaces/mm/lib/product/src/ProductServiceFactory.hpp"
+//#include <FemasMarketDataSessionFactory.hpp>
+//#include <FemasOrderSessionFactory.hpp>
+//#include <ProductServiceFactory.hpp>
 #include <ServiceContextManager.hpp>
 
 int main(int argc, char** argv)

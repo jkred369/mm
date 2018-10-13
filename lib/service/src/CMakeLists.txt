@@ -4,10 +4,10 @@ file(GLOB_RECURSE Service_SOURCES "*.cpp")
 add_library(Service SHARED ${Service_HEADERS} ${Service_SOURCES})
 
 target_include_directories(Service PUBLIC
-	${Bus_INCLUDES}
 	${Common_INCLUDES}
 	${Config_INCLUDES}
 	${Messaging_INCLUDES}
+	${Bus_INCLUDES}
 	${Threading_INCLUDES}
 )
 
