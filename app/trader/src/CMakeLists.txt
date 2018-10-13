@@ -5,7 +5,7 @@ add_executable(Trader ${Trader_HEADERS} ${Trader_SOURCES})
 
 target_include_directories(Trader PUBLIC
 	${Common_INCLUDES}
-	{$Config_INCLUDES}
+	${Config_INCLUDES}
 	${Messaging_INCLUDES}
 	${Threading_INCLUDES}
 	${Bus_INCLUDES}
