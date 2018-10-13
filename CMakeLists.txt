@@ -68,8 +68,8 @@ include_directories(${FEMAS_INCLUDE_DIR})
 
 # compiler options
 set(CMAKE_CXX_STANDARD 14)
-# set(CMAKE_CXX_FLAGS "-g -Wall -O3 -pipe -pthread -std=c++14 -lboost_thread -lboost_system -fprofile-arcs -ftest-coverage")
-set(CMAKE_CXX_FLAGS "-g -Wall -pipe -pthread -std=c++14 -lboost_thread -lboost_system -fprofile-arcs -ftest-coverage")
+# set(CMAKE_CXX_FLAGS "-g -Wall -O3 -pipe -pthread -std=c++14 -lboost_thread -lboost_system -fprofile-arcs -ftest-coverage -lssl -lcrypto")
+set(CMAKE_CXX_FLAGS "-g -Wall -pipe -pthread -std=c++14 -lboost_thread -lboost_system -fprofile-arcs -ftest-coverage -lssl -lcrypto")
 
 # testing
 set(BUILD_TESTING ON)

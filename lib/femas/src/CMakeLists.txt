@@ -7,6 +7,7 @@ add_library(Femas SHARED
 )
 
 target_include_directories(Femas PUBLIC
+	${FEMAS_INCLUDE_DIR}
 	${Bus_INCLUDES}
 	${Common_INCLUDES}
 	${Messaging_INCLUDES}
@@ -21,6 +22,7 @@ target_link_libraries(Femas
 	${TBB_LIBS}
 	${POCO_LIBS}
 	${GTEST_LIBS}
+	${FEMAS_LIBS}
 	Common
 	Messaging
 	Service

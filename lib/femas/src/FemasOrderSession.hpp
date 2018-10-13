@@ -432,6 +432,9 @@ namespace mm
 		// The trading date as from the session.
 		std::string tradingDate;
 
+		// The map where key is the instrument ID and value is the symbol to be sent to exchange.
+		std::unordered_map<std::int64_t, TUstpFtdcInstrumentIDType> symbolMap;
+
 		// The map from client order ID to exchange order ID.
 		std::unordered_map<std::int64_t, TUstpFtdcOrderSysIDType> orderIdMap;
 	};

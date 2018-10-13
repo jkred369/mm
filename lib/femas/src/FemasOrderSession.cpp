@@ -7,7 +7,9 @@
 
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
+#include <ProductService.hpp>
 #include <StringUtil.hpp>
+
 #include "FemasOrderSession.hpp"
 
 mm::Logger mm::FemasOrderSession::logger;
@@ -32,6 +34,19 @@ namespace mm
 	{
 		static_assert(BID >= 0, "Bid index must be positive.");
 		static_assert(ASK >= 0, "Ask index must be positive.");
+
+		// TODO : Make the product update dynamic.
+		{
+			ProductService* productService;
+			if (!serviceContext.getService(productServiceName, productService))
+			{
+				LOGERR("Market data session failed to get product service from service context");
+				throw std::runtime_error("Failed to create Femas market data session. Cannot find product service with name: " + productServiceName);
+			}
+
+			productService->initSnapshot(this);
+			LOGINFO("Symbol map created with {} products.", symbolMap.size());
+		}
 
 		// basic wiring up - the API interface forced const_cast usage
 		session->RegisterSpi(this);
@@ -150,6 +165,20 @@ namespace mm
 		OrderManager<FemasOrderSession, NullObjectPool>::stop();
 	}
 
+	void FemasOrderSession::consume(const std::shared_ptr<const Product>& message)
+	{
+		const ProductMessage& content = message->getContent();
+
+		if (content.symbol.stringSize() > sizeof(TUstpFtdcInstrumentIDType))
+		{
+			LOGERR("Error adding product {}: symbol too long: {}", content.id, content.symbol.toString());
+			return;
+		}
+
+		std::memset(symbolMap[content.id], 0, sizeof(TUstpFtdcInstrumentIDType));
+		std::strncpy(symbolMap[content.id], content.symbol.data(), sizeof(TUstpFtdcInstrumentIDType));
+	}
+
 	void FemasOrderSession::sendOrder(const std::shared_ptr<const OrderMessage>& message)
 	{
 		// fixed values to prevent if blocks
@@ -187,8 +216,19 @@ namespace mm
 		order.TimeCondition = timeCondition[toValue(message->type)];
 		order.VolumeCondition = volumeCondition[toValue(message->type)];
 
-		StringUtil::fromInt(order.InstrumentID, message->instrumentId, sizeof(order.InstrumentID));
 		StringUtil::fromInt(order.UserOrderLocalID, message->orderId, sizeof(order.UserOrderLocalID));
+
+		// ID mapping
+		{
+			auto it = symbolMap.find(message->instrumentId);
+			if (UNLIKELY(it == symbolMap.end()))
+			{
+				LOGERR("Cannot find symbol mapping for order {} on instrument {}.", message->orderId, message->instrumentId);
+				return;
+			}
+
+			std::memcpy(order.InstrumentID, it->second, sizeof(order.InstrumentID));
+		}
 
 		// request
 		const int result = session->ReqOrderInsert(&order, ++requestId);

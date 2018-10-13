@@ -10,8 +10,8 @@
 
 #include <fmt/format.h>
 
-#include <StringUtil.hpp>
 #include <ProductService.hpp>
+#include <StringUtil.hpp>
 
 #include "FemasMarketDataSession.hpp"
 
