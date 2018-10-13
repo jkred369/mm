@@ -51,7 +51,9 @@ namespace mm
 				const std::string& name = loggerConfig->getString(LoggerConfig::LOG_NAME, LoggerConfig::DEFAULT_LOG_NAME);
 				const std::string& pattern = loggerConfig->getString(LoggerConfig::LOG_PATTERN, LoggerSingleton::defaultPattern);
 
-				LoggerSingleton::init(level, path, name, pattern);
+				const std::string timedPath = getTimedLogName(path);
+				LoggerSingleton::init(level, timedPath, name, pattern);
+
 				LOGINFO("Logger {} created with level {}, log file {}", name, LogLevelConstant::getName(level), path);
 			}
 		}
@@ -111,7 +113,15 @@ namespace mm
 				}
 
 				const std::string serviceClass = serviceConfig->getString(ServiceContext::SERVICE_CLASS);
-				if (setService(serviceName, factory.createService(serviceClass, serviceName, serviceConfig, *this)))
+				const std::shared_ptr<IService> service = factory.createService(serviceClass, serviceName, serviceConfig, *this);
+
+				if (!service)
+				{
+					LOGFATAL("Failed to create service {}", serviceName);
+					throw std::runtime_error("Failed to create service " + serviceName);
+				}
+
+				if (setService(serviceName, service))
 				{
 					LOGINFO("Service {} created successfully.", serviceName);
 				}

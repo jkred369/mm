@@ -10,9 +10,9 @@ target_include_directories(Trader PUBLIC
 	${Threading_INCLUDES}
 	${Bus_INCLUDES}
 	${Service_INCLUDES}
-	${Arb_INCLUDES}
 	${Order_INCLUDES}
 	${Femas_INCLUDES}
+	${Arb_INCLUDES}
 )
 
 target_link_libraries(Trader 
@@ -26,8 +26,9 @@ target_link_libraries(Trader
 	Messaging
 	Threading
 	Service
-	Arb
+	Order
 	Femas
+	Arb
 )
 
 configure_file("../config/simulation.txt" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/simulation.txt" COPYONLY)

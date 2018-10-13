@@ -224,6 +224,13 @@ namespace mm
 		//
 		inline bool setService(const std::string& serviceName, const std::shared_ptr<IService>& service)
 		{
+			// sanity check
+			if (!service)
+			{
+				LOGERR("Cannot set null service for {}", serviceName);
+				return false;
+			}
+
 			if (serviceMap.find(serviceName) != serviceMap.end())
 			{
 				LOGERR("Service with name {} already exist. Skipped.", serviceName);

@@ -63,9 +63,15 @@ namespace mm
 
 	void ServiceContextManager::shutdown()
 	{
+		// call to make sure the important logs are written down.
+		logger->flush();
+
 		LOGINFO("Shutting down service context");
 		context->stop();
 		LOGINFO("Service context shut down successfully");
+
+		// final attempt
+		logger->flush();
 	}
 
 }

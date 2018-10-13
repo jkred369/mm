@@ -10,6 +10,9 @@
 
 #include <chrono>
 #include <cstdint>
+#include <cstring>
+#include <ctime>
+#include <string>
 
 namespace mm
 {
@@ -56,6 +59,15 @@ namespace mm
 		static_assert(is_chrono_duration<Duration>::value, "duration must be a std::chrono::duration");
 		return std::chrono::duration_cast<std::chrono::milliseconds>(duration) / std::chrono::milliseconds(1);
 	};
+
+	const std::string inline getTimeString(const std::time_t time, const std::string& format)
+	{
+		char buffer[128];
+		std::memset(buffer, 0, sizeof(buffer));
+
+		std::strftime(buffer, sizeof(buffer), format.c_str(), std::localtime(&time));
+		return std::string(buffer);
+	}
 
 }
 
