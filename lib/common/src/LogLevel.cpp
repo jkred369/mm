@@ -21,6 +21,9 @@ const std::string mm::LoggerConfig::LOG_LEVEL = "Level";
 const std::string mm::LoggerConfig::LOG_NAME = "Name";
 const std::string mm::LoggerConfig::LOG_PATTERN = "Pattern";
 
+const std::string mm::LoggerConfig::DEFAULT_LOG_NAME = "DefaultLogger";
+const std::string mm::LoggerConfig::DEFAULT_LOG_PATH = "";
+
 namespace mm
 {
 	const std::string& LogLevelConstant::getName(LogLevel level)

@@ -63,11 +63,17 @@ namespace mm
 		// The log path
 		static const std::string LOG_PATH;
 
+		// The default log path
+		static const std::string DEFAULT_LOG_PATH;
+
 		// The log level
 		static const std::string LOG_LEVEL;
 
 		// The logger name
 		static const std::string LOG_NAME;
+
+		// The default logger name.
+		static const std::string DEFAULT_LOG_NAME;
 
 		// The log pattern
 		static const std::string LOG_PATTERN;

@@ -11,8 +11,8 @@
 #include "SpdLogger.hpp"
 
 mm::LogLevel mm::SpdLoggerSingleton::level = mm::LogLevel::TRACE;
-std::string mm::SpdLoggerSingleton::path = "";
-std::string mm::SpdLoggerSingleton::loggerName = "DefaultLogger";
+std::string mm::SpdLoggerSingleton::path = mm::LoggerConfig::DEFAULT_LOG_PATH;
+std::string mm::SpdLoggerSingleton::loggerName = mm::LoggerConfig::DEFAULT_LOG_NAME;
 std::string mm::SpdLoggerSingleton::pattern = "[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v";
 const std::string mm::SpdLoggerSingleton::defaultPattern = "[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v";
 
@@ -37,6 +37,7 @@ namespace mm
 		logger = std::make_shared<spdlog::async_logger>(loggerName, sinks.begin(), sinks.end(),
 				spdlog::thread_pool(), spdlog::async_overflow_policy::overrun_oldest);
 		logger->set_pattern(pattern);
+		logger->flush_on(spdlog::level::err);
 
 		spdlog::register_logger(logger);
 		setLevel(level);

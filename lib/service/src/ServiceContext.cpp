@@ -47,8 +47,8 @@ namespace mm
 			else
 			{
 				const LogLevel level = LogLevelConstant::getLevel(loggerConfig->getString(LoggerConfig::LOG_LEVEL, LogLevelConstant::LOG_TRACE));
-				const std::string& path = loggerConfig->getString(LoggerConfig::LOG_PATH);
-				const std::string& name = loggerConfig->getString(LoggerConfig::LOG_NAME);
+				const std::string& path = loggerConfig->getString(LoggerConfig::LOG_PATH, LoggerConfig::DEFAULT_LOG_PATH);
+				const std::string& name = loggerConfig->getString(LoggerConfig::LOG_NAME, LoggerConfig::DEFAULT_LOG_NAME);
 				const std::string& pattern = loggerConfig->getString(LoggerConfig::LOG_PATTERN, LoggerSingleton::defaultPattern);
 
 				LoggerSingleton::init(level, path, name, pattern);
