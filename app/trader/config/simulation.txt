@@ -5,15 +5,15 @@
 
 # First of all always set up logger
 Logger.Level=DEBUG
-Logger.Path=~/temp/Trader.log
+Logger.Path=/home/suoalex/temp/Trader.log
 Logger.Name=Trader
 Logger.Pattern=[%C%m%d %H:%M:%S.%f] [%t] [%^%l%$] %v
 
 # Then set up the dispatcher
 # Set processor affinity where needed
-Dispatcher.ThreadCount=4
+Dispatcher.ThreadCount=2
 Dispatcher.WaitOnEmpty=1
-Dispatcher.CpuAffinity=0,1,2,3
+Dispatcher.CpuAffinity=0,1
 
 # Now need to create all the services
 # The general rule is from fundemental services to custom services
@@ -21,9 +21,11 @@ ServiceList=Product,MarketData,OrderSession,FutureArb
 
 # Followed by service definitions and custom fields
 Product.Class=ProductService
+Product.DispatchKey=3
 Product.FilePath=./data/product.txt
 
 MarketData.Class=FemasMarketDataSession
+MarketData.DispatchKey=0
 MarketData.FrontAddress=tcp://101.251.67.3:17101
 MarketData.BrokerID=0110
 MarketData.UserID=TestUser
@@ -31,6 +33,7 @@ MarketData.Password=TestPassword
 MarketData.DataCenterID=1
 
 OrderSession.Class=FemasOrderSession
+OrderSession.DispatchKey=2
 OrderSession.FrontAddress=tcp://101.251.67.3:17196
 OrderSession.BrokerID=0110
 OrderSession.UserID=TestTrader
@@ -38,6 +41,7 @@ OrderSession.Password=TestPassword
 OrderSession.DataCenterID=1
 
 FutureArb.Class=SingleInstrumentArb
+FutureArb.DispatchKey=1
 FutureArb.ID=2
 FutureArb.SampleCount=20
 

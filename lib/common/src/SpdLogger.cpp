@@ -35,7 +35,7 @@ namespace mm
 	    }
 
 		logger = std::make_shared<spdlog::async_logger>(loggerName, sinks.begin(), sinks.end(),
-				spdlog::thread_pool(), spdlog::async_overflow_policy::block);
+				spdlog::thread_pool(), spdlog::async_overflow_policy::overrun_oldest);
 		logger->set_pattern(pattern);
 
 		spdlog::register_logger(logger);
