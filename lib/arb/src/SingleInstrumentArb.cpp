@@ -8,6 +8,7 @@
 #include <EnumType.hpp>
 #include <Subscription.hpp>
 
+#include "AlgoUtil.hpp"
 #include "SingleInstrumentArb.hpp"
 
 namespace mm
@@ -16,10 +17,14 @@ namespace mm
 			const KeyType dispatchKey,
 			const std::string serviceName,
 			ServiceContext& serviceContext,
+			const std::int64_t strategyId,
 			const std::int64_t instrumentId,
 			const std::size_t sampleCount) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
+		strategyId(strategyId),
 		instrumentId(instrumentId),
+		orderPool(orderPoolSize),
+		orderIdGenerator(AlgoUtil::createOrderIdGenerator(strategyId)),
 		messages(sampleCount),
 		liveOrderId(0)
 	{
@@ -42,7 +47,7 @@ namespace mm
 		}
 
 		if (!serviceContext.subscribe(
-				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, instrumentId),
+				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, strategyId),
 				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this)))
 		{
 			return false;
@@ -92,18 +97,16 @@ namespace mm
 		//
 
 		// assuming we have decided to generate a new order and its a buy
-		// TODO: a pool need to be used here, will do later
-		std::shared_ptr<OrderMessage> order = std::make_shared<OrderMessage>();
+		std::shared_ptr<OrderMessage> order = orderPool.getShared();
 
-		// TODO: use an order ID generator
-		order->orderId = 1;
+		order->orderId = orderIdGenerator.generate();
 		order->instrumentId = instrumentId;
 		order->side = Side::ASK;
 		order->totalQty = 1;
 		order->price = messages.back()->levels[toValue(Side::ASK)][0].price;
 		order->status = OrderStatus::LIVE;
 
-		const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, instrumentId};
+		const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, strategyId};
 		publish(subscription, order);
 	}
 

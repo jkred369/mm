@@ -60,6 +60,23 @@ namespace mm
 		return std::chrono::duration_cast<std::chrono::milliseconds>(duration) / std::chrono::milliseconds(1);
 	};
 
+	std::int64_t inline getDateAsInt(const std::time_t time)
+	{
+		const std::tm* tm = std::localtime(&time);
+		return tm->tm_year;
+	}
+
+	std::int64_t inline getTimeAsInt(const std::time_t time)
+	{
+		const std::tm* tm = std::localtime(&time);
+		return tm->tm_hour * 10000 + tm->tm_min * 100 + tm->tm_sec;
+	}
+
+	std::int64_t inline getTimestampAsInt(const std::time_t time)
+	{
+		return getDateAsInt(time) * 1000000 + getTimeAsInt(time);
+	}
+
 	const std::string inline getTimeString(const std::time_t time, const std::string& format)
 	{
 		char buffer[128];

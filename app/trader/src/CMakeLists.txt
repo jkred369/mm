@@ -42,4 +42,4 @@ target_link_libraries(Trader
 	Arb
 )
 
-configure_file("../config/simulation.txt" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/simulation.txt" COPYONLY)
+configure_file("../config/simulation.cfg" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/simulation.cfg" COPYONLY)
