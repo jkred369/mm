@@ -11,7 +11,7 @@
 #include "FemasOrderSession.hpp"
 #include "FemasOrderSessionFactory.hpp"
 
-const std::string mm::FemasOrderSessionConfig::CLASS_NAME = "FemasOrderDataSession";
+const std::string mm::FemasOrderSessionConfig::CLASS_NAME = "FemasOrderSession";
 const std::string mm::FemasOrderSessionConfig::DISPATCH_KEY = "DispatchKey";
 const std::string mm::FemasOrderSessionConfig::PRODUCT_SERVICE_NAME = "ProductServiceName";
 
