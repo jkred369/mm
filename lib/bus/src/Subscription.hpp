@@ -49,6 +49,18 @@ namespace mm
 					key == rhs.key;
 		}
 
+		//
+		// Implement custom comparison for the subscription.
+		//
+		// rhs : The other subscription instance.
+		//
+		// return : true if the 2 subscription objects are different.
+		//
+		bool operator != (const SubscriptionT& rhs) const
+		{
+			return !(operator == (rhs));
+		}
+
 		// Source type
 		SourceType sourceType;
 

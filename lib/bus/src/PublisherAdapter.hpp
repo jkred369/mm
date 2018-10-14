@@ -53,17 +53,31 @@ namespace mm
 
 		virtual void publish(const Subscription& subscription, const std::shared_ptr<const Message>& message) override
 		{
-			auto it = consumerMap.find(subscription);
-			if (UNLIKELY(it == consumerMap.end()))
+			bool published = publishInternal(subscription, message);
+
+			// TODO: review the publish policy. should we determine the source type with the adapter?
+			if (subscription.sourceType != SourceType::ALL && subscription.key != ALL_ID)
+			{
+				// publish for : ALL-dataType-key, souceType-dataType-ALL, ALL-dataType-ALL
+				const Subscription allTypeSub = {SourceType::ALL, subscription.dataType, subscription.key};
+				const Subscription allKeySub = {subscription.sourceType, subscription.dataType, ALL_ID};
+				const Subscription allSub = {SourceType::ALL, subscription.dataType, ALL_ID};
+
+				published |= publishInternal(allTypeSub, message);
+				published |= publishInternal(allKeySub, message);
+				published |= publishInternal(allSub, message);
+			}
+			else if (subscription.sourceType != SourceType::ALL || subscription.key != ALL_ID)
+			{
+				// in either case we only do for ALL-dataType-ALL
+				const Subscription allSub = {SourceType::ALL, subscription.dataType, ALL_ID};
+				published |= publishInternal(allSub, message);
+			}
+
+			if (UNLIKELY(!published))
 			{
 				LOGWARN("Cannot find consumers for subscription {}-{}-{}",
 						toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
-				return;
-			}
-
-			for (const ConsumerDetail& detail : it->second)
-			{
-				publishTo(detail.dispatchKey, detail.consumer, message);
 			}
 		}
 
@@ -137,6 +151,30 @@ namespace mm
 		}
 
 	protected:
+
+		//
+		// Publish message to the given subscription.
+		//
+		// subscription : The subscription.
+		// message : The message.
+		//
+		// return : true if the subscription is found.
+		//
+		inline bool publishInternal(const Subscription& subscription, const std::shared_ptr<const Message>& message)
+		{
+			auto it = consumerMap.find(subscription);
+			if (LIKELY(it != consumerMap.end()))
+			{
+				for (const ConsumerDetail& detail : it->second)
+				{
+					publishTo(detail.dispatchKey, detail.consumer, message);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
 
 		//
 		// Utility to publish to a specific consumer (without flashing the existing consumers).
