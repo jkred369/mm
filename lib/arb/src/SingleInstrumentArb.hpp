@@ -17,10 +17,10 @@
 #include <NullMutex.hpp>
 #include <IConsumer.hpp>
 #include <IdGenerator.hpp>
-#include <IPublisher.hpp>
 #include <ObjectPool.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>
+#include <PublisherAdapter.hpp>
 
 namespace mm
 {
@@ -31,7 +31,7 @@ namespace mm
 			public DispatchableService,
 			public IConsumer<MarketDataMessage>,
 			public IConsumer<OrderSummaryMessage>,
-			public IPublisher<OrderMessage>
+			public PublisherAdapter<OrderMessage>
 	{
 	public:
 
@@ -73,12 +73,20 @@ namespace mm
 		virtual void consume(const std::shared_ptr<const MarketDataMessage>& message) override;
 		virtual void consume(const std::shared_ptr<const OrderSummaryMessage>& message) override;
 
+		//
+		// publisher adapter overriding for type checks
+		//
+		virtual bool subscribe(const Subscription& subscription, IConsumer<OrderMessage>* consumer) override;
+
 	private:
 
 		//
 		// Processing the core logic.
 		//
 		void process();
+
+		// Logger of the class.
+		static Logger logger;
 
 		// The strategy ID.
 		const std::int64_t strategyId;

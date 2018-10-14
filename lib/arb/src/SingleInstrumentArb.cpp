@@ -11,6 +11,8 @@
 #include "AlgoUtil.hpp"
 #include "SingleInstrumentArb.hpp"
 
+mm::Logger mm::SingleInstrumentArb::logger;
+
 namespace mm
 {
 	SingleInstrumentArb::SingleInstrumentArb(
@@ -21,6 +23,7 @@ namespace mm
 			const std::int64_t instrumentId,
 			const std::size_t sampleCount) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
+		PublisherAdapter<OrderMessage>(serviceContext.getDispatcher()),
 		strategyId(strategyId),
 		instrumentId(instrumentId),
 		orderPool(orderPoolSize),
@@ -82,6 +85,29 @@ namespace mm
 		{
 			liveOrderId = 0;
 		}
+	}
+
+	bool SingleInstrumentArb::subscribe(const Subscription& subscription, IConsumer<OrderMessage>* consumer)
+	{
+		if (subscription.dataType != DataType::ORDER_SUMMARY)
+		{
+			LOGERR("Error subscribing to order summary message with invalid data type: {}", toValue(subscription.dataType));
+			return false;
+		}
+
+		if (subscription.sourceType != SourceType::ARB && subscription.sourceType != SourceType::ALL)
+		{
+			LOGWARN("Strategy {} doesn't support source type: {}", serviceName, toValue(subscription.sourceType));
+			return false;
+		}
+
+		if (subscription.key != ALL_ID && subscription.key != strategyId)
+		{
+			LOGWARN("Strategy {} doesn't support key value {}", serviceName, subscription.key);
+			return false;
+		}
+
+		return PublisherAdapter<OrderMessage>::subscribe(subscription, consumer);
 	}
 
 	void SingleInstrumentArb::process()
