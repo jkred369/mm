@@ -22,7 +22,7 @@ ServiceList=Product,MarketData,OrderSession,FutureArb
 # Followed by service definitions and custom fields
 Product.Class=ProductService
 Product.DispatchKey=3
-Product.FilePath=./data/product.txt
+Product.FilePath=~/data/product/product.txt
 
 MarketData.Class=FemasMarketDataSession
 MarketData.DispatchKey=0
