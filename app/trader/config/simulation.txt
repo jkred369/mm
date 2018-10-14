@@ -41,6 +41,9 @@ OrderSession.BrokerID=0110
 OrderSession.UserID=90096706
 OrderSession.Password=xiaoling717
 OrderSession.DataCenterID=1
+OrderSession.HedgeFlag=1
+OrderSession.IsAutoSuspend=1
+OrderSession.ExchangeId=1
 
 FutureArb.Class=SingleInstrumentArb
 FutureArb.DispatchKey=1
