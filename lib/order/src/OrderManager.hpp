@@ -73,6 +73,42 @@ namespace mm
 		}
 
 		//
+		// Override to subscribe to the order messages.
+		//
+		virtual bool start() override
+		{
+			if (!DispatchableService::start())
+			{
+				return false;
+			}
+
+			// need to subscribe for all algos for potential orders
+			if (serviceContext.subscribeAll(
+					Subscription(SourceType::ALL, DataType::NEW_ORDER, ALL_ID),
+					dynamic_cast<IConsumer<OrderMessage>*> (this)) == 0)
+			{
+				LOGWARN("Order manager {} didn't subscribe to any order source.", serviceName);
+			}
+
+			return true;
+		}
+
+		//
+		// Override to do unsubscribing.
+		//
+		virtual void stop() override
+		{
+			if (serviceContext.unsubscribeAll(
+					Subscription(SourceType::ALL, DataType::NEW_ORDER, ALL_ID),
+					dynamic_cast<IConsumer<OrderMessage>*> (this)) == 0)
+			{
+				LOGWARN("Order manager {} didn't unsubscribe from any order source.", serviceName);
+			}
+
+			DispatchableService::stop();
+		}
+
+		//
 		// consumer a order message.
 		//
 		// message : The order message.

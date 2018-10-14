@@ -170,7 +170,7 @@ namespace mm
 				return false;
 			}
 
-			int count = 0;
+			std::int64_t count = 0;
 
 			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
 			{
@@ -210,6 +210,37 @@ namespace mm
 					});
 				}
 			}
+		}
+
+		//
+		// Make the consumer unsubscribe from the given subscription.
+		//
+		// subscription : The subscription.
+		// consumer : The consumer unsubscribing from it.
+		//
+		template<typename Message> std::int64_t unsubscribeAll(const Subscription& subscription, IConsumer<Message>* consumer)
+		{
+			if (consumer == nullptr)
+			{
+				LOGERR("Attempt to unsubscribe with null consumer to {}-{}-{}", toValue(subscription.sourceType), toValue(subscription.dataType), subscription.key);
+				return false;
+			}
+
+			std::int64_t count = 0;
+
+			for (std::pair<const std::string, std::shared_ptr<IService> >& pair : serviceMap)
+			{
+				if (IPublisher<Message>* subscriber = dynamic_cast<IPublisher<Message>*> (pair.second.get()))
+				{
+					dispatcher->submit(subscriber->getKey(), [subscription, consumer, subscriber] () {
+						subscriber->unsubscribe(subscription, consumer);
+					});
+
+					++count;
+				}
+			}
+
+			return count;
 		}
 
 	protected:
