@@ -26,18 +26,20 @@ Product.DataFile=~/data/product/product.txt
 
 MarketData.Class=FemasMarketDataSession
 MarketData.DispatchKey=0
+MarketData.ProductServiceName=Product
 MarketData.FrontAddress=tcp://101.251.67.3:17101
 MarketData.BrokerID=0110
-MarketData.UserID=TestUser
-MarketData.Password=TestPassword
+MarketData.UserID=90096706
+MarketData.Password=xiaoling717
 MarketData.DataCenterID=1
 
 OrderSession.Class=FemasOrderSession
 OrderSession.DispatchKey=2
+OrderSession.ProductServiceName=Product
 OrderSession.FrontAddress=tcp://101.251.67.3:17196
 OrderSession.BrokerID=0110
-OrderSession.UserID=TestTrader
-OrderSession.Password=TestPassword
+OrderSession.UserID=90096706
+OrderSession.Password=xiaoling717
 OrderSession.DataCenterID=1
 
 FutureArb.Class=SingleInstrumentArb

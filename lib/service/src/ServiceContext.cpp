@@ -54,7 +54,7 @@ namespace mm
 				const std::string timedPath = getTimedLogName(path);
 				LoggerSingleton::init(level, timedPath, name, pattern);
 
-				LOGINFO("Logger {} created with level {}, log file {}", name, LogLevelConstant::getName(level), path);
+				LOGINFO("Logger {} created with level {}, log file {}", name, LogLevelConstant::getName(level), timedPath);
 			}
 		}
 
