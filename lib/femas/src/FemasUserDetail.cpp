@@ -34,15 +34,15 @@ namespace mm
 					config->getString(FemasUserDetailConfig::KEY_FILE_NAME, ""),
 					config->getString(FemasUserDetailConfig::CA_FILE_NAME, ""),
 					config->getString(FemasUserDetailConfig::KEY_FILE_PASSWORD, ""),
-					config->getString(FemasUserDetailConfig::USER_ID, ""),
+					config->getString(FemasUserDetailConfig::USER_ID),
 					config->getInt64(FemasUserDetailConfig::DATA_CENTER_ID, 0),
-					config->getString(FemasUserDetailConfig::BROKER_ID, ""),
+					config->getString(FemasUserDetailConfig::BROKER_ID),
 					config->getString(FemasUserDetailConfig::TRADING_SYSTEM_NAME, ""),
 					config->getString(FemasUserDetailConfig::MAC_ADDRESS, ""),
 					config->getString(FemasUserDetailConfig::IP_ADDRESS, ""),
 					config->getString(FemasUserDetailConfig::INTERFACE_PRODUCT_INFO, ""),
 					config->getString(FemasUserDetailConfig::USER_PRODUCE_INFO, ""),
-					config->getString(FemasUserDetailConfig::PASSWORD, ""),
+					config->getString(FemasUserDetailConfig::PASSWORD),
 					config->getString(FemasUserDetailConfig::PROTOCOL_INFO, ""))
 	{
 	}

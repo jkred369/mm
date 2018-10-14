@@ -90,6 +90,8 @@ namespace mm
 
 		// login attempt
 		CUstpFtdcReqUserLoginField field;
+		std::memset(&field, 0, sizeof(field));
+
 		field.DataCenterID = userDetail.dataCenterId;
 
 		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));

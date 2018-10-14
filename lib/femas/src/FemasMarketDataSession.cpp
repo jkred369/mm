@@ -84,9 +84,11 @@ namespace mm
 	{
 		// login attempt
 		CUstpFtdcReqUserLoginField field;
-		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+		std::memset(&field, 0, sizeof(field));
+
 		field.DataCenterID = userDetail.dataCenterId;
 
+		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
 		StringUtil::copy(field.IPAddress, userDetail.ipAddress, sizeof(field.IPAddress));
 		StringUtil::copy(field.InterfaceProductInfo, userDetail.interfaceProductInfo, sizeof(field.InterfaceProductInfo));
 		StringUtil::copy(field.MacAddress, userDetail.macAddress, sizeof(field.MacAddress));
