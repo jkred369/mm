@@ -33,6 +33,10 @@ namespace mm
 	{
 	}
 
+	SingleInstrumentArb::~SingleInstrumentArb()
+	{
+	}
+
 	bool SingleInstrumentArb::start()
 	{
 		// call parent to do sanity check

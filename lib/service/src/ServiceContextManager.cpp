@@ -31,6 +31,7 @@ namespace mm
 		// register the signal handler
 		std::signal(SIGTERM, handle);
 		std::signal(SIGUSR1, handle);
+		std::signal(SIGUSR2, handle);
 
 		// start the context
 		DelegateServiceFactory& factory = DelegateServiceFactory::getFactory();

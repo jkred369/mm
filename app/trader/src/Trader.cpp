@@ -12,6 +12,7 @@
 #include <FemasOrderSessionFactory.hpp>
 #include <ProductServiceFactory.hpp>
 #include <ServiceContextManager.hpp>
+#include <SingleInstrumentArbFactory.hpp>
 
 int main(int argc, char** argv)
 {
@@ -22,10 +23,10 @@ int main(int argc, char** argv)
 	}
 
 	// make sure factory is properly registered
-	if (
-		!mm::FemasMarketDataSessionFactory::registered ||
+	if (!mm::FemasMarketDataSessionFactory::registered ||
 		!mm::FemasOrderSessionFactory::registered ||
-		!mm::ProductServiceFactory::registered)
+		!mm::ProductServiceFactory::registered ||
+		!mm::SingleInstrumentArbFactory::registered)
 	{
 		std::cerr << "Not all required service factory registered." << std::endl;
 		return -1;
