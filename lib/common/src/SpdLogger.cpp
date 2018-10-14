@@ -5,6 +5,8 @@
  *      Author: suoalex
  */
 
+#include <chrono>
+
 #include "spdlog/async.h"
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
@@ -37,9 +39,11 @@ namespace mm
 		logger = std::make_shared<spdlog::async_logger>(loggerName, sinks.begin(), sinks.end(),
 				spdlog::thread_pool(), spdlog::async_overflow_policy::overrun_oldest);
 		logger->set_pattern(pattern);
-		logger->flush_on(spdlog::level::err);
 
+		spdlog::flush_on(spdlog::level::err);
+		spdlog::flush_every(std::chrono::seconds(1));
 		spdlog::register_logger(logger);
+
 		setLevel(level);
 	}
 

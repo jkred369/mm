@@ -25,7 +25,7 @@ namespace mm
 		//
 		// Constructor.
 		//
-		// levl : The log level.
+		// level : The log level.
 		// path : The log file path.
 		// loggerName : The name of the logger.
 		// pattern : The log pattern.

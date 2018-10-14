@@ -414,6 +414,9 @@ namespace mm
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.
 		CUstpFtdcTraderApi* session;
 
+		// The init count down latch.
+		CountDownLatch<> initLatch;
+
 		// The start up count down latch.
 		CountDownLatch<> startLatch;
 

@@ -15,6 +15,7 @@
 
 #include <femas/USTPFtdcMduserApi.h>
 
+#include <CountDownLatch.hpp>
 #include <DispatchableService.hpp>
 #include <EnumType.hpp>
 #include <FieldDefinition.hpp>
@@ -212,6 +213,9 @@ namespace mm
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.
 		CUstpFtdcMduserApi* session;
+
+		// The init count down latch.
+		CountDownLatch<> initLatch;
 
 		// Flag if stop is called or in process.
 		std::atomic<bool> stopFlag;

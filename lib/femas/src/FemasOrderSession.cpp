@@ -88,6 +88,10 @@ namespace mm
 			return false;
 		}
 
+		// wait on init latch to make sure the connection is established
+		LOGINFO("Waiting for connection...")
+		initLatch.wait();
+
 		// login attempt
 		CUstpFtdcReqUserLoginField field;
 		std::memset(&field, 0, sizeof(field));
@@ -276,6 +280,7 @@ namespace mm
 
 	void FemasOrderSession::OnFrontConnected()
 	{
+		initLatch.countDown();
 		LOGDEBUG("Market data session connected.");
 	}
 
