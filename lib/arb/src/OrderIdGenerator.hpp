@@ -61,15 +61,20 @@ namespace mm
 				throw std::invalid_argument("Timestamp must be positive");
 			}
 
-			if (strategyId < 0 || strategyId >= strategyShiftFactor)
-			{
-				throw std::invalid_argument("Invalid strategy ID");
-			}
-
 			if (shiftFactor < 1)
 			{
 				throw std::invalid_argument("Invalid shift factor");
 			}
+		}
+
+		//
+		// Generate the ID as an ID generator to implement IdGenerator concept.
+		//
+		// return : The new generated ID as timestamp * shiftFacor + incremented counter * strategy shift.
+		//
+		inline std::int64_t generate()
+		{
+			return timestamp * shiftFactor + (++counter) * strategyShiftFactor;
 		}
 
 		//
@@ -84,11 +89,13 @@ namespace mm
 		{
 			if (strategyId > 0 && strategyId < strategyShiftFactor)
 			{
-				return timestamp * shiftFactor + (++counter) * strategyShiftFactor + strategyId;
+				return generate() + strategyId;
 			}
 
 			return invalidOrderId;
 		}
+
+
 
 	private:
 
