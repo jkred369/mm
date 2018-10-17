@@ -9,6 +9,7 @@
 #include <Subscription.hpp>
 
 #include "AlgoUtil.hpp"
+#include "OrderIdGenerator.hpp"
 #include "SingleInstrumentArb.hpp"
 
 mm::Logger mm::SingleInstrumentArb::logger;
@@ -27,7 +28,7 @@ namespace mm
 		strategyId(strategyId),
 		instrumentId(instrumentId),
 		orderPool(orderPoolSize),
-		orderIdGenerator(AlgoUtil::createOrderIdGenerator(strategyId)),
+		orderIdGenerator(AlgoUtil::getDefaultOrderIdGenerator()),
 		messages(sampleCount),
 		liveOrderId(0)
 	{
@@ -129,7 +130,7 @@ namespace mm
 		// assuming we have decided to generate a new order and its a buy
 		std::shared_ptr<OrderMessage> order = orderPool.getShared();
 
-		order->orderId = orderIdGenerator.generate();
+		order->orderId = orderIdGenerator.generate(strategyId);
 		order->instrumentId = instrumentId;
 		order->side = Side::ASK;
 		order->totalQty = 1;

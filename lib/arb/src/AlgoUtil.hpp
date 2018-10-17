@@ -20,7 +20,7 @@ namespace mm
 		//
 		// Get the default order ID generator.
 		//
-		OrderIdGenerator& getDefaultOrderIdGenerator()
+		static OrderIdGenerator& getDefaultOrderIdGenerator()
 		{
 			static OrderIdGenerator generator;
 			return generator;

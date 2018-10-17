@@ -24,6 +24,8 @@
 
 namespace mm
 {
+	class OrderIdGenerator;
+
 	//
 	// The strategy for single instrument arbitrage.
 	//
@@ -98,7 +100,7 @@ namespace mm
 		NullObjectPool<OrderMessage> orderPool;
 
 		// The order ID generator.
-		NumericalIdGenerator<NullMutex> orderIdGenerator;
+		OrderIdGenerator& orderIdGenerator;
 
 		// The chrological messages.
 		boost::circular_buffer<std::shared_ptr<const MarketDataMessage> > messages;
