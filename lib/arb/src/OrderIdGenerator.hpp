@@ -77,7 +77,7 @@ namespace mm
 		//
 		inline std::int64_t generate(std::int64_t strategyId)
 		{
-			if (strategyId > 0 && strategyId < strategyShiftFactor)
+			if (strategyId >= 0 && strategyId < strategyShiftFactor)
 			{
 				return generate() + strategyId;
 			}
