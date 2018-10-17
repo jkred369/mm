@@ -68,16 +68,6 @@ namespace mm
 		}
 
 		//
-		// Generate the ID as an ID generator to implement IdGenerator concept.
-		//
-		// return : The new generated ID as timestamp * shiftFacor + incremented counter * strategy shift.
-		//
-		inline std::int64_t generate()
-		{
-			return timestamp * shiftFactor + (++counter) * strategyShiftFactor;
-		}
-
-		//
 		// Generate the ID.
 		//
 		// strategy ID: The strategy ID requesting for next ID.
@@ -95,7 +85,17 @@ namespace mm
 			return invalidOrderId;
 		}
 
+	protected:
 
+		//
+		// Generate the ID as an ID generator to implement IdGenerator concept.
+		//
+		// return : The new generated ID as timestamp * shiftFacor + incremented counter * strategy shift.
+		//
+		inline std::int64_t generate()
+		{
+			return timestamp * shiftFactor + (++counter) * strategyShiftFactor;
+		}
 
 	private:
 
