@@ -134,6 +134,60 @@ namespace mm
 		ASSERT_TRUE(consumer4.counter.load() == 1);
 	}
 
+	TEST(PublisherAdapterTest, UnsubscribeCase)
+	{
+		Dispatcher dispatcher;
+
+		DummyConsumer consumer1;
+		DummyConsumer consumer2;
+		DummyConsumer consumer3;
+		DummyConsumer consumer4;
+		DummyPublisherAdapter adapter(dispatcher);
+
+		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, 1};
+		adapter.subscribe(subscription, &consumer1);
+
+		const Subscription allSource = {SourceType::ALL, DataType::MARKET_DATA, 1};
+		adapter.subscribe(allSource, &consumer2);
+
+		const Subscription allId = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, ALL_ID};
+		adapter.subscribe(allId, &consumer3);
+
+		const Subscription all = {SourceType::ALL, DataType::MARKET_DATA, ALL_ID};
+		adapter.subscribe(all, &consumer4);
+
+		adapter.publish(subscription, std::make_shared<DummyMessage>());
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		ASSERT_TRUE(consumer1.counter.load() == 1);
+		ASSERT_TRUE(consumer2.counter.load() == 1);
+		ASSERT_TRUE(consumer3.counter.load() == 1);
+		ASSERT_TRUE(consumer4.counter.load() == 1);
+
+		adapter.unsubscribe(allSource, &consumer2);
+		adapter.publish(subscription, std::make_shared<DummyMessage>());
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		ASSERT_TRUE(consumer1.counter.load() == 2);
+		ASSERT_TRUE(consumer2.counter.load() == 1);
+		ASSERT_TRUE(consumer3.counter.load() == 2);
+		ASSERT_TRUE(consumer4.counter.load() == 2);
+
+		adapter.unsubscribe(all, &consumer4);
+		adapter.publish(subscription, std::make_shared<DummyMessage>());
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		ASSERT_TRUE(consumer1.counter.load() == 3);
+		ASSERT_TRUE(consumer2.counter.load() == 1);
+		ASSERT_TRUE(consumer3.counter.load() == 3);
+		ASSERT_TRUE(consumer4.counter.load() == 2);
+
+		adapter.unsubscribe(subscription, &consumer1);
+		adapter.publish(subscription, std::make_shared<DummyMessage>());
+		std::this_thread::sleep_for(std::chrono::milliseconds(4));
+		ASSERT_TRUE(consumer1.counter.load() == 3);
+		ASSERT_TRUE(consumer2.counter.load() == 1);
+		ASSERT_TRUE(consumer3.counter.load() == 4);
+		ASSERT_TRUE(consumer4.counter.load() == 2);
+	}
+
 }
 
 
