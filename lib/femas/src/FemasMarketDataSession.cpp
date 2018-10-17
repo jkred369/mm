@@ -24,10 +24,12 @@ namespace mm
 			const std::string serviceName,
 			ServiceContext& serviceContext,
 			const std::string& productServiceName,
-			const FemasUserDetail& detail) :
+			const FemasUserDetail& detail,
+			const int cpuAffinity) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
 		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		userDetail(detail),
+		cpuAffinity(cpuAffinity),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),
 		requestId(0)
@@ -203,6 +205,13 @@ namespace mm
 
 	void FemasMarketDataSession::OnFrontConnected()
 	{
+		// here is the first chance we could set affinity for the callback thread
+		if (cpuAffinity != ThreadUtil::CPU_ID_NOT_SET)
+		{
+			ThreadUtil::setAffinity(cpuAffinity);
+			LOGINFO("Order callback thread pin to core {}", cpuAffinity);
+		}
+
 		initLatch.countDown();
 		LOGDEBUG("Market data session connected.");
 	}

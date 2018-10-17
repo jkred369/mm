@@ -50,6 +50,7 @@ namespace mm
 		// productServiceName : The product service name.
 		// userDetail : The configuration details.
 		// orderDetail : The order configuration details.
+		// cpuAffinity : The CPU affinity for callback thread, if any.
 		//
 		FemasOrderSession(
 				const KeyType dispatchKey,
@@ -57,7 +58,8 @@ namespace mm
 				ServiceContext& serviceContext,
 				const std::string productServiceName,
 				const FemasUserDetail& userDetail,
-				const FemasOrderDetail& orderDetail);
+				const FemasOrderDetail& orderDetail,
+				const int cpuAffinity = ThreadUtil::CPU_ID_NOT_SET);
 
 		// virtual destructor.
 		virtual ~FemasOrderSession();
@@ -403,6 +405,9 @@ namespace mm
 
 		// The order session detail.
 		const FemasOrderDetail orderDetail;
+
+		// The CPU affinity for callback thread.
+		const int cpuAffinity;
 
 		// The dispatcher.
 		Dispatcher& dispatcher;

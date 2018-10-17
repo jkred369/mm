@@ -19,6 +19,9 @@ namespace mm
 	//
 	struct ThreadUtil
 	{
+		// Flag the CPU affinity ID isn't set.
+		static constexpr int CPU_ID_NOT_SET = -1;
+
 		//
 		// Set the current thread to run on the given CPU.
 		//
@@ -38,6 +41,11 @@ namespace mm
 		//
 		static bool setAffinity(pid_t pid, int cpu)
 		{
+			if (cpu == CPU_ID_NOT_SET)
+			{
+				return false;
+			}
+
 			cpu_set_t set;
 			CPU_ZERO(&set);
 			CPU_SET(cpu, &set);

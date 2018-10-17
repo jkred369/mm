@@ -14,6 +14,7 @@
 const std::string mm::FemasOrderSessionConfig::CLASS_NAME = "FemasOrderSession";
 const std::string mm::FemasOrderSessionConfig::DISPATCH_KEY = "DispatchKey";
 const std::string mm::FemasOrderSessionConfig::PRODUCT_SERVICE_NAME = "ProductServiceName";
+const std::string mm::FemasOrderSessionConfig::CPU_AFFINITY = "CpuAffinity";
 
 const bool mm::FemasOrderSessionFactory::registered = mm::DelegateServiceFactory::getFactory().registerFactory(
 		mm::FemasOrderSessionConfig::CLASS_NAME, new mm::FemasOrderSessionFactory());
@@ -42,10 +43,11 @@ namespace mm
 		// creation
 		const KeyType dispatchKey = config->getInt64(FemasOrderSessionConfig::DISPATCH_KEY);
 		const std::string productServiceName = config->getString(FemasOrderSessionConfig::PRODUCT_SERVICE_NAME);
+		const int cpuAffinity = config->getInt64(FemasOrderSessionConfig::CPU_AFFINITY, ThreadUtil::CPU_ID_NOT_SET);
 		const FemasUserDetail userDetail(config);
 		const FemasOrderDetail orderDetail(config);
 
-		return std::shared_ptr<IService> (new FemasOrderSession(dispatchKey, serviceName, context, productServiceName, userDetail, orderDetail));
+		return std::shared_ptr<IService> (new FemasOrderSession(dispatchKey, serviceName, context, productServiceName, userDetail, orderDetail, cpuAffinity));
 	}
 }
 

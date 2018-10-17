@@ -26,6 +26,9 @@ namespace mm
 
 		// The service name for product service to use.
 		static const std::string PRODUCT_SERVICE_NAME;
+
+		// The CPU affinity for threads.
+		static const std::string CPU_AFFINITY;
 	};
 
 	//

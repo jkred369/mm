@@ -57,15 +57,13 @@ namespace mm
 	{
 	public:
 
-		// Flag the CPU affinity ID isn't set.
-		static constexpr int CPU_ID_NOT_SET = -1;
-
 		//
 		// Constructor.
 		//
 		// waitOnEmpty : Flag if thread should enter passive wait when queue is empty.
 		//
-		TaskRunner(bool waitOnEmpty = true, int cpuId = CPU_ID_NOT_SET) : waitOnEmpty(waitOnEmpty), cpuId(cpuId), stopRequested(false), thread(nullptr)
+		TaskRunner(bool waitOnEmpty = true, int cpuId = ThreadUtil::CPU_ID_NOT_SET) :
+			waitOnEmpty(waitOnEmpty), cpuId(cpuId), stopRequested(false), thread(nullptr)
 		{
 		}
 
@@ -93,7 +91,7 @@ namespace mm
 			thread.reset(new std::thread([this] ()
 			{
 				// set the CPU affinity where needed
-				if (cpuId != CPU_ID_NOT_SET)
+				if (cpuId != ThreadUtil::CPU_ID_NOT_SET)
 				{
 					if (!ThreadUtil::setAffinity(cpuId))
 					{
@@ -224,7 +222,7 @@ namespace mm
 		{
 			for (std::size_t i = 0; i < threadCount; ++i)
 			{
-				runners[i].reset(new TaskRunner<Mutex> (waitOnEmpty, cpuIds.empty() ? TaskRunner<Mutex>::CPU_ID_NOT_SET : cpuIds[i]));
+				runners[i].reset(new TaskRunner<Mutex> (waitOnEmpty, cpuIds.empty() ? ThreadUtil::CPU_ID_NOT_SET : cpuIds[i]));
 			}
 
 			if (startOnCreate)

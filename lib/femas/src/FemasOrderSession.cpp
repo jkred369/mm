@@ -22,10 +22,12 @@ namespace mm
 			ServiceContext& serviceContext,
 			const std::string productServiceName,
 			const FemasUserDetail& userDetail,
-			const FemasOrderDetail& orderDetail) :
+			const FemasOrderDetail& orderDetail,
+			const int cpuAffinity) :
 		OrderManager<FemasOrderSession, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
 		userDetail(userDetail),
 		orderDetail(orderDetail),
+		cpuAffinity(cpuAffinity),
 		dispatcher(serviceContext.getDispatcher()),
 		executionReportPool(POOL_SIZE),
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
@@ -280,6 +282,13 @@ namespace mm
 
 	void FemasOrderSession::OnFrontConnected()
 	{
+		// here is the first chance we could set affinity for the callback thread
+		if (cpuAffinity != ThreadUtil::CPU_ID_NOT_SET)
+		{
+			ThreadUtil::setAffinity(cpuAffinity);
+			LOGINFO("Order callback thread pin to core {}", cpuAffinity);
+		}
+
 		initLatch.countDown();
 		LOGDEBUG("Market data session connected.");
 	}

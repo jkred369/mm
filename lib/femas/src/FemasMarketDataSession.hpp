@@ -26,6 +26,7 @@
 #include <Product.hpp>
 #include <PublisherAdapter.hpp>
 #include <ServiceContext.hpp>
+#include <ThreadUtil.hpp>
 
 #include "FemasUserDetail.hpp"
 
@@ -50,13 +51,15 @@ namespace mm
 		// serviceContext : The service context.
 		// productServiceName : The name of the product service.
 		// userDetail : The configuration details.
+		// cpuAffinity : The CPU affinity for callback thread, if any.
 		//
 		FemasMarketDataSession(
 				KeyType dispatchKey,
 				const std::string serviceName,
 				ServiceContext& serviceContext,
 				const std::string& productServiceName,
-				const FemasUserDetail& detail);
+				const FemasUserDetail& detail,
+				const int cpuAffinity = ThreadUtil::CPU_ID_NOT_SET);
 
 		//
 		// Destructor.
@@ -209,6 +212,9 @@ namespace mm
 
 		// The login user detail.
 		const FemasUserDetail userDetail;
+
+		// The CPU affinity for callback thread.
+		const int cpuAffinity;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.
