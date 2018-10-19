@@ -189,7 +189,7 @@ namespace mm
 		//
 		// return : The capacity of the string.
 		//
-		size_t capacity() const
+		static constexpr size_t capacity()
 		{
 			return size;
 		}

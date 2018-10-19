@@ -158,18 +158,23 @@ namespace mm
 
 		// ensure we have the symbol mapping
 		const std::int64_t key = subscription.key;
-		if (std::find_if(symbolMap.begin(), symbolMap.end(), [&key] (const std::pair<SymbolType, std::int64_t>& pair) {
+		auto it = std::find_if(symbolMap.begin(), symbolMap.end(), [&key] (const std::pair<SymbolType, std::int64_t>& pair) {
 			return key == pair.second;
-		}) == symbolMap.end())
+		});
+
+		if (it == symbolMap.end())
 		{
 			LOGERR("Cannot subscribe to market data with key: {}. No symbol mapping defined.", key);
 			return false;
 		}
 
-		fmt::format_int format(subscription.key);
-
+		// manipulate the symbol buffer
 		// femas requires char* without writing to it
-		char* request[1] = {const_cast<char*> (format.c_str())};
+		char symbol[SymbolType::capacity() + 1];
+		std::memset(symbol, 0, sizeof(symbol));
+		it->first.copy(symbol);
+
+		char* request[1] = {symbol};
 		const int result = session->SubMarketData(request, 1);
 
 		if (result != 0)
@@ -209,7 +214,7 @@ namespace mm
 		if (cpuAffinity != ThreadUtil::CPU_ID_NOT_SET)
 		{
 			ThreadUtil::setAffinity(cpuAffinity);
-			LOGINFO("Order callback thread pin to core {}", cpuAffinity);
+			LOGINFO("Market data callback thread pin to core {}", cpuAffinity);
 		}
 
 		initLatch.countDown();
