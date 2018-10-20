@@ -19,6 +19,7 @@
 #include <DispatchableService.hpp>
 #include <EnumType.hpp>
 #include <Exchange.hpp>
+#include <IConsumer.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
 #include <Product.hpp>
@@ -35,7 +36,8 @@ namespace mm
 	//
 	class FemasProductDownloadSession :
 			public DispatchableService,
-			public CUstpFtdcTraderSpi
+			public CUstpFtdcTraderSpi,
+			public IConsumer<Product>
 	{
 	public:
 
@@ -385,7 +387,7 @@ namespace mm
 		//
 		// return : The exchange value.
 		//
-		Exchange getCurrency(const CUstpFtdcRspInstrumentField* field) const;
+		Exchange getExchange(const CUstpFtdcRspInstrumentField* field) const;
 
 	private:
 

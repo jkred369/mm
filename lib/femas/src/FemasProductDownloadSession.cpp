@@ -5,6 +5,8 @@
  *      Author: suoalex
  */
 
+#include <algorithm>
+#include <array>
 #include <string>
 
 #include <EnumType.hpp>
@@ -85,7 +87,8 @@ namespace mm
 		initLatch.wait();
 
 		// login attempt
-		if (login() != 0)
+		const int result = login();
+		if (result != 0)
 		{
 			LOGERR("Error loging as user {} with code: {}", userDetail.userId, result);
 			return false;
@@ -101,6 +104,8 @@ namespace mm
 
 			session->ReqQryInstrument(&field, ++requestId);
 		}
+
+		return true;
 	}
 
 	void FemasProductDownloadSession::stop()
@@ -115,7 +120,8 @@ namespace mm
 		}
 
 		// attempt to logout but stop even if failed
-		if (logout() != 0)
+		const int result = logout();
+		if (result != 0)
 		{
 			LOGERR("Error logout user: {} with code: {}", userDetail.userId, result);
 		}
@@ -328,7 +334,7 @@ namespace mm
 		product.symbol = instrument->InstrumentID;
 		product.productType = getProductType(instrument);
 		product.currency = getCurrency(instrument);
-		product.exchange = instrument->ExchangeID;
+		product.exchange = getExchange(instrument);
 
 		if (instrument->OptionsType != USTP_FTDC_OT_NotOptions)
 		{
@@ -430,6 +436,27 @@ namespace mm
 		}
 
 		throw std::invalid_argument("Cannot determine currency for value: " + std::to_string((int)field->Currency));
+	}
+
+	Exchange FemasProductDownloadSession::getExchange(const CUstpFtdcRspInstrumentField* field) const
+	{
+		static const std::array<std::pair<const char*, Exchange>, 13 > pairs = {{
+				{"SSE", Exchange::SSE}, {"SZSE", Exchange::SZSE}, {"CFFEX", Exchange::CFFEX}, {"SHFE", Exchange::SHFE},
+				{"CZCE", Exchange::CZCE}, {"DCE", Exchange::DCE}, {"INE", Exchange::INE}, {"SGE", Exchange::SGE},
+				{"HKEX", Exchange::HKEX}, {"SMART", Exchange::SMART}, {"GLOBEX", Exchange::GLOBEX}, {"IDEALPRO", Exchange::IDEALPRO},
+				{"OANDA", Exchange::OANDA}
+		}};
+
+		auto it = std::find_if(pairs.begin(), pairs.end(), [field] (const std::pair<const char*, Exchange>& pair) {
+			return std::strcmp(pair.first, field->ExchangeID) == 0;
+		});
+
+		if (it != pairs.end())
+		{
+			return it->second;
+		}
+
+		throw std::invalid_argument("Cannot interpret exchange name: " + std::string(field->ExchangeID));
 	}
 
 }
