@@ -136,6 +136,8 @@ namespace mm
 		startLatch.wait();
 
 		// TODO: determine if resume is proper here.
+		// according to doc, user topic == private topic.
+		session->SubscribePublicTopic(USTP_TERT_RESUME);
 		session->SubscribeUserTopic(USTP_TERT_RESUME);
 	}
 

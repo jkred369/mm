@@ -16,7 +16,7 @@ namespace mm
 	FemasOrderDetail::FemasOrderDetail(const std::shared_ptr<IConfig> config) :
 			FemasOrderDetail(
 					config->getInt64(FemasOrderDetailConfig::HEDGE_FLAG),
-					config->getInt64(FemasOrderDetailConfig::IS_AUTO_SUSPEND),
+					config->getInt64(FemasOrderDetailConfig::IS_AUTO_SUSPEND, 0),
 					config->getString(FemasOrderDetailConfig::EXCHANGE_ID))
 	{
 	}
