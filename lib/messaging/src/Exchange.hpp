@@ -18,10 +18,43 @@ namespace mm
 	enum class Exchange : std::int64_t
 	{
 		// Shanghai stock exchange
-		SSE = 0,
+		SSE = 1,
+
+		// Shenzhen stock exchange
+		SZSE = 2,
+
+		// China financial future exchange
+		CFFEX = 3,
 
 		// Shanghai future exchange
-		SHFE = 1,
+		SHFE = 4,
+
+		// Shenzhou commodity exchange
+		CZCE = 5,
+
+		// Dalian commodity exchange
+		DCE = 6,
+
+		// International energy exchange
+		INE = 7,
+
+		// Shanghai gold exchange
+		SGE = 8,
+
+		// Hong Kong exchange
+		HKEX = 9,
+
+		// Interactive broker
+		SMART = 10,
+
+		// Chicago commodity exchange
+		GLOBEX = 11,
+
+		// Interactive broker FX
+		IDEALPRO = 12,
+
+		// Oanda FX
+		OANDA = 13,
 	};
 }
 

@@ -18,10 +18,12 @@
 #include <CountDownLatch.hpp>
 #include <DispatchableService.hpp>
 #include <EnumType.hpp>
+#include <Exchange.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
 #include <Product.hpp>
 #include <ProductMessage.hpp>
+#include <ProductType.hpp>
 #include <ProductService.hpp>
 
 #include "FemasUserDetail.hpp"
@@ -61,6 +63,11 @@ namespace mm
 		//
 		virtual bool start() override;
 		virtual void stop() override;
+
+		//
+		// consumer interface.
+		//
+		virtual void consume(const std::shared_ptr<const Product>& message) override;
 
 		//
 		// Fired when the session is connected.
@@ -337,6 +344,49 @@ namespace mm
 		//
 		virtual void OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *info, int requestID, bool isLast) override;
 
+	protected:
+
+		//
+		// Try login to the session.
+		//
+		// return : The result from the login API.
+		//
+		int login();
+
+		//
+		// Try log out from the session.
+		//
+		// return : The result from the logout API.
+		//
+		int logout();
+
+		//
+		// Determine instrument type given the data.
+		//
+		// field : The data fields.
+		//
+		// return : The instrument type.
+		//
+		ProductType getProductType(const CUstpFtdcRspInstrumentField* field) const;
+
+		//
+		// Determine currency from given data.
+		//
+		// field : The data fields.
+		//
+		// return : The currency type.
+		//
+		Currency getCurrency(const CUstpFtdcRspInstrumentField* field) const;
+
+		//
+		// Determine exchange from given data.
+		//
+		// field : The data fields.
+		//
+		// return : The exchange value.
+		//
+		Exchange getCurrency(const CUstpFtdcRspInstrumentField* field) const;
+
 	private:
 
 		// The logger for this class.
@@ -367,6 +417,9 @@ namespace mm
 		// The request ID value keeper.
 		int requestId;
 
+		// The current max product ID. used to generate new product ID.
+		int maxProductId;
+
 		// The exchange ID used to fill in the order.
 		std::string exchangeId;
 
@@ -377,7 +430,10 @@ namespace mm
 		std::string tradingDate;
 
 		// The map where key is the instrument ID and value is the product message.
-		std::unordered_map<std::int64_t, ProductMessage> symbolMap;
+		std::unordered_map<std::int64_t, ProductMessage> rawProductMap;
+
+		// The map where key is the symbol and value is the instrument ID for the instrument.
+		std::unordered_map<SymbolType, std::int64_t> symbolMap;
 	};
 }
 

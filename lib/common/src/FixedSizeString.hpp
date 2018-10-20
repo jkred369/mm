@@ -29,6 +29,7 @@ namespace mm
 		//
 		FixedSizeString() : length(0)
 		{
+			std::memset(buffer, 0, size);
 		}
 
 		//
@@ -38,6 +39,7 @@ namespace mm
 		//
 		FixedSizeString(const char* string) : length(std::min(size, std::strlen(string)))
 		{
+			std::memset(buffer, 0, size);
 			std::strncpy(buffer, string, length);
 		}
 
@@ -48,6 +50,7 @@ namespace mm
 		//
 		FixedSizeString(const std::string& string) : length(std::min(size, string.size()))
 		{
+			std::memset(buffer, 0, size);
 			std::strncpy(buffer, string.c_str(), length);
 		}
 

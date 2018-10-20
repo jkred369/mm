@@ -5,6 +5,8 @@
  *      Author: suoalex
  */
 
+#include <string>
+
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
 #include <ProductService.hpp>
@@ -28,7 +30,8 @@ namespace mm
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
 		productService(nullptr),
 		stopFlag(false),
-		requestId(0)
+		requestId(0),
+		maxProductId(0)
 	{
 		// Seeking product service.
 		if (!serviceContext.getService(productServiceName, productService))
@@ -78,40 +81,26 @@ namespace mm
 		}
 
 		// wait on init latch to make sure the connection is established
-		LOGINFO("Waiting for connection...")
+		LOGINFO("Waiting for connection...");
 		initLatch.wait();
 
 		// login attempt
-		CUstpFtdcReqUserLoginField field;
-		std::memset(&field, 0, sizeof(field));
-
-		field.DataCenterID = userDetail.dataCenterId;
-
-		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
-		StringUtil::copy(field.IPAddress, userDetail.ipAddress, sizeof(field.IPAddress));
-		StringUtil::copy(field.InterfaceProductInfo, userDetail.interfaceProductInfo, sizeof(field.InterfaceProductInfo));
-		StringUtil::copy(field.MacAddress, userDetail.macAddress, sizeof(field.MacAddress));
-		StringUtil::copy(field.Password, userDetail.password, sizeof(field.Password));
-		StringUtil::copy(field.ProtocolInfo, userDetail.protocolInfo, sizeof(field.ProtocolInfo));
-		StringUtil::copy(field.TradingDay, session->GetTradingDay(), sizeof(field.TradingDay));
-		StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
-		StringUtil::copy(field.UserProductInfo, userDetail.userProductInfo, sizeof(field.UserProductInfo));
-
-		const int result = session->ReqUserLogin(&field, ++requestId);
-
-		if (result == 0)
-		{
-			LOGINFO("Product download session logged in as {}", userDetail.userId);
-			return true;
-		}
-		else
+		if (login() != 0)
 		{
 			LOGERR("Error loging as user {} with code: {}", userDetail.userId, result);
 			return false;
 		}
 
-		// querying the products
-		session->SubscribeUserTopic(USTP_TERT_RESUME);
+		LOGINFO("Waiting for login response...");
+		startLatch.wait();
+
+		// querying all the products
+		{
+			CUstpFtdcQryInstrumentField field;
+			std::memset(&field, 0, sizeof(field));
+
+			session->ReqQryInstrument(&field, ++requestId);
+		}
 	}
 
 	void FemasProductDownloadSession::stop()
@@ -126,16 +115,9 @@ namespace mm
 		}
 
 		// attempt to logout but stop even if failed
+		if (logout() != 0)
 		{
-			CUstpFtdcReqUserLogoutField field;
-			StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
-			StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
-
-			const int result = session->ReqUserLogout(&field, ++requestId);
-			if (result != 0)
-			{
-				LOGERR("Error logout user: {} with code: {}", userDetail.userId, result);
-			}
+			LOGERR("Error logout user: {} with code: {}", userDetail.userId, result);
 		}
 
 		// actually stop the service
@@ -146,6 +128,17 @@ namespace mm
 
 		// delegate
 		DispatchableService::stop();
+	}
+
+	void FemasProductDownloadSession::consume(const std::shared_ptr<const Product>& message)
+	{
+		const ProductMessage& content = message->getContent();
+		symbolMap[content.symbol] = content.id;
+
+		if (maxProductId < content.id)
+		{
+			maxProductId = content.id;
+		}
 	}
 
 	void FemasProductDownloadSession::OnFrontConnected()
@@ -185,6 +178,8 @@ namespace mm
 		{
 			tradingDate = userLogin->TradingDay;
 			LOGINFO("User {} logged in successfully on date {}", userLogin->UserID, tradingDate);
+
+			startLatch.countDown();
 		}
 		else
 		{
@@ -310,6 +305,35 @@ namespace mm
 
 	void FemasProductDownloadSession::OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
+		std::shared_ptr<ProductMessage> message = std::make_shared<ProductMessage> ();
+		ProductMessage& product = *message;
+
+		// determine product ID
+		{
+			const SymbolType symbol(instrument->InstrumentID);
+			auto it = symbolMap.find(symbol);
+
+			if (it == symbolMap.end())
+			{
+				product.id = ++maxProductId;
+				LOGINFO("New product {} ID set to {}", std::string(instrument->InstrumentID), product.id);
+			}
+			else
+			{
+				product.id = it->second;
+			}
+		}
+
+		// fill in all the fields
+		product.symbol = instrument->InstrumentID;
+		product.productType = getProductType(instrument);
+		product.currency = getCurrency(instrument);
+		product.exchange = instrument->ExchangeID;
+
+		if (instrument->OptionsType != USTP_FTDC_OT_NotOptions)
+		{
+			product.callPut = instrument->OptionsType == USTP_FTDC_OT_CallOptions ? CallPutType::CALL : CallPutType::PUT;
+		}
 
 	}
 
@@ -350,6 +374,62 @@ namespace mm
 	void FemasProductDownloadSession::OnRspQryInvestorMargin(CUstpFtdcInvestorMarginField *investorMargin, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
 
+	}
+
+	int FemasProductDownloadSession::login()
+	{
+		CUstpFtdcReqUserLoginField field;
+		std::memset(&field, 0, sizeof(field));
+
+		field.DataCenterID = userDetail.dataCenterId;
+
+		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+		StringUtil::copy(field.IPAddress, userDetail.ipAddress, sizeof(field.IPAddress));
+		StringUtil::copy(field.InterfaceProductInfo, userDetail.interfaceProductInfo, sizeof(field.InterfaceProductInfo));
+		StringUtil::copy(field.MacAddress, userDetail.macAddress, sizeof(field.MacAddress));
+		StringUtil::copy(field.Password, userDetail.password, sizeof(field.Password));
+		StringUtil::copy(field.ProtocolInfo, userDetail.protocolInfo, sizeof(field.ProtocolInfo));
+		StringUtil::copy(field.TradingDay, session->GetTradingDay(), sizeof(field.TradingDay));
+		StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
+		StringUtil::copy(field.UserProductInfo, userDetail.userProductInfo, sizeof(field.UserProductInfo));
+
+		const int result = session->ReqUserLogin(&field, ++requestId);
+		return result;
+	}
+
+	int FemasProductDownloadSession::logout()
+	{
+		CUstpFtdcReqUserLogoutField field;
+		StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+		StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
+
+		const int result = session->ReqUserLogout(&field, ++requestId);
+		return result;
+	}
+
+	ProductType FemasProductDownloadSession::getProductType(const CUstpFtdcRspInstrumentField* field) const
+	{
+		// TODO: Determine the product types.
+		if (field->OptionsType != USTP_FTDC_OT_NotOptions)
+		{
+			return ProductType::EUROPEAN;
+		}
+
+		return ProductType::FUTURE;
+	}
+
+	Currency FemasProductDownloadSession::getCurrency(const CUstpFtdcRspInstrumentField* field) const
+	{
+		if (field->Currency == USTP_FTDC_C_RMB)
+		{
+			return Currency::CNY;
+		}
+		else if (field->Currency == USTP_FTDC_C_UDOLLAR)
+		{
+			return Currency::USD;
+		}
+
+		throw std::invalid_argument("Cannot determine currency for value: " + std::to_string((int)field->Currency));
 	}
 
 }
