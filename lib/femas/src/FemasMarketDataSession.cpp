@@ -30,6 +30,7 @@ namespace mm
 		PublisherAdapter<MarketDataMessage>(serviceContext.getDispatcher()),
 		userDetail(detail),
 		cpuAffinity(cpuAffinity),
+		marketDataPool(poolSize),
 		session(CUstpFtdcMduserApi::CreateFtdcMduserApi()),
 		stopFlag(false),
 		requestId(0)
@@ -296,7 +297,7 @@ namespace mm
 
 	void FemasMarketDataSession::OnRtnDepthMarketData(CUstpFtdcDepthMarketDataField *depthMarketData)
 	{
-		std::shared_ptr<MarketDataMessage> messagePointer = getMessage();
+		std::shared_ptr<MarketDataMessage> messagePointer = marketDataPool.getShared();
 		MarketDataMessage& message = *messagePointer;
 
 		// level 1 fields
@@ -343,9 +344,7 @@ namespace mm
 		message.levels[ASK][4].price = depthMarketData->AskPrice5;
 		message.levels[ASK][4].qty = depthMarketData->AskVolume5;
 
-		// TODO: make the char based intrument ID to int mapping.
-		// const Subscription sub = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, message.instrumentId};
-		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, 1};
+		const Subscription subscription = {SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, message.instrumentId};
 		publish(subscription, messagePointer);
 	}
 

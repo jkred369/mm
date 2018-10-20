@@ -15,6 +15,7 @@
 #include <StringUtil.hpp>
 
 #include "FemasProductDownloadSession.hpp"
+#include "FemasUtil.hpp"
 
 mm::Logger mm::FemasProductDownloadSession::logger;
 
@@ -330,17 +331,44 @@ namespace mm
 			}
 		}
 
+		// determine underlying ID
+		{
+			const SymbolType underlyingSymbol(instrument->UnderlyingInstrID);
+			if (underlyingSymbol.stringSize() > 0)
+			{
+				auto it = symbolMap.find(underlyingSymbol);
+				if (it == symbolMap.end())
+				{
+					LOGERR("Failed to find underlying with symbol: {}", underlyingSymbol.toString());
+					return;
+				}
+
+				product.underlyerId = it->second;
+			}
+		}
+
 		// fill in all the fields
 		product.symbol = instrument->InstrumentID;
 		product.productType = getProductType(instrument);
-		product.currency = getCurrency(instrument);
-		product.exchange = getExchange(instrument);
+		product.currency = FemasUtil::getCurrency(instrument->Currency);
+		product.exchange = FemasUtil::getExchange(instrument->ExchangeID);
+
+		product.contractRatio = instrument->UnderlyingMultiple;
+		product.lotSize = instrument->VolumeMultiple;
+		product.listingDate = FemasUtil::getDate(instrument->OpenDate);
+		product.lastTradingDate = FemasUtil::getDate(instrument->ExpireDate);
+		product.expiryDate = FemasUtil::getDate(instrument->ExpireDate);
 
 		if (instrument->OptionsType != USTP_FTDC_OT_NotOptions)
 		{
 			product.callPut = instrument->OptionsType == USTP_FTDC_OT_CallOptions ? CallPutType::CALL : CallPutType::PUT;
+			product.strike = instrument->StrikePrice;
 		}
 
+		// publish to product service
+		// TODO: clarify how to populate the products
+		// const Subscription subscription(SourceType::ALL, DataType::PRODUCT, product.id);
+		// publish(subscription, message);
 	}
 
 	void FemasProductDownloadSession::OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
@@ -422,41 +450,6 @@ namespace mm
 		}
 
 		return ProductType::FUTURE;
-	}
-
-	Currency FemasProductDownloadSession::getCurrency(const CUstpFtdcRspInstrumentField* field) const
-	{
-		if (field->Currency == USTP_FTDC_C_RMB)
-		{
-			return Currency::CNY;
-		}
-		else if (field->Currency == USTP_FTDC_C_UDOLLAR)
-		{
-			return Currency::USD;
-		}
-
-		throw std::invalid_argument("Cannot determine currency for value: " + std::to_string((int)field->Currency));
-	}
-
-	Exchange FemasProductDownloadSession::getExchange(const CUstpFtdcRspInstrumentField* field) const
-	{
-		static const std::array<std::pair<const char*, Exchange>, 13 > pairs = {{
-				{"SSE", Exchange::SSE}, {"SZSE", Exchange::SZSE}, {"CFFEX", Exchange::CFFEX}, {"SHFE", Exchange::SHFE},
-				{"CZCE", Exchange::CZCE}, {"DCE", Exchange::DCE}, {"INE", Exchange::INE}, {"SGE", Exchange::SGE},
-				{"HKEX", Exchange::HKEX}, {"SMART", Exchange::SMART}, {"GLOBEX", Exchange::GLOBEX}, {"IDEALPRO", Exchange::IDEALPRO},
-				{"OANDA", Exchange::OANDA}
-		}};
-
-		auto it = std::find_if(pairs.begin(), pairs.end(), [field] (const std::pair<const char*, Exchange>& pair) {
-			return std::strcmp(pair.first, field->ExchangeID) == 0;
-		});
-
-		if (it != pairs.end())
-		{
-			return it->second;
-		}
-
-		throw std::invalid_argument("Cannot interpret exchange name: " + std::string(field->ExchangeID));
 	}
 
 }

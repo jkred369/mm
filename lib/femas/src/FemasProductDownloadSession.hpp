@@ -371,24 +371,6 @@ namespace mm
 		//
 		ProductType getProductType(const CUstpFtdcRspInstrumentField* field) const;
 
-		//
-		// Determine currency from given data.
-		//
-		// field : The data fields.
-		//
-		// return : The currency type.
-		//
-		Currency getCurrency(const CUstpFtdcRspInstrumentField* field) const;
-
-		//
-		// Determine exchange from given data.
-		//
-		// field : The data fields.
-		//
-		// return : The exchange value.
-		//
-		Exchange getExchange(const CUstpFtdcRspInstrumentField* field) const;
-
 	private:
 
 		// The logger for this class.

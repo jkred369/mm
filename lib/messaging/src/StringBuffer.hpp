@@ -17,6 +17,7 @@
 
 #include <fmt/format.h>
 
+#include <DateTime.hpp>
 #include <EnumType.hpp>
 #include <FixedSizeString.hpp>
 #include <Logger.hpp>
@@ -175,6 +176,17 @@ namespace mm
 		}
 
 		//
+		// output a date to the buffer.
+		//
+		// value : The date.
+		//
+		inline StringBuffer& operator << (const Date& value)
+		{
+			const std::int64_t yyyymmdd = DateUtil::dateToInt(value);
+			return operator << (yyyymmdd);
+		}
+
+		//
 		// output an enum type to the buffer.
 		//
 		// value : The enum type.
@@ -324,6 +336,20 @@ namespace mm
 			value = items[readIndex];
 
 			++readIndex;
+			return *this;
+		}
+
+		//
+		// input a date from the buffer.
+		//
+		// value : The date value.
+		//
+		inline StringBuffer& operator >> (Date& value)
+		{
+			std::int64_t yyyymmdd;
+			operator >> (yyyymmdd);
+			value = DateUtil::intToDate(yyyymmdd);
+
 			return *this;
 		}
 

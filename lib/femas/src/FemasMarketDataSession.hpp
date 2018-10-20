@@ -23,6 +23,7 @@
 #include <Logger.hpp>
 #include <MarketDataMessage.hpp>
 #include <NativeDefinition.hpp>
+#include <ObjectPool.hpp>
 #include <Product.hpp>
 #include <PublisherAdapter.hpp>
 #include <ServiceContext.hpp>
@@ -207,6 +208,9 @@ namespace mm
 		// The int value for ask
 		static constexpr int ASK = toValue(Side::ASK);
 
+		// The market data pool size.
+		static constexpr std::size_t poolSize = 1000;
+
 		// The logger for this class.
 		static Logger logger;
 
@@ -215,6 +219,9 @@ namespace mm
 
 		// The CPU affinity for callback thread.
 		const int cpuAffinity;
+
+		// The market data message pool.
+		NullObjectPool<MarketDataMessage> marketDataPool;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.

@@ -11,15 +11,13 @@
 #include <cstdint>
 #include <chrono>
 
+#include <DateTime.hpp>
 #include <FixedSizeString.hpp>
 
 namespace mm
 {
 	// defines all the field types for specific fields.
 	typedef FixedSizeString<31> SymbolType;
-
-	// TODO: pick a good date lib.
-	typedef int Date;
 }
 
 
