@@ -5,6 +5,9 @@
  *      Author: suoalex
  */
 
+#include <chrono>
+#include <iostream>
+#include <thread>
 #include <unordered_map>
 
 #include <gtest/gtest.h>
@@ -91,6 +94,7 @@ namespace mm
 			message.status = OrderStatus::LIVE;
 
 			order.consume(ptr);
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
 			ASSERT_TRUE(order.getOrderId() == message.orderId);
 			ASSERT_TRUE(order.getInstrumentId() == message.instrumentId);
@@ -147,6 +151,7 @@ namespace mm
 			message.status = OrderStatus::LIVE;
 
 			order.consume(ptr);
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
 			ASSERT_TRUE(order.getOrderId() == message.orderId);
 			ASSERT_TRUE(order.getInstrumentId() == message.instrumentId);
@@ -189,6 +194,7 @@ namespace mm
 			message.status = OrderStatus::CANCELLED;
 
 			order.consume(ptr);
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
 			ASSERT_TRUE(!exchange.statusMap.empty());
 			ASSERT_TRUE(exchange.statusMap.find(message.orderId) != exchange.statusMap.end());
@@ -285,6 +291,7 @@ namespace mm
 			message.tradedQty = 0;
 
 			order.consume(ptr);
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
 			ASSERT_TRUE(!exchange.statusMap.empty());
 			ASSERT_TRUE(exchange.statusMap.find(message.orderId) != exchange.statusMap.end());
@@ -317,7 +324,7 @@ namespace mm
 
 			message.orderId = 1;
 			message.instrumentId = 2;
-			message.executionId = 20001312;
+			message.executionId = "20001312";
 			message.avgTradedPrice = 19999.0;
 			message.execPrice = 19999.0;
 			message.price = 20000.0;
@@ -328,6 +335,7 @@ namespace mm
 			message.tradedQty = 1;
 
 			order.consume(ptr);
+			std::this_thread::sleep_for(std::chrono::milliseconds(2));
 
 			// exchange interface isn't touched ...
 			ASSERT_TRUE(!exchange.statusMap.empty());
@@ -369,6 +377,7 @@ namespace mm
 				ASSERT_TRUE(trade.qty == 1);
 				ASSERT_TRUE(trade.price == 19999.0);
 				ASSERT_TRUE(trade.side == Side::BID);
+				ASSERT_TRUE(trade.executionId.toString() == "20001312");
 			}
 		}
 	}

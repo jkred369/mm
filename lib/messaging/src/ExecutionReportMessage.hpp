@@ -53,8 +53,8 @@ namespace mm
 				return false;
 			}
 
-			buffer << orderId << instrumentId << executionId << openQty << tradedQty << execQty;
-			buffer << price << avgTradedPrice << execPrice << status << side;
+			buffer << orderId << instrumentId << openQty << tradedQty << execQty;
+			buffer << price << avgTradedPrice << execPrice << status << side << tradeTimestamp << executionId;
 
 			return buffer.getError();
 		}
@@ -74,8 +74,8 @@ namespace mm
 				return false;
 			}
 
-			buffer >> orderId >> instrumentId >> executionId >> openQty >> tradedQty >> execQty;
-			buffer >> price >> avgTradedPrice >> execPrice >> status >> side;
+			buffer >> orderId >> instrumentId >> openQty >> tradedQty >> execQty;
+			buffer >> price >> avgTradedPrice >> execPrice >> status >> side >> tradeTimestamp >> executionId;
 
 			return buffer.getError();
 		}
@@ -87,7 +87,7 @@ namespace mm
 		//
 		inline bool hasTrade() const
 		{
-			return executionId != 0;
+			return execQty != 0;
 		}
 
 		//
@@ -105,9 +105,6 @@ namespace mm
 
 		// The instrument ID.
 		std::int64_t instrumentId;
-
-		// The execution ID.
-		std::int64_t executionId;
 
 		// The open live qty.
 		std::int64_t openQty;
@@ -133,6 +130,11 @@ namespace mm
 		// The order side.
 		Side side;
 
+		// The trade timestamp if this is a trade
+		DateTime tradeTimestamp;
+
+		// The execution ID.
+		ExecutionIdType executionId;
 	};
 
 	DEFINE_OPERATORS(ExecutionReportMessage)

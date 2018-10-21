@@ -19,6 +19,7 @@
 #include <Currency.hpp>
 #include <DateTime.hpp>
 #include <Exchange.hpp>
+#include <OrderStatus.hpp>
 #include <ProductType.hpp>
 
 #include <femas/USTPFtdcUserApiDataType.h>
@@ -79,6 +80,28 @@ namespace mm
 			}
 
 			throw std::invalid_argument("Cannot interpret exchange name: " + std::string(exchangeId));
+		}
+
+		//
+		// Concert femas status to order status.
+		//
+		// status : femas order status.
+		//
+		// return : converted order status.
+		//
+		static inline OrderStatus getStatus(const TUstpFtdcOrderStatusType status)
+		{
+			static constexpr OrderStatus statuses[] = {
+					OrderStatus::FULL_FILLED, // USTP_FTDC_OS_AllTraded '0'
+					OrderStatus::LIVE, // USTP_FTDC_OS_PartTradedQueueing '1'
+					OrderStatus::LIVE, // USTP_FTDC_OS_PartTradedNotQueueing '2'
+					OrderStatus::LIVE, // USTP_FTDC_OS_NoTradeQueueing '3'
+					OrderStatus::LIVE, // USTP_FTDC_OS_NoTradeNotQueueing '4'
+					OrderStatus::CANCELLED, // USTP_FTDC_OS_Canceled '5'
+					OrderStatus::PENDING_ACK, // USTP_FTDC_OS_AcceptedNoReply '6'
+			};
+
+			return statuses[status - '0'];
 		}
 
 		//

@@ -18,6 +18,7 @@ namespace mm
 {
 	// defines all the field types for specific fields.
 	typedef FixedSizeString<31> SymbolType;
+	typedef FixedSizeString<21> ExecutionIdType;
 }
 
 

@@ -185,6 +185,29 @@ namespace mm
 		// The dispatch key.
 		const KeyType dispatchKey;
 
+		//
+		// Get the order from the given instrument ID and order ID.
+		//
+		// instrumentId : The instrument ID of the order.
+		// orderId : The order ID of the order.
+		//
+		// return : pointer to the order; or nullptr if order cannot be found.
+		//
+		inline const ExchangeOrder* getOrder(std::int64_t instrumentId, std::int64_t orderId)
+		{
+			if (const ExchangeOrder* result = liveCache.getOrder(instrumentId, orderId))
+			{
+				return result;
+			}
+
+			if (const ExchangeOrder* result = completedCache.getOrder(instrumentId, orderId))
+			{
+				return result;
+			}
+
+			return nullptr;
+		}
+
 	private:
 
 		// Logger of the class.

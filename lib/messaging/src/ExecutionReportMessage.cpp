@@ -12,7 +12,6 @@ namespace mm
 	ExecutionReportMessage::ExecutionReportMessage() :
 			orderId(0),
 			instrumentId(0),
-			executionId(0),
 			openQty(0),
 			tradedQty(0),
 			execQty(0),
@@ -28,7 +27,6 @@ namespace mm
 	{
 		return orderId == rhs.orderId &&
 				instrumentId == rhs.instrumentId &&
-				executionId == rhs.executionId &&
 				openQty == rhs.openQty &&
 				tradedQty == rhs.tradedQty &&
 				execQty == rhs.execQty &&
@@ -36,6 +34,8 @@ namespace mm
 				avgTradedPrice == rhs.avgTradedPrice &&
 				execPrice == rhs.execPrice &&
 				status == rhs.status &&
-				side == rhs.side;
+				side == rhs.side &&
+				tradeTimestamp == rhs.tradeTimestamp &&
+				executionId == rhs.executionId;
 	}
 }

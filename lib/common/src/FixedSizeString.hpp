@@ -59,7 +59,7 @@ namespace mm
 		//
 		// string : The raw c string.
 		//
-		FixedSizeString<size>& operator = (const char* string)
+		inline FixedSizeString<size>& operator = (const char* string)
 		{
 			length = std::min(size, std::strlen(string));
 			std::strncpy(buffer, string, length);
@@ -72,7 +72,7 @@ namespace mm
 		//
 		// string : The cpp string.
 		//
-		FixedSizeString<size>& operator = (const std::string& string)
+		inline FixedSizeString<size>& operator = (const std::string& string)
 		{
 			length = std::min(size, string.size());
 			std::strncpy(buffer, string.c_str(), length);
@@ -87,7 +87,7 @@ namespace mm
 		//
 		// return : true if the contents are equal.
 		//
-		template<std::size_t RightSize> bool equals(const FixedSizeString<RightSize>& rhs) const
+		template<std::size_t RightSize> inline bool equals(const FixedSizeString<RightSize>& rhs) const
 		{
 			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
 		}
@@ -99,7 +99,7 @@ namespace mm
 		//
 		// return : true if the contents are equal.
 		//
-		bool equals(const FixedSizeString& rhs) const
+		inline bool equals(const FixedSizeString& rhs) const
 		{
 			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
 		}
@@ -111,7 +111,7 @@ namespace mm
 		//
 		// return : true if the contents are equal.
 		//
-		bool equals(const std::string& rhs) const
+		inline bool equals(const std::string& rhs) const
 		{
 			return length == rhs.length() && std::memcmp(buffer, rhs.c_str(), length) == 0;
 		}
@@ -121,7 +121,7 @@ namespace mm
 		//
 		// return : hash value for the string.
 		//
-		std::size_t hash() const
+		inline std::size_t hash() const
 		{
 			std::size_t result = 7;
 			for (std::size_t i = 0; i < length; ++i)
@@ -137,7 +137,7 @@ namespace mm
 		//
 		// return : A std string with identical content on stack.
 		//
-		std::string toString() const
+		inline std::string toString() const
 		{
 			return std::string(buffer, length);
 		}
@@ -147,7 +147,7 @@ namespace mm
 		//
 		// return : A char buffer with size same as the length and content identical on heap.
 		//
-		char* toStr() const
+		inline char* toStr() const
 		{
 			char* result = new char[length + 1];
 
@@ -162,7 +162,7 @@ namespace mm
 		//
 		// buffer : The buffer. Caller needs to make sure the length of buffer is enough.
 		//
-		void copy(char* buffer) const
+		inline void copy(char* buffer) const
 		{
 			std::strncpy(buffer, this->buffer, length);
 		}
@@ -172,7 +172,7 @@ namespace mm
 		//
 		// return : The size of the string stored.
 		//
-		size_t stringSize() const
+		inline size_t stringSize() const
 		{
 			return length;
 		}
@@ -182,7 +182,7 @@ namespace mm
 		//
 		// return : The data from the string.
 		//
-		const char* data() const
+		inline const char* data() const
 		{
 			return buffer;
 		}
@@ -192,7 +192,7 @@ namespace mm
 		//
 		// return : The capacity of the string.
 		//
-		static constexpr size_t capacity()
+		inline static constexpr size_t capacity()
 		{
 			return size;
 		}
@@ -206,12 +206,12 @@ namespace mm
 		char buffer[size];
 	};
 
-	template<std::size_t LeftSize, std::size_t RightSize> bool operator == (const FixedSizeString<LeftSize> lhs, const FixedSizeString<RightSize>& rhs)
+	template<std::size_t LeftSize, std::size_t RightSize> inline bool operator == (const FixedSizeString<LeftSize> lhs, const FixedSizeString<RightSize>& rhs)
 	{
 		return lhs.equals(rhs);
 	}
 
-	template<std::size_t Size> bool operator == (const FixedSizeString<Size> lhs, const std::string& rhs)
+	template<std::size_t Size> inline bool operator == (const FixedSizeString<Size> lhs, const std::string& rhs)
 	{
 		return lhs.equals(rhs);
 	}

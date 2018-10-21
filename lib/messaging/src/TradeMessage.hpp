@@ -10,6 +10,7 @@
 
 #include <cstdint>
 
+#include "FieldDefinition.hpp"
 #include "Message.hpp"
 #include "OrderStatus.hpp"
 #include "Side.hpp"
@@ -52,7 +53,7 @@ namespace mm
 				return false;
 			}
 
-			buffer << orderId << instrumentId << strategyId << executionId << side << qty << price;
+			buffer << orderId << instrumentId << strategyId  << side << qty << price << timestamp << executionId;
 			return buffer.getError();
 		}
 
@@ -71,17 +72,7 @@ namespace mm
 				return false;
 			}
 
-			buffer >> orderId >> instrumentId >> strategyId >> executionId >> side >> qty >> price;
-		}
-
-		//
-		// Determine if the message contains a trade.
-		//
-		// return : true if the message contains a trade.
-		//
-		inline bool isTrade() const
-		{
-			return executionId != 0;
+			buffer >> orderId >> instrumentId >> strategyId >> side >> qty >> price >> timestamp >> executionId;
 		}
 
 		//
@@ -103,9 +94,6 @@ namespace mm
 		// The strategy ID.
 		std::int64_t strategyId;
 
-		// The trade ID.
-		std::int64_t executionId;
-
 		// The order side.
 		Side side;
 
@@ -114,6 +102,12 @@ namespace mm
 
 		// Trade price.
 		double price;
+
+		// Trade timestamp.
+		DateTime timestamp;
+
+		// The trade ID.
+		ExecutionIdType executionId;
 	};
 
 	DEFINE_OPERATORS(TradeMessage)

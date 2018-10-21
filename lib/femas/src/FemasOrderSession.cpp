@@ -5,6 +5,8 @@
  *      Author: suoalex
  */
 
+#include <cstdlib>
+
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
 #include <PositionMessage.hpp>
@@ -12,6 +14,7 @@
 #include <StringUtil.hpp>
 
 #include "FemasOrderSession.hpp"
+#include "FemasUtil.hpp"
 
 mm::Logger mm::FemasOrderSession::logger;
 
@@ -26,6 +29,7 @@ namespace mm
 			const FemasOrderDetail& orderDetail,
 			const int cpuAffinity) :
 		OrderManager<FemasOrderSession, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
+		PublisherAdapter<ExecutionReportMessage> (serviceContext.getDispatcher()),
 		PublisherAdapter<PositionMessage> (serviceContext.getDispatcher()),
 		userDetail(userDetail),
 		orderDetail(orderDetail),
@@ -205,10 +209,10 @@ namespace mm
 	void FemasOrderSession::sendOrder(const std::shared_ptr<const OrderMessage>& message)
 	{
 		// fixed values to prevent if blocks
-		constexpr TUstpFtdcDirectionType direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
-		constexpr TUstpFtdcTimeConditionType timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
-		constexpr TUstpFtdcVolumeConditionType volumeCondition[] = {USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_CV};
-		constexpr TUstpFtdcOffsetFlagType offsetType[] = {USTP_FTDC_OF_Open, USTP_FTDC_OF_Close, USTP_FTDC_OF_ForceClose, USTP_FTDC_OF_CloseToday, USTP_FTDC_OF_CloseYesterday};
+		static constexpr TUstpFtdcDirectionType direction[] = {USTP_FTDC_D_Buy, USTP_FTDC_D_Sell};
+		static constexpr TUstpFtdcTimeConditionType timeCondition[] = {USTP_FTDC_TC_GFD, USTP_FTDC_TC_GFD, USTP_FTDC_TC_IOC, USTP_FTDC_TC_GFD};
+		static constexpr TUstpFtdcVolumeConditionType volumeCondition[] = {USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_AV, USTP_FTDC_VC_CV};
+		static constexpr TUstpFtdcOffsetFlagType offsetType[] = {USTP_FTDC_OF_Open, USTP_FTDC_OF_Close, USTP_FTDC_OF_ForceClose, USTP_FTDC_OF_CloseToday, USTP_FTDC_OF_CloseYesterday};
 
 		CUstpFtdcInputOrderField order;
 		std::memset(&order, 0, sizeof(order));
@@ -258,6 +262,17 @@ namespace mm
 		if (UNLIKELY(result != 0))
 		{
 			LOGERR("Error sending order {} on instrument {}: {}", message->orderId, message->instrumentId, result);
+
+			// execution report feed back
+			std::shared_ptr<ExecutionReportMessage> messagePointer = executionReportPool.getShared();
+			ExecutionReportMessage& report = *messagePointer;
+
+			report.orderId = message->orderId;
+			report.instrumentId = message->instrumentId;
+			report.status = OrderStatus::NEW_REJECTED;
+
+			const Subscription subscription(SourceType::FEMAS_ORDER, DataType::EXEC_REPORT, message->strategyId);
+			PublisherAdapter<ExecutionReportMessage>::publish(subscription, messagePointer);
 		}
 	}
 
@@ -292,6 +307,17 @@ namespace mm
 		if (UNLIKELY(result != 0))
 		{
 			LOGERR("Error sending cancel on order {}, instrument {}: {}", message->orderId, message->instrumentId, result);
+
+			// execution report feed back
+			std::shared_ptr<ExecutionReportMessage> messagePointer = executionReportPool.getShared();
+			ExecutionReportMessage& report = *messagePointer;
+
+			report.orderId = message->orderId;
+			report.instrumentId = message->instrumentId;
+			report.status = OrderStatus::CANCEL_REJECTED;
+
+			const Subscription subscription(SourceType::FEMAS_ORDER, DataType::EXEC_REPORT, message->strategyId);
+			PublisherAdapter<ExecutionReportMessage>::publish(subscription, messagePointer);
 		}
 	}
 
@@ -396,7 +422,33 @@ namespace mm
 
 	void FemasOrderSession::OnRspOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
+		std::shared_ptr<ExecutionReportMessage> messagePointer = executionReportPool.getShared();
+		ExecutionReportMessage& report = *messagePointer;
 
+		// ID mapping
+		if (UNLIKELY(!getIdFromSymbol(inputOrder->InstrumentID, report.instrumentId)))
+		{
+			LOGERR("Error getting instrument for new order response.");
+			return;
+		}
+
+		report.orderId = std::atoi(inputOrder->UserOrderLocalID);
+		report.side = inputOrder->Direction == USTP_FTDC_D_Buy ? Side::BID : Side::ASK;
+		report.openQty = inputOrder->Volume;
+
+		// check if we got any error
+		report.status = info->ErrorID == 0 ? OrderStatus::LIVE : OrderStatus::NEW_REJECTED;
+
+		// get the strategy ID and publish
+		if (const ExchangeOrder* order = getOrder(report.instrumentId, report.orderId))
+		{
+			const Subscription subscription(SourceType::FEMAS_ORDER, DataType::EXEC_REPORT, order->getStrategyId());
+			PublisherAdapter<ExecutionReportMessage>::publish(subscription, messagePointer);
+		}
+		else
+		{
+			LOGERR("Failed to get order for instrument: {}, order ID: {}", report.instrumentId, report.orderId);
+		}
 	}
 
 	void FemasOrderSession::OnRspOrderAction(CUstpFtdcOrderActionField *orderAction, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
@@ -411,12 +463,72 @@ namespace mm
 
 	void FemasOrderSession::OnRtnTrade(CUstpFtdcTradeField *trade)
 	{
+		std::shared_ptr<ExecutionReportMessage> messagePointer = executionReportPool.getShared();
+		ExecutionReportMessage& report = *messagePointer;
 
+		// ID mapping
+		if (UNLIKELY(!getIdFromSymbol(trade->InstrumentID, report.instrumentId)))
+		{
+			LOGERR("Error getting instrument for trade.");
+			return;
+		}
+
+		report.orderId = std::atoi(trade->UserOrderLocalID);
+		report.executionId = trade->TradeID;
+
+		report.execQty = trade->TradeVolume;
+		report.execPrice = trade->TradePrice;
+		report.avgTradedPrice = trade->TradePrice;
+		report.side = trade->Direction == USTP_FTDC_D_Buy ? Side::BID : Side::ASK;
+
+		// TODO: convert trade timestamp
+
+		// get the strategy ID and publish
+		if (const ExchangeOrder* order = getOrder(report.instrumentId, report.orderId))
+		{
+			const Subscription subscription(SourceType::FEMAS_ORDER, DataType::EXEC_REPORT, order->getStrategyId());
+			PublisherAdapter<ExecutionReportMessage>::publish(subscription, messagePointer);
+		}
+		else
+		{
+			LOGERR("Failed to get order for instrument: {}, order ID: {}", report.instrumentId, report.orderId);
+		}
 	}
 
 	void FemasOrderSession::OnRtnOrder(CUstpFtdcOrderField *order)
 	{
+		std::shared_ptr<ExecutionReportMessage> messagePointer = executionReportPool.getShared();
+		ExecutionReportMessage& report = *messagePointer;
 
+		// ID mapping
+		if (UNLIKELY(!getIdFromSymbol(order->InstrumentID, report.instrumentId)))
+		{
+			LOGERR("Error getting instrument for trade.");
+			return;
+		}
+
+		report.orderId = std::atoi(order->UserOrderLocalID);
+		report.status = FemasUtil::getStatus(order->OrderStatus);
+
+		report.price = order->LimitPrice;
+		report.execQty = order->VolumeTraded;
+		report.openQty = order->VolumeRemain;
+
+		report.side = order->Direction == USTP_FTDC_D_Buy ? Side::BID : Side::ASK;
+
+		// TODO: convert order timestamp
+		// TODO: determine avg traded price from ExchangeOrder below
+
+		// get the strategy ID and publish
+		if (const ExchangeOrder* order = getOrder(report.instrumentId, report.orderId))
+		{
+			const Subscription subscription(SourceType::FEMAS_ORDER, DataType::EXEC_REPORT, order->getStrategyId());
+			PublisherAdapter<ExecutionReportMessage>::publish(subscription, messagePointer);
+		}
+		else
+		{
+			LOGERR("Failed to get order for instrument: {}, order ID: {}", report.instrumentId, report.orderId);
+		}
 	}
 
 	void FemasOrderSession::OnErrRtnOrderInsert(CUstpFtdcInputOrderField *inputOrder, CUstpFtdcRspInfoField *info)
@@ -505,17 +617,10 @@ namespace mm
 		PositionMessage& message = *messagePointer;
 
 		// ID mapping
+		if (UNLIKELY(!getIdFromSymbol(investorPosition->InstrumentID, message.instrumentId)))
 		{
-			const SymbolType symbol(investorPosition->InstrumentID);
-
-			auto it = symbolMap.find(symbol);
-			if (UNLIKELY(it == symbolMap.end()))
-			{
-				LOGERR("Cannot find symbol mapping for instrument {}.", symbol.toString());
-				return;
-			}
-
-			message.instrumentId = it->second;
+			LOGERR("Error getting instrument for position.");
+			return;
 		}
 
 		// fields

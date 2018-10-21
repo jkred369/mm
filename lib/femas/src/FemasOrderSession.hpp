@@ -17,6 +17,7 @@
 
 #include <CountDownLatch.hpp>
 #include <EnumType.hpp>
+#include <ExecutionReportMessage.hpp>
 #include <IService.hpp>
 #include <Logger.hpp>
 #include <ObjectPool.hpp>
@@ -37,6 +38,7 @@ namespace mm
 	//
 	class FemasOrderSession :
 			public OrderManager<FemasOrderSession, NullObjectPool>,
+			public PublisherAdapter<ExecutionReportMessage>,
 			public PublisherAdapter<PositionMessage>,
 			public IConsumer<Product>,
 			public CUstpFtdcTraderSpi
@@ -388,6 +390,29 @@ namespace mm
 				LOGERR("Failed to get exchange order ID for order ID: {}", clientOrderId);
 				return false;
 			}
+		}
+
+		//
+		// Get the instrument ID from the given symbol.
+		//
+		// symbol : The exchange symbol.
+		// id : The instrument ID to write.
+		//
+		// return : true if the operation is successful.
+		//
+		inline bool getIdFromSymbol(const TUstpFtdcInstrumentIDType& symbol, std::int64_t& id)
+		{
+			const SymbolType internalSymbol(symbol);
+
+			auto it = symbolMap.find(internalSymbol);
+			if (UNLIKELY(it == symbolMap.end()))
+			{
+				LOGERR("Cannot find symbol mapping for instrument {}.", internalSymbol.toString());
+				return false;
+			}
+
+			id = it->second;
+			return true;
 		}
 
 		// The int value for bid
