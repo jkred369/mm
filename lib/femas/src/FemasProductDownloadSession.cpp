@@ -7,11 +7,14 @@
 
 #include <algorithm>
 #include <array>
+#include <fstream>
 #include <string>
+#include <vector>
 
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
 #include <ProductService.hpp>
+#include <StringBuffer.hpp>
 #include <StringUtil.hpp>
 
 #include "FemasProductDownloadSession.hpp"
@@ -26,8 +29,10 @@ namespace mm
 			const std::string serviceName,
 			ServiceContext& serviceContext,
 			const std::string productServiceName,
+			const std::string outputPath,
 			const FemasUserDetail& userDetail) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
+		outputPath(outputPath),
 		userDetail(userDetail),
 		dispatcher(serviceContext.getDispatcher()),
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
@@ -42,6 +47,8 @@ namespace mm
 			LOGERR("Market data session failed to get product service from service context");
 			throw std::runtime_error("Failed to create Femas product download session. Cannot find product service with name: " + productServiceName);
 		}
+
+		productService->initSnapshot(this);
 
 		// basic wiring up - the API interface forced const_cast usage
 		session->RegisterSpi(this);
@@ -104,9 +111,11 @@ namespace mm
 			std::memset(&field, 0, sizeof(field));
 
 			session->ReqQryInstrument(&field, ++requestId);
+			outputLatch.wait();
 		}
 
-		return true;
+		// when output is finished we can always return false to cause the context shut down gracefully.
+		return false;
 	}
 
 	void FemasProductDownloadSession::stop()
@@ -146,6 +155,8 @@ namespace mm
 		{
 			maxProductId = content.id;
 		}
+
+		rawProductMap[content.id] = content;
 	}
 
 	void FemasProductDownloadSession::OnFrontConnected()
@@ -312,8 +323,7 @@ namespace mm
 
 	void FemasProductDownloadSession::OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
-		std::shared_ptr<ProductMessage> message = std::make_shared<ProductMessage> ();
-		ProductMessage& product = *message;
+		ProductMessage product;
 
 		// determine product ID
 		{
@@ -365,10 +375,15 @@ namespace mm
 			product.strike = instrument->StrikePrice;
 		}
 
-		// publish to product service
-		// TODO: clarify how to populate the products
-		// const Subscription subscription(SourceType::ALL, DataType::PRODUCT, product.id);
-		// publish(subscription, message);
+		// add the product to the map for writing out
+		rawProductMap[product.id] = product;
+		LOGINFO("Refreshed product {}, {}", product.id, product.symbol.toString());
+
+		if (isLast)
+		{
+			LOGINFO("All products retrieved. Outputing...");
+			output();
+		}
 	}
 
 	void FemasProductDownloadSession::OnRspQryExchange(CUstpFtdcRspExchangeField *exchange, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
@@ -450,6 +465,49 @@ namespace mm
 		}
 
 		return ProductType::FUTURE;
+	}
+
+	void FemasProductDownloadSession::output()
+	{
+		std::vector<std::int64_t> ids;
+		ids.reserve(rawProductMap.size());
+
+		// firstly, remove all the products that are expired
+		const Date today = DateUtil::today();
+		for (auto it = rawProductMap.begin(); it != rawProductMap.end(); )
+		{
+			const ProductMessage& product = it->second;
+			if (product.expiryDate < today)
+			{
+				it = rawProductMap.erase(it);
+			}
+			else
+			{
+				ids.push_back(it->first);
+				++it;
+			}
+		}
+
+		std::sort(ids.begin(), ids.end());
+		LOGINFO("{} products will be written to {}", rawProductMap.size(), outputPath);
+
+		// output
+		{
+			std::ofstream os(outputPath);
+			for (const std::int64_t& id : ids)
+			{
+				StringBuffer buffer;
+
+				const ProductMessage& product = rawProductMap[id];
+				product.serialize(buffer);
+				os << buffer;
+			}
+
+			os.flush();
+			LOGINFO("Product output finished.");
+
+			outputLatch.countDown();
+		}
 	}
 
 }

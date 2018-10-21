@@ -48,6 +48,7 @@ namespace mm
 		// serviceName : The service name in context.
 		// serviceContext : The service context.
 		// productServiceName : The product service name.
+		// outputPath : The output path.
 		// userDetail : The configuration details.
 		//
 		FemasProductDownloadSession(
@@ -55,6 +56,7 @@ namespace mm
 				const std::string serviceName,
 				ServiceContext& serviceContext,
 				const std::string productServiceName,
+				const std::string outputPath,
 				const FemasUserDetail& userDetail);
 
 		// virtual destructor.
@@ -371,10 +373,18 @@ namespace mm
 		//
 		ProductType getProductType(const CUstpFtdcRspInstrumentField* field) const;
 
+		//
+		// Output the available products.
+		//
+		void output();
+
 	private:
 
 		// The logger for this class.
 		static Logger logger;
+
+		// The path to output product file.
+		const std::string outputPath;
 
 		// The login user detail.
 		const FemasUserDetail userDetail;
@@ -394,6 +404,9 @@ namespace mm
 
 		// The start up count down latch.
 		CountDownLatch<> startLatch;
+
+		// The output count down latch.
+		CountDownLatch<> outputLatch;
 
 		// Flag if stop is called or in process.
 		std::atomic<bool> stopFlag;
