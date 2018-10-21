@@ -7,6 +7,7 @@
 
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
+#include <PositionMessage.hpp>
 #include <ProductService.hpp>
 #include <StringUtil.hpp>
 
@@ -25,11 +26,13 @@ namespace mm
 			const FemasOrderDetail& orderDetail,
 			const int cpuAffinity) :
 		OrderManager<FemasOrderSession, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
+		PublisherAdapter<PositionMessage> (serviceContext.getDispatcher()),
 		userDetail(userDetail),
 		orderDetail(orderDetail),
 		cpuAffinity(cpuAffinity),
 		dispatcher(serviceContext.getDispatcher()),
 		executionReportPool(POOL_SIZE),
+		positionPool(POSITION_POOL_SIZE),
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
 		stopFlag(false),
 		requestId(0)
@@ -47,7 +50,7 @@ namespace mm
 			}
 
 			productService->initSnapshot(this);
-			LOGINFO("Symbol map created with {} products.", symbolMap.size());
+			LOGINFO("Symbol map created with {} products.", idMap.size());
 		}
 
 		// basic wiring up - the API interface forced const_cast usage
@@ -193,8 +196,10 @@ namespace mm
 			return;
 		}
 
-		std::memset(symbolMap[content.id], 0, sizeof(TUstpFtdcInstrumentIDType));
-		std::strncpy(symbolMap[content.id], content.symbol.data(), sizeof(TUstpFtdcInstrumentIDType));
+		std::memset(idMap[content.id], 0, sizeof(TUstpFtdcInstrumentIDType));
+		std::strncpy(idMap[content.id], content.symbol.data(), sizeof(TUstpFtdcInstrumentIDType));
+
+		symbolMap[content.symbol] = content.id;
 	}
 
 	void FemasOrderSession::sendOrder(const std::shared_ptr<const OrderMessage>& message)
@@ -238,10 +243,10 @@ namespace mm
 
 		// ID mapping
 		{
-			auto it = symbolMap.find(message->instrumentId);
-			if (UNLIKELY(it == symbolMap.end()))
+			auto it = idMap.find(message->instrumentId);
+			if (UNLIKELY(it == idMap.end()))
 			{
-				LOGERR("Cannot find symbol mapping for order {} on instrument {}.", message->orderId, message->instrumentId);
+				LOGERR("Cannot find id mapping for order {} on instrument {}.", message->orderId, message->instrumentId);
 				return;
 			}
 
@@ -496,7 +501,30 @@ namespace mm
 
 	void FemasOrderSession::OnRspQryInvestorPosition(CUstpFtdcRspInvestorPositionField *investorPosition, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
+		std::shared_ptr<PositionMessage> messagePointer = positionPool.getShared();
+		PositionMessage& message = *messagePointer;
 
+		// ID mapping
+		{
+			const SymbolType symbol(investorPosition->InstrumentID);
+
+			auto it = symbolMap.find(symbol);
+			if (UNLIKELY(it == symbolMap.end()))
+			{
+				LOGERR("Cannot find symbol mapping for instrument {}.", symbol.toString());
+				return;
+			}
+
+			message.instrumentId = it->second;
+		}
+
+		// fields
+		// TODO: check out the position direction
+		message.totalQty = investorPosition->Position;
+		message.sodQty = investorPosition->YdPosition;
+
+		const Subscription subscription(SourceType::FEMAS_ORDER, DataType::POSITION, message.instrumentId);
+		PublisherAdapter<PositionMessage>::publish(subscription, messagePointer);
 	}
 
 	void FemasOrderSession::OnRspQryComplianceParam(CUstpFtdcRspComplianceParamField *complianceParam, CUstpFtdcRspInfoField *info, int requestID, bool isLast)

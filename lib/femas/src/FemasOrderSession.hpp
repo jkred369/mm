@@ -23,6 +23,7 @@
 #include <OrderManager.hpp>
 #include <OrderMessage.hpp>
 #include <OrderSummaryMessage.hpp>
+#include <PositionMessage.hpp>
 #include <Product.hpp>
 #include <PublisherAdapter.hpp>
 
@@ -36,6 +37,7 @@ namespace mm
 	//
 	class FemasOrderSession :
 			public OrderManager<FemasOrderSession, NullObjectPool>,
+			public PublisherAdapter<PositionMessage>,
 			public IConsumer<Product>,
 			public CUstpFtdcTraderSpi
 	{
@@ -397,6 +399,9 @@ namespace mm
 		// The pool size for the execution report.
 		static constexpr std::size_t POOL_SIZE = 1000;
 
+		// The pool size for position message.
+		static constexpr std::size_t POSITION_POOL_SIZE = 100;
+
 		// The logger for this class.
 		static Logger logger;
 
@@ -414,6 +419,9 @@ namespace mm
 
 		// The execution report pool.
 		NullObjectPool<ExecutionReportMessage> executionReportPool;
+
+		// The position pool.
+		NullObjectPool<PositionMessage> positionPool;
 
 		// The actual API session.
 		// Note that we cannot use unique_ptr etc here as the destructor is protected.
@@ -441,7 +449,10 @@ namespace mm
 		std::string tradingDate;
 
 		// The map where key is the instrument ID and value is the symbol to be sent to exchange.
-		std::unordered_map<std::int64_t, TUstpFtdcInstrumentIDType> symbolMap;
+		std::unordered_map<std::int64_t, TUstpFtdcInstrumentIDType> idMap;
+
+		// The may where key is the instrument symbol and value is the instrument ID.
+		std::unordered_map<SymbolType, std::int64_t> symbolMap;
 
 		// The map from client order ID to exchange order ID.
 		std::unordered_map<std::int64_t, TUstpFtdcOrderSysIDType> orderIdMap;

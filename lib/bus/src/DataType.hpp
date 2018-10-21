@@ -100,6 +100,9 @@ namespace mm
 
 		// Trade (execution)
 		TRADE = 27,
+
+		// Position
+		POSITION = 28,
 	};
 }
 
