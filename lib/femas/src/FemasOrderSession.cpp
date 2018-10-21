@@ -42,8 +42,8 @@ namespace mm
 			ProductService* productService;
 			if (!serviceContext.getService(productServiceName, productService))
 			{
-				LOGERR("Market data session failed to get product service from service context");
-				throw std::runtime_error("Failed to create Femas market data session. Cannot find product service with name: " + productServiceName);
+				LOGERR("Order session failed to get product service from service context");
+				throw std::runtime_error("Failed to create Femas order session. Cannot find product service with name: " + productServiceName);
 			}
 
 			productService->initSnapshot(this);
@@ -114,7 +114,7 @@ namespace mm
 
 		if (result == 0)
 		{
-			LOGINFO("Market data session logged in as {}", userDetail.userId);
+			LOGINFO("Order session logged in as {}", userDetail.userId);
 			return true;
 		}
 		else
@@ -132,7 +132,15 @@ namespace mm
 			session->ReqQryUserInvestor(&field, ++requestId);
 		}
 
-		LOGINFO("Waiting for investor ID querying...");
+		{
+			CUstpFtdcQryInvestorPositionField field;
+			StringUtil::copy(field.BrokerID, userDetail.brokerId, sizeof(field.BrokerID));
+			StringUtil::copy(field.UserID, userDetail.userId, sizeof(field.UserID));
+
+			session->ReqQryInvestorPosition(&field, ++requestId);
+		}
+
+		LOGINFO("Waiting for data querying...");
 		startLatch.wait();
 
 		// TODO: determine if resume is proper here.
@@ -292,12 +300,12 @@ namespace mm
 		}
 
 		initLatch.countDown();
-		LOGDEBUG("Market data session connected.");
+		LOGDEBUG("Order session connected.");
 	}
 
 	void FemasOrderSession::OnFrontDisconnected(int reason)
 	{
-		LOGDEBUG("Market data session disconnected on {}, auto-reconnecting", reason);
+		LOGDEBUG("Order session disconnected on {}, auto-reconnecting", reason);
 	}
 
 	void FemasOrderSession::OnHeartBeatWarning(int timeLapse)
