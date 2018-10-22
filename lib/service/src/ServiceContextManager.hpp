@@ -27,11 +27,6 @@ namespace mm
 	public:
 
 		//
-		// The signal handler for shut down.
-		//
-		static void handle(int signal);
-
-		//
 		// Create context and start the program. The calling thread would be blocked till context stop.
 		//
 		// path : The path for the configuration file.
@@ -45,32 +40,11 @@ namespace mm
 
 	private:
 
-		//
-		// structure for shut down handling
-		//
-		struct ShutDownMonitor
-		{
-			// the mutex for locking
-			std::mutex mutex;
-
-			// the condition for raising
-			std::condition_variable condition;
-		};
-
 		// Logger of the class.
 		static Logger logger;
 
-		// The shut down monitor
-		static std::atomic<bool> shutDownFlag;
-
 		// The context.
 		std::unique_ptr<ServiceContext> context;
-
-		// The mux for the condition.
-		std::mutex mutex;
-
-		// The condition to block.
-		std::condition_variable condition;
 	};
 }
 

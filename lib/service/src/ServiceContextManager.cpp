@@ -5,33 +5,34 @@
  *      Author: suoalex
  */
 
-#include <csignal>
+#include <iostream>
 #include <signal.h>
 
 #include "DelegateServiceFactory.hpp"
 #include "ServiceContextManager.hpp"
 
 mm::Logger mm::ServiceContextManager::logger;
-std::atomic<bool> mm::ServiceContextManager::shutDownFlag;
 
 namespace mm
 {
-	void ServiceContextManager::handle(int signal)
-	{
-		if (signal == SIGTERM || signal == SIGUSR1)
-		{
-			shutDownFlag.store(true);
-		}
-	}
-
 	void ServiceContextManager::createContextAndStart(const std::string path)
 	{
-		shutDownFlag.store(false);
+		bool shutDownFlag = false;
 
-		// register the signal handler
-		std::signal(SIGTERM, handle);
-		std::signal(SIGUSR1, handle);
-		std::signal(SIGUSR2, handle);
+		// block the default signals
+		{
+			sigset_t signals;
+			sigemptyset(&signals);
+			sigaddset(&signals, SIGTERM);
+			sigaddset(&signals, SIGUSR1);
+			sigaddset(&signals, SIGUSR2);
+
+			if (pthread_sigmask(SIG_BLOCK, &signals, NULL) != 0)
+			{
+				std::cerr << "Error blocking signal masks" << std::endl;
+				shutDownFlag = true;
+			}
+		}
 
 		// start the context
 		DelegateServiceFactory& factory = DelegateServiceFactory::getFactory();
@@ -40,11 +41,11 @@ namespace mm
 		if (!context->start())
 		{
 			LOGFATAL("Error starting context. Stopping...");
-			shutDownFlag.store(true);
+			shutDownFlag = true;
 		}
 
 		// block and shut down
-		while (!shutDownFlag.load())
+		while (!shutDownFlag)
 		{
 			sigset_t signals;
 			sigemptyset(&signals);
@@ -56,6 +57,12 @@ namespace mm
 			if (sigwait(&signals, &result) != 0)
 			{
 				LOGERR("Error on signal waiting: {}", result);
+			}
+
+			if (result == SIGTERM || result == SIGUSR1 || result == SIGUSR2)
+			{
+				LOGERR("Received signal {}, shutting down ...", result);
+				shutDownFlag = true;
 			}
 		}
 

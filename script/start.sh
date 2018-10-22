@@ -4,4 +4,4 @@
 
 export MM_LIB_PATH="$MM_PATH/lib:$LD_LIBRARY_PATH"
 
-$MM_PATH/bin/$1 $MM_PATH/config/$2
+nohup $MM_PATH/bin/$1 $MM_PATH/config/$2 &
