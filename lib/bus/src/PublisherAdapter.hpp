@@ -18,7 +18,6 @@
 #include <IPublisher.hpp>
 #include <Logger.hpp>
 #include <NativeDefinition.hpp>
-#include <SpinLockGuard.hpp>
 #include <Subscription.hpp>
 
 namespace mm
