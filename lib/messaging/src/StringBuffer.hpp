@@ -187,6 +187,16 @@ namespace mm
 		}
 
 		//
+		// output a time stamp to the buffer.
+		//
+		// value : The time stamp.
+		//
+		inline StringBuffer& operator << (const DateTime& value)
+		{
+			return operator << (std::to_iso_string(value));
+		}
+
+		//
 		// output an enum type to the buffer.
 		//
 		// value : The enum type.
@@ -350,6 +360,20 @@ namespace mm
 			operator >> (yyyymmdd);
 			value = DateUtil::intToDate(yyyymmdd);
 
+			return *this;
+		}
+
+		//
+		// input a time stamp from the buffer.
+		//
+		// value : The time stamp value.
+		//
+		inline StringBuffer&& operator >> (DateTime& value)
+		{
+			std::string stringValue;
+			operator >> (stringValue);
+
+			value = std::from_iso_string(stringValue);
 			return *this;
 		}
 

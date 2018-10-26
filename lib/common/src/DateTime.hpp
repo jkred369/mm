@@ -66,6 +66,35 @@ namespace mm
 			return year * 10000 + month * 100 + day;
 		}
 	};
+
+	//
+	// The struct defines the common utility functions for datetime.
+	//
+	struct DateTimeUtil
+	{
+		// The epoch daet time.
+		static const DateTime epochDateTime;
+
+		//
+		// Get the current local date time.
+		//
+		// return : current local date time.
+		//
+		static inline DateTime now()
+		{
+			return boost::posix_time::microsec_clock::local_time();
+		}
+
+		//
+		// Get the current UTC date time.
+		//
+		// return : current UTC date time.
+		//
+		static inline DateTime utc()
+		{
+			return boost::posix_time::microsec_clock::universal_time();
+		}
+	};
 }
 
 

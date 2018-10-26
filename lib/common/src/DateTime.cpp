@@ -8,3 +8,4 @@
 #include "DateTime.hpp"
 
 const mm::Date mm::DateUtil::epochDate(1970, 1, 1);
+const mm::DateTime mm::DateTimeUtil::epochDateTime(mm::DateUtil::epochDate);
