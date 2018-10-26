@@ -73,6 +73,7 @@ namespace mm
 			}
 
 			buffer >> orderId >> instrumentId >> strategyId >> side >> qty >> price >> timestamp >> executionId;
+			return buffer.getError();
 		}
 
 		//

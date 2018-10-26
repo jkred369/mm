@@ -193,7 +193,7 @@ namespace mm
 		//
 		inline StringBuffer& operator << (const DateTime& value)
 		{
-			return operator << (std::to_iso_string(value));
+			return operator << (boost::posix_time::to_iso_string(value));
 		}
 
 		//
@@ -368,12 +368,12 @@ namespace mm
 		//
 		// value : The time stamp value.
 		//
-		inline StringBuffer&& operator >> (DateTime& value)
+		inline StringBuffer& operator >> (DateTime& value)
 		{
 			std::string stringValue;
 			operator >> (stringValue);
 
-			value = std::from_iso_string(stringValue);
+			value = boost::posix_time::from_iso_string(stringValue);
 			return *this;
 		}
 

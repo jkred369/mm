@@ -7,6 +7,7 @@
 
 #include <gtest/gtest.h>
 
+#include "StringBuffer.hpp"
 #include "TradeMessage.hpp"
 
 namespace mm
@@ -23,6 +24,14 @@ namespace mm
 		message.qty = 1000;
 		message.strategyId = 5;
 		message.timestamp = DateTimeUtil::now();
+
+		StringBuffer buffer;
+		message.serialize(buffer);
+
+		TradeMessage message2;
+		message2.deserialize(buffer);
+
+		ASSERT_TRUE(message == message2);
 	}
 }
 
