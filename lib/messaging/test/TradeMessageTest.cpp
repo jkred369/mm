@@ -31,6 +31,14 @@ namespace mm
 		TradeMessage message2;
 		message2.deserialize(buffer);
 
+		ASSERT_TRUE(message2.instrumentId == 1);
+		ASSERT_TRUE(message2.orderId == 2);
+		ASSERT_TRUE(message2.executionId == "12345");
+		ASSERT_TRUE(message2.side == Side::BID);
+		ASSERT_TRUE(message2.price == 2.0);
+		ASSERT_TRUE(message2.qty == 1000);
+		ASSERT_TRUE(message2.strategyId == 5);
+
 		ASSERT_TRUE(message == message2);
 	}
 }
