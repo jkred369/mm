@@ -623,8 +623,10 @@ namespace mm
 
 		// fields
 		// TODO: check out the position direction
-		message.totalQty = investorPosition->Position;
-		message.sodQty = investorPosition->YdPosition;
+		const std::int64_t direction = investorPosition->Direction == USTP_FTDC_D_Buy ? 1 : -1;
+
+		message.totalQty = investorPosition->Position * direction;
+		message.sodQty = investorPosition->YdPosition * direction;
 
 		const Subscription subscription(SourceType::FEMAS_ORDER, DataType::POSITION, message.instrumentId);
 		PublisherAdapter<PositionMessage>::publish(subscription, messagePointer);
