@@ -516,7 +516,6 @@ namespace mm
 		report.side = order->Direction == USTP_FTDC_D_Buy ? Side::BID : Side::ASK;
 
 		// TODO: convert order timestamp
-		// TODO: determine avg traded price from ExchangeOrder below
 
 		// get the strategy ID and publish
 		if (const ExchangeOrder* order = getOrder(report.instrumentId, report.orderId))
