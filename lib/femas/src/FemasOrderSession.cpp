@@ -478,7 +478,6 @@ namespace mm
 
 		report.execQty = trade->TradeVolume;
 		report.execPrice = trade->TradePrice;
-		report.avgTradedPrice = trade->TradePrice;
 		report.side = trade->Direction == USTP_FTDC_D_Buy ? Side::BID : Side::ASK;
 
 		// TODO: convert trade timestamp

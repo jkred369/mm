@@ -52,7 +52,7 @@ namespace mm
 				return false;
 			}
 
-			buffer << orderId << instrumentId << strategyId << side << totalQty << price << avgTradedPrice << status;
+			buffer << orderId << instrumentId << strategyId << side << totalQty << price << tradedNotional << status;
 			return buffer.getError();
 		}
 
@@ -71,7 +71,7 @@ namespace mm
 				return false;
 			}
 
-			buffer >> orderId >> instrumentId >> strategyId >> side >> totalQty >> price >> avgTradedPrice >> status;
+			buffer >> orderId >> instrumentId >> strategyId >> side >> totalQty >> price >> tradedNotional >> status;
 			return buffer.getError();
 		}
 
@@ -83,6 +83,16 @@ namespace mm
 		inline std::int64_t remainQty() const
 		{
 			return totalQty - tradedQty;
+		}
+
+		//
+		// Get the average traded price.
+		//
+		// return : the average traded price if the order is traded; or 0 if there is no trade.
+		//
+		inline double avgTradedPrice() const
+		{
+			return tradedQty == 0 ? 0.0 : tradedNotional / tradedQty;
 		}
 
 		// The order ID.
@@ -106,8 +116,8 @@ namespace mm
 		// Market price.
 		double price;
 
-		// Average traded price.
-		double avgTradedPrice;
+		// Total traded notional.
+		double tradedNotional;
 
 		// current order status.
 		OrderStatus status;

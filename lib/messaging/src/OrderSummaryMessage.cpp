@@ -17,7 +17,7 @@ namespace mm
 			totalQty(0),
 			tradedQty(0),
 			price(0.0),
-			avgTradedPrice(0.0),
+			tradedNotional(0.0),
 			status(OrderStatus::NEW)
 	{
 	}
@@ -31,7 +31,7 @@ namespace mm
 				totalQty == rhs.totalQty &&
 				tradedQty == rhs.tradedQty &&
 				price == rhs.price &&
-				avgTradedPrice == rhs.avgTradedPrice &&
+				tradedNotional == rhs.tradedNotional &&
 				status == rhs.status;
 	}
 

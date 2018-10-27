@@ -16,7 +16,6 @@ namespace mm
 			tradedQty(0),
 			execQty(0),
 			price(0.0),
-			avgTradedPrice(0.0),
 			execPrice(0.0),
 			status(OrderStatus::NEW),
 			side(Side::BID)
@@ -31,7 +30,6 @@ namespace mm
 				tradedQty == rhs.tradedQty &&
 				execQty == rhs.execQty &&
 				price == rhs.price &&
-				avgTradedPrice == rhs.avgTradedPrice &&
 				execPrice == rhs.execPrice &&
 				status == rhs.status &&
 				side == rhs.side &&

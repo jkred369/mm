@@ -325,7 +325,6 @@ namespace mm
 			message.orderId = 1;
 			message.instrumentId = 2;
 			message.executionId = "20001312";
-			message.avgTradedPrice = 19999.0;
 			message.execPrice = 19999.0;
 			message.price = 20000.0;
 			message.execQty = 1;
@@ -358,7 +357,7 @@ namespace mm
 				ASSERT_TRUE(summary.price == 20000.0);
 				ASSERT_TRUE(summary.totalQty == 1);
 				ASSERT_TRUE(summary.tradedQty == 1);
-				ASSERT_TRUE(summary.avgTradedPrice == 19999.0);
+				ASSERT_TRUE(summary.avgTradedPrice() == 19999.0);
 				ASSERT_TRUE(summary.side == Side::BID);
 				ASSERT_TRUE(summary.status == OrderStatus::FULL_FILLED);
 			}

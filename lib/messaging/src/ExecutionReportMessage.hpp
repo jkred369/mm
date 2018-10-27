@@ -54,7 +54,7 @@ namespace mm
 			}
 
 			buffer << orderId << instrumentId << openQty << tradedQty << execQty;
-			buffer << price << avgTradedPrice << execPrice << status << side << tradeTimestamp << executionId;
+			buffer << price << execPrice << status << side << tradeTimestamp << executionId;
 
 			return buffer.getError();
 		}
@@ -75,7 +75,7 @@ namespace mm
 			}
 
 			buffer >> orderId >> instrumentId >> openQty >> tradedQty >> execQty;
-			buffer >> price >> avgTradedPrice >> execPrice >> status >> side >> tradeTimestamp >> executionId;
+			buffer >> price >> execPrice >> status >> side >> tradeTimestamp >> executionId;
 
 			return buffer.getError();
 		}
@@ -117,9 +117,6 @@ namespace mm
 
 		// The open price.
 		double price;
-
-		// The average traded price.
-		double avgTradedPrice;
 
 		// The execution price (if this is a trade).
 		double execPrice;

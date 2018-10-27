@@ -53,7 +53,7 @@ namespace mm
 			totalQty(0),
 			tradedQty(0),
 			price(0.0),
-			avgTradedPrice(0.0),
+			tradedNotional(0.0),
 			status(OrderStatus::NEW)
 		{
 		}
@@ -138,11 +138,11 @@ namespace mm
 			// firstly populate the latest status of the order
 			if (LIKELY(!OrderStatusUtil::completed(status)))
 			{
-				avgTradedPrice = message->avgTradedPrice;
 				price = message->price;
 				status = message->status;
 				totalQty = message->totalQty();
 				tradedQty = message->tradedQty;
+				tradedNotional += message->execQty * message->execPrice;
 
 				sendSummary();
 			}
@@ -185,7 +185,7 @@ namespace mm
 			message->totalQty = totalQty;
 			message->tradedQty = tradedQty;
 			message->price = price;
-			message->avgTradedPrice = avgTradedPrice;
+			message->tradedNotional = tradedNotional;
 			message->status = status;
 
 			const Subscription subscription = {SourceType::ALL, DataType::ORDER_SUMMARY, strategyId};
@@ -269,7 +269,7 @@ namespace mm
 		//
 		inline double getAvgTradedPrice() const
 		{
-			return avgTradedPrice;
+			return tradedQty == 0 ? 0.0 : tradedNotional / tradedQty;
 		}
 
 		//
@@ -324,7 +324,7 @@ namespace mm
 		double price;
 
 		// Average traded price.
-		double avgTradedPrice;
+		double tradedNotional;
 
 		// current order status.
 		OrderStatus status;
