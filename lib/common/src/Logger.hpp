@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "LogLevel.hpp"
+#include "NativeDefinition.hpp"
 #include "SpdLogger.hpp"
 #include "TimeUtil.hpp"
 
@@ -19,7 +20,14 @@ namespace mm
 	typedef std::shared_ptr<spdlog::logger> Logger;
 	typedef SpdLoggerSingleton LoggerSingleton;
 
-#define LOG(level, ...) { if (!logger.get()) {logger = LoggerSingleton::getLogger(); } if (logger.get()) { logger->level(__VA_ARGS__); } }
+#define LOG_STR_H(x) #x
+#define LOG_STR_HELPER(x) LOG_STR_H(x)
+
+#ifdef DEBUG
+#define LOG(level, ...) { if (UNLIKELY(!logger.get())) {logger = LoggerSingleton::getLogger(); } if (LIKELY(logger.get())) { logger->level("[" __FILE__ ":" LOG_STR_HELPER(__LINE__) "]" " " __VA_ARGS__); } }
+#else
+#define LOG(level, ...) { if (UNLIKELY(!logger.get())) {logger = LoggerSingleton::getLogger(); } if (LIKELY(logger.get())) { logger->level(__VA_ARGS__); } }
+#endif
 
 #define LOGTRACE(...) LOG(trace, __VA_ARGS__)
 #define LOGDEBUG(...) LOG(debug, __VA_ARGS__)
