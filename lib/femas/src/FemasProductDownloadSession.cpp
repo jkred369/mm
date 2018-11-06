@@ -44,7 +44,7 @@ namespace mm
 		// Seeking product service.
 		if (!serviceContext.getService(productServiceName, productService))
 		{
-			LOGERR("Market data session failed to get product service from service context");
+			LOGERR("Product download session failed to get product service from service context");
 			throw std::runtime_error("Failed to create Femas product download session. Cannot find product service with name: " + productServiceName);
 		}
 
