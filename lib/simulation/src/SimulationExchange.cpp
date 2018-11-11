@@ -7,9 +7,11 @@
 
 #include <algorithm>
 
+#include <boost/algorithm/string.hpp>
 #include <fmt/format.h>
 
 #include <ProductService.hpp>
+#include <StringUtil.hpp>
 
 #include "SimulationExchange.hpp"
 
@@ -46,6 +48,8 @@ namespace mm
 			productService->initSnapshot(this);
 			LOGINFO("Symbol map created with {} products.", lotSizeMap.size());
 		}
+
+		// loading up the market data ticks - could be big
 	}
 
 	SimulationExchange::~SimulationExchange()
@@ -205,6 +209,39 @@ namespace mm
 
 		const Subscription subscription(SourceType::ALL, DataType::EXEC_REPORT, message->strategyId);
 		PublisherAdapter<ExecutionReportMessage>::publish(subscription, response);
+	}
+
+	void SimulationExchange::loadMarketData(std::istream& is)
+	{
+		try
+		{
+			std::vector<std::string> items;
+
+			for (std::string line; std::getline(is, line); )
+			{
+				StringUtil::trim(line);
+				if (line.size() == 0 || line[0] == '#')
+				{
+					continue;
+				}
+
+				boost::split(items, line, boost::is_any_of("|"));
+				for (std::string& item : items)
+				{
+					StringUtil::trim(item);
+				}
+
+				std::shared_ptr<MarketDataMessage> marketData = marketDataPool.getShared();
+			}
+		}
+		catch (std::exception& e)
+		{
+			LOGERR("Failed to read market data: {}", e.what());
+		}
+		catch (...)
+		{
+			LOGERR("Failed to read market data with unknown reason.");
+		}
 	}
 
 	void SimulationExchange::determineExecution(const std::shared_ptr<MarketDataMessage>& marketData)

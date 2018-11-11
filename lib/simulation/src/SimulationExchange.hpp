@@ -8,9 +8,11 @@
 #ifndef LIB_SIMULATION_SRC_SIMULATIONEXCHANGE_HPP_
 #define LIB_SIMULATION_SRC_SIMULATIONEXCHANGE_HPP_
 
+#include <istream>
 #include <unordered_map>
 #include <vector>
 
+#include <DateTime.hpp>
 #include <ExecutionReportMessage.hpp>
 #include <MarketDataMessage.hpp>
 #include <IConsumer.hpp>
@@ -87,6 +89,13 @@ namespace mm
 		static constexpr int ASK = toValue(Side::ASK);
 
 		//
+		// Load up the market data messages from the given input stream.
+		//
+		// is : The input stream with the market data info.
+		//
+		void loadMarketData(std::istream& is);
+
+		//
 		// Check if execution can be done on the given market data update.
 		//
 		// marketData : The last market data update for the instrument.
@@ -110,6 +119,9 @@ namespace mm
 
 		// The pool for execution report messages.
 		NullObjectPool<ExecutionReportMessage> executionReportPool;
+
+		// The market data messages to broadcast.
+		std::vector<std::pair<DateTime, std::shared_ptr<MarketDataMessage> > > marketDataMessages;
 
 		// The map where key is the instrument ID and value is the lot size for the instrument.
 		std::unordered_map<std::int64_t, std::int64_t> lotSizeMap;

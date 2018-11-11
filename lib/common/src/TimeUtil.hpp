@@ -63,7 +63,7 @@ namespace mm
 	std::int64_t inline getDateAsInt(const std::time_t time)
 	{
 		const std::tm* tm = std::localtime(&time);
-		return tm->tm_year;
+		return tm->tm_year * 10000 + tm->tm_mon * 100 + tm->tm_mday;
 	}
 
 	std::int64_t inline getTimeAsInt(const std::time_t time)

@@ -47,11 +47,11 @@ namespace mm
 		}
 		catch (std::exception& e)
 		{
-			LOGERR("Failed to read property: {}", e.what());
+			LOGERR("Failed to read product data: {}", e.what());
 		}
 		catch (...)
 		{
-			LOGERR("Failed to read property with unknown reason.");
+			LOGERR("Failed to read product with unknown reason.");
 		}
 	}
 
