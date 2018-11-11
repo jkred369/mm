@@ -102,6 +102,9 @@ namespace mm
 		// The scheduler used.
 		Scheduler& scheduler;
 
+		// The execution ID counter.
+		std::int64_t executionIdCounter;
+
 		// The pool used for market data messages.
 		NullObjectPool<MarketDataMessage> marketDataPool;
 

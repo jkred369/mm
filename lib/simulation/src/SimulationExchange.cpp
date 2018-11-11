@@ -7,6 +7,8 @@
 
 #include <algorithm>
 
+#include <fmt/format.h>
+
 #include <ProductService.hpp>
 
 #include "SimulationExchange.hpp"
@@ -25,6 +27,7 @@ namespace mm
 		PublisherAdapter<ExecutionReportMessage> (serviceContext.getDispatcher()),
 		dispatcher(serviceContext.getDispatcher()),
 		scheduler(serviceContext.getScheduler()),
+		executionIdCounter(0),
 		marketDataPool(POOL_SIZE),
 		executionReportPool(POOL_SIZE)
 	{
@@ -210,12 +213,71 @@ namespace mm
 		for (auto it = orderMap.begin(); it != orderMap.end(); )
 		{
 			OrderSummaryMessage& summary = it->second;
+
+			// work out execution if any
 			if ((summary.side == Side::BID && summary.price >= marketData->levels[toValue(Side::ASK)][0].price) ||
 				(summary.side == Side::ASK && summary.price <= marketData->levels[toValue(Side::BID)][0].price))
 			{
+				std::int64_t execQty = 0;
+				double execNotional = 0.0;
+				const std::size_t index = summary.side == Side::BID ? toValue(Side::ASK) : toValue(Side::BID);
 
+				for (int i = 0; i < MarketDataMessage::MAX_DEPTH && summary.remainQty() - execQty > 0; ++i)
+				{
+					if ((summary.side == Side::BID && summary.price >= marketData->levels[index][i].price) ||
+						(summary.side == Side::ASK && summary.price <= marketData->levels[index][i].price))
+					{
+						const std::int64_t levelQty = std::min(summary.remainQty(), marketData->levels[index][i].qty);
+
+						execQty += levelQty;
+						execNotional += levelQty * marketData->levels[index][i].price;
+					}
+				}
+
+				// publish the execution
+				if (execQty > 0)
+				{
+					summary.tradedQty += execQty;
+					summary.tradedNotional += execNotional;
+
+					std::shared_ptr<ExecutionReportMessage> trade = executionReportPool.getShared();
+					trade->instrumentId = summary.instrumentId;
+					trade->orderId = summary.orderId;
+					trade->price = summary.price;
+					trade->side = summary.side;
+					trade->execQty = execQty;
+					trade->execPrice = execNotional / execQty;
+					trade->executionId = fmt::format_int(++executionIdCounter).c_str();
+					trade->tradeTimestamp = DateTimeUtil::now();
+					trade->openQty = summary.remainQty();
+					trade->tradedQty = summary.tradedQty;
+					trade->status = summary.status;
+
+					const Subscription subscription(SourceType::ALL, DataType::EXEC_REPORT, summary.strategyId);
+					PublisherAdapter<ExecutionReportMessage>::publish(subscription, trade);
+				}
 			}
 
+			if (OrderStatusUtil::completed(summary.status))
+			{
+				std::shared_ptr<ExecutionReportMessage> response = executionReportPool.getShared();
+				response->instrumentId = summary.instrumentId;
+				response->orderId = summary.orderId;
+				response->price = summary.price;
+				response->side = summary.side;
+				response->openQty = 0;
+				response->tradedQty = summary.tradedQty;
+				response->status = summary.status;
+
+				const Subscription subscription(SourceType::ALL, DataType::EXEC_REPORT, summary.strategyId);
+				PublisherAdapter<ExecutionReportMessage>::publish(subscription, response);
+
+				it = orderMap.erase(it);
+			}
+			else
+			{
+				++it;
+			}
 		}
 	}
 
