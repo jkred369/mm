@@ -56,6 +56,9 @@ namespace mm
 		virtual bool subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 		virtual void unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer) override;
 
+		virtual bool subscribe(const Subscription& subscription, IConsumer<ExecutionReportMessage>* consumer) override;
+		virtual void unsubscribe(const Subscription& subscription, IConsumer<ExecutionReportMessage>* consumer) override;
+
 		//
 		// consumer interface
 		//
@@ -109,7 +112,7 @@ namespace mm
 		std::unordered_map<std::int64_t, std::int64_t> lotSizeMap;
 
 		// The map where key is the instrument ID and value is a set of the live orders.
-		std::unordered_map<std::int64_t, std::vector<OrderSummaryMessage> > instrumentOrderMap;
+		std::unordered_map<std::int64_t, std::unordered_map<std::int64_t, OrderSummaryMessage> > instrumentOrderMap;
 
 		// The map with the last market data for each instrument.
 		std::unordered_map<std::int64_t, std::shared_ptr<MarketDataMessage> > lastMarketDataMap;
