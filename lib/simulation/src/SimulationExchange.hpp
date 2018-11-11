@@ -83,6 +83,13 @@ namespace mm
 		// The int value for ask
 		static constexpr int ASK = toValue(Side::ASK);
 
+		//
+		// Check if execution can be done on the given market data update.
+		//
+		// marketData : The last market data update for the instrument.
+		//
+		void determineExecution(const std::shared_ptr<MarketDataMessage>& marketData);
+
 		// The logger for this class.
 		static Logger logger;
 
@@ -104,6 +111,8 @@ namespace mm
 		// The map where key is the instrument ID and value is a set of the live orders.
 		std::unordered_map<std::int64_t, std::vector<OrderSummaryMessage> > instrumentOrderMap;
 
+		// The map with the last market data for each instrument.
+		std::unordered_map<std::int64_t, std::shared_ptr<MarketDataMessage> > lastMarketDataMap;
 	};
 }
 

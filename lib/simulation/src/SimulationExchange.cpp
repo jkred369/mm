@@ -64,10 +64,42 @@ namespace mm
 
 	bool SimulationExchange::subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
+		if (UNLIKELY(lotSizeMap.find(subscription.key) != lotSizeMap.end()))
+		{
+			return false;
+		}
+
+		if (subscription.dataType == DataType::MARKET_DATA)
+		{
+			return PublisherAdapter<MarketData>::subscribe(subscription, consumer);
+		}
+		else if (subscription.dataType == DataType::EXEC_REPORT)
+		{
+			return PublisherAdapter<ExeutionReportMessage>::subscribe(subscription, consumer);
+		}
+
+		return OrderManager<SimulationExchange, NullObjectPool>::subscribe(subscription, consumer);
 	}
 
 	void SimulationExchange::unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
+		if (UNLIKELY(lotSizeMap.find(subscription.key) != lotSizeMap.end()))
+		{
+			return;
+		}
+
+		if (subscription.dataType == DataType::MARKET_DATA)
+		{
+			PublisherAdapter<MarketData>::unsubscribe(subscription, consumer);
+		}
+		else if (subscription.dataType == DataType::EXEC_REPORT)
+		{
+			PublisherAdapter<ExeutionReportMessage>::unsubscribe(subscription, consumer);
+		}
+		else
+		{
+			OrderManager<SimulationExchange, NullObjectPool>::unsubscribe(subscription, consumer);
+		}
 	}
 
 	void SimulationExchange::consume(const std::shared_ptr<const Product>& message)
@@ -78,10 +110,55 @@ namespace mm
 
 	void SimulationExchange::sendOrder(const std::shared_ptr<const OrderMessage>& message)
 	{
+		std::shared_ptr<ExecutionReportMessage> response = executionReportPool.getShared();
+		response->instrumentId = message->instrumentId;
+		response->orderId = message->orderId;
+		response->side = message->side;
+
+		// sanity check
+		if (UNLIKELY(instrumentOrderMap.find(message->instrumentId) == instrumentOrderMap.end()))
+		{
+			response->status = OrderStatus::NEW_REJECTED;
+		}
+		else
+		{
+			response->status = OrderStatus::LIVE;
+
+			// this is the state keeper for the exchange so we don't resolve to the pool
+			std::shared_ptr<OrderSummaryMessage> summary = std::make_shared<OrderSummaryMessage>();
+			summary->instrumentId = message->instrumentId;
+			summary->orderId = message->orderId;
+			summary->price = message->price;
+			summary->side = message->side;
+			summary->status = response->status;
+			summary->strategyId = message->strategyId;
+			summary->totalQty = message->totalQty;
+			summary->tradedNotional = 0;
+			summary->tradedQty = 0;
+
+			instrumentOrderMap[message->instrumentId].push_back(summary);
+		}
+
+		const Subscription subscription(SourceType::ALL, DataType::EXEC_REPORT, message->strategyId);
+		PublisherAdapter<ExecutionReportMessage>::publish(subscription, response);
+
+		// check execution if any
+		if (std::shared_ptr<MarketDataMessage> marketData = lastMarketDataMap[message->instrumentId])
+		{
+			determineExecution(marketData);
+		}
 	}
 
 	void SimulationExchange::cancel(const std::shared_ptr<const OrderMessage>& message)
 	{
+	}
+
+	void SimulationExchange::determineExecution(const std::shared_ptr<MarketDataMessage>& marketData)
+	{
+		for (std::shared_ptr<OrderSummaryMessage> summary : instrumentOrderMap[marketData->instrumentId])
+		{
+
+		}
 	}
 
 }
