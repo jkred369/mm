@@ -8,6 +8,7 @@
 #ifndef LIB_SIMULATION_SRC_SIMULATIONEXCHANGE_HPP_
 #define LIB_SIMULATION_SRC_SIMULATIONEXCHANGE_HPP_
 
+#include <chrono>
 #include <istream>
 #include <unordered_map>
 #include <vector>
@@ -88,6 +89,9 @@ namespace mm
 		// The int value for ask
 		static constexpr int ASK = toValue(Side::ASK);
 
+		// The time to sleep before starting replay.
+		static constexpr int LEAD_SLEEP_SECONDS = 5;
+
 		//
 		// Load up the market data messages from the given input stream.
 		//
@@ -120,11 +124,14 @@ namespace mm
 		// The pool for execution report messages.
 		NullObjectPool<ExecutionReportMessage> executionReportPool;
 
-		// The market data messages to broadcast.
-		std::vector<std::pair<DateTime, std::shared_ptr<MarketDataMessage> > > marketDataMessages;
+		// The map where key is the symbol of the instrument and value is the instrument ID.
+		std::unordered_map<SymbolType, std::int64_t> symbolMap;
 
 		// The map where key is the instrument ID and value is the lot size for the instrument.
 		std::unordered_map<std::int64_t, std::int64_t> lotSizeMap;
+
+		// The market data messages to broadcast.
+		std::vector<std::pair<std::chrono::microseconds, std::shared_ptr<MarketDataMessage> > > marketDataMessages;
 
 		// The map where key is the instrument ID and value is a set of the live orders.
 		std::unordered_map<std::int64_t, std::unordered_map<std::int64_t, OrderSummaryMessage> > instrumentOrderMap;

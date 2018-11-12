@@ -8,6 +8,7 @@
 #ifndef LIB_COMMON_SRC_DATETIME_HPP_
 #define LIB_COMMON_SRC_DATETIME_HPP_
 
+#include <boost/chrono/duration.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace mm
@@ -93,6 +94,54 @@ namespace mm
 		static inline DateTime utc()
 		{
 			return boost::posix_time::microsec_clock::universal_time();
+		}
+
+		//
+		// Convert no. of seconds from epoch to date time.
+		//
+		// seconds : No. of seconds from epoch.
+		//
+		// return : Datetime object.
+		//
+		static inline DateTime fromEpochSeconds(double seconds)
+		{
+			return fromEpochNanos(seconds * 1000000000);
+		}
+
+		//
+		// Convert no. of milliseconds from epoch to date time.
+		//
+		// millis : No. of milliseconds from epoch.
+		//
+		// return : Datetime object.
+		//
+		static inline DateTime fromEpochMillis(double millis)
+		{
+			return fromEpochNanos(millis * 1000000);
+		}
+
+		//
+		// Convert no. of microseconds from epoch to date time.
+		//
+		// micros : No. of microseconds from epoch.
+		//
+		// return : Datetime object.
+		//
+		static inline DateTime fromEpochMicros(double micros)
+		{
+			return fromEpochNanos(micros * 1000);
+		}
+
+		//
+		// Convert no. of nanoseconds from epoch to date time.
+		//
+		// nanos : No. of nanoseconds from epoch.
+		//
+		// return : Datetime object.
+		//
+		static inline DateTime fromEpochNanos(std::int64_t nanos)
+		{
+			return epochDateTime + boost::chrono::nanoseconds(nanos);
 		}
 	};
 }

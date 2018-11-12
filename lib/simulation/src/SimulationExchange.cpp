@@ -133,6 +133,7 @@ namespace mm
 	{
 		const ProductMessage& product = message->getContent();
 
+		symbolMap[product.symbol] = product.id;
 		lotSizeMap[product.id] = product.lotSize;
 		instrumentOrderMap[product.id] = std::unordered_map<std::int64_t, OrderSummaryMessage> ();
 	}
@@ -232,6 +233,29 @@ namespace mm
 				}
 
 				std::shared_ptr<MarketDataMessage> marketData = marketDataPool.getShared();
+
+				// sanity check
+				SymbolType symbol = items[1];
+				if (symbolMap.find(symbol) == symbolMap.end())
+				{
+					LOGWARN("Skipping unsupported instrument {}", items[1]);
+				}
+
+				// the timestamp
+				const std::chrono::microseconds timestamp = marketDataMessages.empty() ?
+						std::chrono::microseconds(0) :
+						std::chrono::microseconds(std::stod(items[2]) * 1000 * 1000) - marketDataMessages.back().first;
+
+				// the market data
+				marketData->instrumentId = symbolMap[symbol];
+				marketData->last = std::stod(items[3]);
+				marketData->volume = std::stol(items[4]);
+				marketData->levels[toValue(Side::BID)][0].price = std::stod(items[5]);
+				marketData->levels[toValue(Side::BID)][0].qty = std::stod(items[6]);
+				marketData->levels[toValue(Side::ASK)][0].price = std::stod(items[7]);
+				marketData->levels[toValue(Side::ASK)][0].qty = std::stod(items[8]);
+
+				marketDataMessages.push_back(std::make_pair(timestamp, marketData));
 			}
 		}
 		catch (std::exception& e)
