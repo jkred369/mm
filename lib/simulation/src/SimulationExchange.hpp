@@ -90,7 +90,7 @@ namespace mm
 		static constexpr int ASK = toValue(Side::ASK);
 
 		// The time to sleep before starting replay.
-		static constexpr int LEAD_SLEEP_SECONDS = 5;
+		static const std::int64_t LEAD_SLEEP_SECONDS;
 
 		//
 		// Load up the market data messages from the given input stream.

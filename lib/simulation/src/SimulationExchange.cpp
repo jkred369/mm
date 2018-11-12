@@ -15,6 +15,7 @@
 
 #include "SimulationExchange.hpp"
 
+const std::int64_t mm::SimulationExchange::LEAD_SLEEP_SECONDS = 5;
 mm::Logger mm::SimulationExchange::logger;
 
 namespace mm
@@ -63,7 +64,37 @@ namespace mm
 			return false;
 		}
 
-		// TODO: start the market data broadcasting
+		// start the market data broadcasting
+		if (marketDataMessages.empty())
+		{
+			LOGERR("No market data loaded.");
+			return true;
+		}
+
+		LOGINFO("Starting market data replay in {} seconds...", LEAD_SLEEP_SECONDS);
+
+		std::size_t index = 0;
+		Runnable task = [&] () {
+
+			// firstly do publish
+			const std::shared_ptr<MarketDataMessage> message = marketDataMessages[index].second;
+			const Subscription subscription(SourceType::ALL, DataType::MARKET_DATA, message->instrumentId);
+
+			PublisherAdapter<MarketDataMessage>::publish(subscription, message);
+
+			// schedule for the next round
+			if (LIKELY(index < marketDataMessages.size() - 1))
+			{
+				const std::chrono::microseconds delay = marketDataMessages[++index].first;
+				scheduler.schedule(DispatchKey::MARKET_DATA, task, delay);
+			}
+			else
+			{
+				LOGINFO("Market data replay finished.");
+			}
+		};
+
+		scheduler.schedule(DispatchKey::MARKET_DATA, task, std::chrono::seconds(LEAD_SLEEP_SECONDS));
 
 		return true;
 	}
@@ -242,9 +273,11 @@ namespace mm
 				}
 
 				// the timestamp
-				const std::chrono::microseconds timestamp = marketDataMessages.empty() ?
-						std::chrono::microseconds(0) :
-						std::chrono::microseconds(std::stod(items[2]) * 1000 * 1000) - marketDataMessages.back().first;
+				const std::chrono::microseconds timestamp = std::chrono::microseconds(
+						static_cast<std::int64_t> (std::stod(items[2]) * 1000 * 1000));
+
+				const std::chrono::microseconds delay = marketDataMessages.empty() ?
+						std::chrono::microseconds(0) : timestamp - marketDataMessages.back().first;
 
 				// the market data
 				marketData->instrumentId = symbolMap[symbol];
@@ -255,7 +288,7 @@ namespace mm
 				marketData->levels[toValue(Side::ASK)][0].price = std::stod(items[7]);
 				marketData->levels[toValue(Side::ASK)][0].qty = std::stod(items[8]);
 
-				marketDataMessages.push_back(std::make_pair(timestamp, marketData));
+				marketDataMessages.push_back(std::make_pair(delay, marketData));
 			}
 		}
 		catch (std::exception& e)
@@ -283,7 +316,7 @@ namespace mm
 				double execNotional = 0.0;
 				const std::size_t index = summary.side == Side::BID ? toValue(Side::ASK) : toValue(Side::BID);
 
-				for (int i = 0; i < MarketDataMessage::MAX_DEPTH && summary.remainQty() - execQty > 0; ++i)
+				for (std::size_t i = 0; i < MarketDataMessage::MAX_DEPTH && summary.remainQty() - execQty > 0; ++i)
 				{
 					if ((summary.side == Side::BID && summary.price >= marketData->levels[index][i].price) ||
 						(summary.side == Side::ASK && summary.price <= marketData->levels[index][i].price))
