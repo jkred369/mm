@@ -21,9 +21,10 @@
 #include <EnumType.hpp>
 #include <FixedSizeString.hpp>
 #include <Logger.hpp>
-#include <Message.hpp>
 #include <NativeDefinition.hpp>
 #include <StringUtil.hpp>
+
+#include "Message.hpp"
 
 namespace mm
 {
@@ -449,14 +450,7 @@ namespace mm
 	// so : The stream.
 	// buffer : The buffer object.
 	//
-	std::ostream& operator << (std::ostream& os, const StringBuffer& buffer)
-	{
-		buffer.output(os);
-		return os;
-	}
-
+	std::ostream& operator << (std::ostream& os, const StringBuffer& buffer);
 }
-
-mm::Logger mm::StringBuffer::logger;
 
 #endif /* LIB_MESSAGING_SRC_STRINGBUFFER_HPP_ */

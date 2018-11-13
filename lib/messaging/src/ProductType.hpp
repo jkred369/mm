@@ -40,6 +40,9 @@ namespace mm
 
 		// American option.
 		AMERICAN = 7,
+
+		// Government bond
+		GVMT_BOND = 8,
 	};
 }
 
