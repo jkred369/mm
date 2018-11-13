@@ -18,13 +18,13 @@
 
 namespace mm
 {
-	TEST(ProductMessageTest, OutputCase)
+	TEST(ProductMessageTest, DISABLED_OutputCase)
 	{
 		bool headerRead = false;
 		std::int64_t idCounter = 0;
 
-		std::ifstream is("~/workspaces/mm/data/code.csv");
-		std::ofstream os("~/workspaces/mm/data/product.txt");
+		std::ifstream is("/home/alexsuo/workspaces/mm/data/code.csv");
+		std::ofstream os("/home/alexsuo/workspaces/mm/data/product.txt");
 
 		for (std::string line; std::getline(is, line); )
 		{
@@ -63,8 +63,8 @@ namespace mm
 
 			// output
 			StringBuffer buffer;
-			product.serialize(buffer);
-			os << buffer << std::endl;
+			ASSERT_TRUE(product.serialize(buffer));
+			os << buffer;
 		}
 
 		os.flush();
