@@ -38,11 +38,21 @@ namespace mm
 	{
 	public:
 
+		//
+		// Constructor.
+		//
+		// dispatchKey : The dispatch key.
+		// serviceName : The service name.
+		// serviceContext : The service context.
+		// productServiceName : The product service name.
+		// marketDataStream : The input stream for market data.
+		//
 		SimulationExchange(
 				const KeyType dispatchKey,
 				const std::string serviceName,
 				ServiceContext& serviceContext,
-				const std::string productServiceName);
+				const std::string productServiceName,
+				std::istream& marketDataStream);
 
 		// virtual destructor.
 		virtual ~SimulationExchange();

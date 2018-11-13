@@ -24,7 +24,8 @@ namespace mm
 			const KeyType dispatchKey,
 			const std::string serviceName,
 			ServiceContext& serviceContext,
-			const std::string productServiceName) :
+			const std::string productServiceName,
+			std::istream& marketDataStream) :
 		OrderManager<SimulationExchange, NullObjectPool>(dispatchKey, serviceName, serviceContext, *this),
 		PublisherAdapter<MarketDataMessage> (serviceContext.getDispatcher()),
 		PublisherAdapter<ExecutionReportMessage> (serviceContext.getDispatcher()),
@@ -51,6 +52,7 @@ namespace mm
 		}
 
 		// loading up the market data ticks - could be big
+		loadMarketData(marketDataStream);
 	}
 
 	SimulationExchange::~SimulationExchange()

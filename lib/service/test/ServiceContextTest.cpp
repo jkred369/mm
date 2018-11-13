@@ -37,7 +37,7 @@ namespace mm
 
 	struct SimpleService : IService
 	{
-		SimpleService(const std::string className) : className(className)
+		SimpleService(const std::string className) : className(className), counter(0)
 		{
 		}
 
