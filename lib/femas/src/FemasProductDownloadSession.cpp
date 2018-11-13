@@ -342,6 +342,7 @@ namespace mm
 		}
 
 		// determine underlying ID
+		bool underlyingFound = false;
 		{
 			const SymbolType underlyingSymbol(instrument->UnderlyingInstrID);
 			if (underlyingSymbol.stringSize() > 0)
@@ -350,35 +351,42 @@ namespace mm
 				if (it == symbolMap.end())
 				{
 					LOGERR("Failed to find underlying with symbol: {}", underlyingSymbol.toString());
-					return;
 				}
-
-				product.underlyerId = it->second;
+				else
+				{
+					product.underlyerId = it->second;
+					underlyingFound = true;
+				}
 			}
 		}
 
 		// fill in all the fields
-		product.symbol = instrument->InstrumentID;
-		product.productType = getProductType(instrument);
-		product.currency = FemasUtil::getCurrency(instrument->Currency);
-		product.exchange = FemasUtil::getExchange(instrument->ExchangeID);
-
-		product.contractRatio = instrument->UnderlyingMultiple;
-		product.lotSize = instrument->VolumeMultiple;
-		product.listingDate = FemasUtil::getDate(instrument->OpenDate);
-		product.lastTradingDate = FemasUtil::getDate(instrument->ExpireDate);
-		product.expiryDate = FemasUtil::getDate(instrument->ExpireDate);
-
-		if (instrument->OptionsType != USTP_FTDC_OT_NotOptions)
+		if (underlyingFound)
 		{
-			product.callPut = instrument->OptionsType == USTP_FTDC_OT_CallOptions ? CallPutType::CALL : CallPutType::PUT;
-			product.strike = instrument->StrikePrice;
+			product.symbol = instrument->InstrumentID;
+			product.productType = getProductType(instrument);
+			product.currency = FemasUtil::getCurrency(instrument->Currency);
+			product.exchange = FemasUtil::getExchange(instrument->ExchangeID);
+
+			product.contractRatio = instrument->UnderlyingMultiple;
+			product.lotSize = instrument->VolumeMultiple;
+			product.listingDate = FemasUtil::getDate(instrument->OpenDate);
+			product.lastTradingDate = FemasUtil::getDate(instrument->ExpireDate);
+			product.expiryDate = FemasUtil::getDate(instrument->ExpireDate);
+
+			if (instrument->OptionsType != USTP_FTDC_OT_NotOptions)
+			{
+				product.callPut = instrument->OptionsType ==
+						USTP_FTDC_OT_CallOptions ? CallPutType::CALL : CallPutType::PUT;
+				product.strike = instrument->StrikePrice;
+			}
+
+			// add the product to the map for writing out
+			rawProductMap[product.id] = product;
+			LOGINFO("Refreshed product {}, {}", product.id, product.symbol.toString());
 		}
 
-		// add the product to the map for writing out
-		rawProductMap[product.id] = product;
-		LOGINFO("Refreshed product {}, {}", product.id, product.symbol.toString());
-
+		// proceed the final product writing
 		if (isLast)
 		{
 			LOGINFO("All products retrieved. Outputing...");
