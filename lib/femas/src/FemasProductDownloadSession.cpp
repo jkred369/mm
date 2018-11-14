@@ -9,6 +9,7 @@
 #include <array>
 #include <fstream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 
 #include <EnumType.hpp>
@@ -323,73 +324,15 @@ namespace mm
 
 	void FemasProductDownloadSession::OnRspQryInstrument(CUstpFtdcRspInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
-		ProductMessage product;
-
-		// determine product ID
-		{
-			const SymbolType symbol(instrument->InstrumentID);
-			auto it = symbolMap.find(symbol);
-
-			if (it == symbolMap.end())
-			{
-				product.id = ++maxProductId;
-				LOGINFO("New product {} ID set to {}", std::string(instrument->InstrumentID), product.id);
-			}
-			else
-			{
-				product.id = it->second;
-			}
-		}
-
-		// determine underlying ID
-		bool underlyingFound = false;
-		{
-			const SymbolType underlyingSymbol(instrument->UnderlyingInstrID);
-			if (underlyingSymbol.stringSize() > 0)
-			{
-				auto it = symbolMap.find(underlyingSymbol);
-				if (it == symbolMap.end())
-				{
-					LOGERR("Failed to find underlying with symbol: {}", underlyingSymbol.toString());
-				}
-				else
-				{
-					product.underlyerId = it->second;
-					underlyingFound = true;
-				}
-			}
-		}
-
-		// fill in all the fields
-		if (underlyingFound)
-		{
-			product.symbol = instrument->InstrumentID;
-			product.productType = getProductType(instrument);
-			product.currency = FemasUtil::getCurrency(instrument->Currency);
-			product.exchange = FemasUtil::getExchange(instrument->ExchangeID);
-
-			product.contractRatio = instrument->UnderlyingMultiple;
-			product.lotSize = instrument->VolumeMultiple;
-			product.listingDate = FemasUtil::getDate(instrument->OpenDate);
-			product.lastTradingDate = FemasUtil::getDate(instrument->ExpireDate);
-			product.expiryDate = FemasUtil::getDate(instrument->ExpireDate);
-
-			if (instrument->OptionsType != USTP_FTDC_OT_NotOptions)
-			{
-				product.callPut = instrument->OptionsType ==
-						USTP_FTDC_OT_CallOptions ? CallPutType::CALL : CallPutType::PUT;
-				product.strike = instrument->StrikePrice;
-			}
-
-			// add the product to the map for writing out
-			rawProductMap[product.id] = product;
-			LOGINFO("Refreshed product {}, {}", product.id, product.symbol.toString());
-		}
+		instruments.push_back(*instrument);
 
 		// proceed the final product writing
 		if (isLast)
 		{
-			LOGINFO("All products retrieved. Outputing...");
+			LOGINFO("All instruments retrieved. Updating...");
+			buildProduct();
+
+			LOGINFO("All products built. Outputing...");
 			output();
 		}
 	}
@@ -464,15 +407,106 @@ namespace mm
 		return result;
 	}
 
-	ProductType FemasProductDownloadSession::getProductType(const CUstpFtdcRspInstrumentField* field) const
+	ProductType FemasProductDownloadSession::getProductType(const CUstpFtdcRspInstrumentField& field) const
 	{
 		// TODO: Determine the product types.
-		if (field->OptionsType != USTP_FTDC_OT_NotOptions)
+		if (field.OptionsType != USTP_FTDC_OT_NotOptions)
 		{
 			return ProductType::EUROPEAN;
 		}
 
 		return ProductType::FUTURE;
+	}
+
+	void FemasProductDownloadSession::buildProduct()
+	{
+		std::unordered_set<SymbolType> processedSymbols;
+
+		while (true)
+		{
+			const std::size_t prevSize = processedSymbols.size();
+
+			for (const CUstpFtdcRspInstrumentField& instrument : instruments)
+			{
+				ProductMessage product;
+
+				// check on symbol
+				const SymbolType symbol(instrument.InstrumentID);
+				if (processedSymbols.find(symbol) != processedSymbols.end())
+				{
+					continue;
+				}
+
+				// determine product ID
+				{
+					auto it = symbolMap.find(symbol);
+
+					if (it == symbolMap.end())
+					{
+						product.id = ++maxProductId;
+						LOGINFO("New product {} ID set to {}", std::string(instrument.InstrumentID), product.id);
+					}
+					else
+					{
+						product.id = it->second;
+					}
+				}
+
+				// determine underlying ID
+				bool underlyingFound = false;
+				{
+					const SymbolType underlyingSymbol(instrument.UnderlyingInstrID);
+					if (underlyingSymbol.stringSize() > 0)
+					{
+						auto it = symbolMap.find(underlyingSymbol);
+						if (it == symbolMap.end())
+						{
+							LOGERR("Failed to find underlying with symbol: {}", underlyingSymbol.toString());
+						}
+						else
+						{
+							product.underlyerId = it->second;
+							underlyingFound = true;
+						}
+					}
+				}
+
+				// fill in all the fields
+				if (underlyingFound)
+				{
+					product.symbol = instrument.InstrumentID;
+					product.productType = getProductType(instrument);
+					product.currency = FemasUtil::getCurrency(instrument.Currency);
+					product.exchange = FemasUtil::getExchange(instrument.ExchangeID);
+
+					product.contractRatio = instrument.UnderlyingMultiple;
+					product.lotSize = instrument.VolumeMultiple;
+					product.listingDate = FemasUtil::getDate(instrument.OpenDate);
+					product.lastTradingDate = FemasUtil::getDate(instrument.ExpireDate);
+					product.expiryDate = FemasUtil::getDate(instrument.ExpireDate);
+
+					if (instrument.OptionsType != USTP_FTDC_OT_NotOptions)
+					{
+						product.callPut = instrument.OptionsType ==
+								USTP_FTDC_OT_CallOptions ? CallPutType::CALL : CallPutType::PUT;
+						product.strike = instrument.StrikePrice;
+					}
+
+					// add the product to the map for writing out
+					rawProductMap[product.id] = product;
+					processedSymbols.insert(symbol);
+					LOGINFO("Refreshed product {}, {}", product.id, product.symbol.toString());
+				}
+			}
+
+			// if we cannot make any progress, let it be
+			if (prevSize == processedSymbols.size())
+			{
+				break;
+			}
+		}
+
+		LOGINFO("{} products added or updated.", processedSymbols.size());
 	}
 
 	void FemasProductDownloadSession::output()

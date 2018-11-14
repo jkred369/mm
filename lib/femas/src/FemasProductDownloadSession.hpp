@@ -371,7 +371,12 @@ namespace mm
 		//
 		// return : The instrument type.
 		//
-		ProductType getProductType(const CUstpFtdcRspInstrumentField* field) const;
+		ProductType getProductType(const CUstpFtdcRspInstrumentField& field) const;
+
+		//
+		// Build the products from download data.
+		//
+		void buildProduct();
 
 		//
 		// Output the available products.
@@ -425,6 +430,9 @@ namespace mm
 
 		// The trading date as from the session.
 		std::string tradingDate;
+
+		// The instruments as from the exchange.
+		std::vector<CUstpFtdcRspInstrumentField> instruments;
 
 		// The map where key is the instrument ID and value is the product message.
 		std::unordered_map<std::int64_t, ProductMessage> rawProductMap;
