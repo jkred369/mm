@@ -7,6 +7,7 @@
 
 #include <DispatchKey.hpp>
 #include <DelegateServiceFactory.hpp>
+#include <ProductType.hpp>
 #include <ThreadUtil.hpp>
 
 #include "FemasProductDownloadSession.hpp"
@@ -16,6 +17,7 @@ const std::string mm::FemasProductDownloadSessionConfig::CLASS_NAME = "FemasProd
 const std::string mm::FemasProductDownloadSessionConfig::DISPATCH_KEY = "DispatchKey";
 const std::string mm::FemasProductDownloadSessionConfig::PRODUCT_SERVICE_NAME = "ProductServiceName";
 const std::string mm::FemasProductDownloadSessionConfig::OUTPUT_PATH = "OutputPath";
+const std::string mm::FemasProductDownloadSessionConfig::INCLUDED_TYPES = "IncludedTypes";
 
 const bool mm::FemasProductDownloadSessionFactory::registered = mm::DelegateServiceFactory::getFactory().registerFactory(
 		mm::FemasProductDownloadSessionConfig::CLASS_NAME, new mm::FemasProductDownloadSessionFactory());
@@ -47,7 +49,14 @@ namespace mm
 		const std::string outputPath = config->getString(FemasProductDownloadSessionConfig::OUTPUT_PATH);
 		const FemasUserDetail userDetail(config);
 
-		return std::shared_ptr<IService> (new FemasProductDownloadSession(dispatchKey, serviceName, context, productServiceName, outputPath, userDetail));
+		std::unordered_set<ProductType> types;
+		for (const std::string& typeString : config->getStringList(FemasProductDownloadSessionConfig::INCLUDED_TYPES))
+		{
+			types.insert(ProductTypeUtil::fromString(typeString));
+		}
+
+		return std::shared_ptr<IService> (new FemasProductDownloadSession(
+				dispatchKey, serviceName, context, productServiceName, outputPath, userDetail, types));
 	}
 }
 

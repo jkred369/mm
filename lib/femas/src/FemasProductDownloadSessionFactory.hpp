@@ -29,6 +29,9 @@ namespace mm
 
 		// The output path for the product definitions.
 		static const std::string OUTPUT_PATH;
+
+		// The included product types.
+		static const std::string INCLUDED_TYPES;
 	};
 
 	//
