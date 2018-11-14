@@ -12,6 +12,8 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include <femas/USTPFtdcTraderApi.h>
 
@@ -50,6 +52,7 @@ namespace mm
 		// productServiceName : The product service name.
 		// outputPath : The output path.
 		// userDetail : The configuration details.
+		// productTypes : The product types to retrieve. Empty set will retrieve all products.
 		//
 		FemasProductDownloadSession(
 				const KeyType dispatchKey,
@@ -57,7 +60,8 @@ namespace mm
 				ServiceContext& serviceContext,
 				const std::string productServiceName,
 				const std::string outputPath,
-				const FemasUserDetail& userDetail);
+				const FemasUserDetail& userDetail,
+				const std::unordered_set<ProductType> productTypes = {});
 
 		// virtual destructor.
 		virtual ~FemasProductDownloadSession();
@@ -393,6 +397,9 @@ namespace mm
 
 		// The login user detail.
 		const FemasUserDetail userDetail;
+
+		// The product types to retrieve.
+		const std::unordered_set<ProductType> productTypes;
 
 		// The dispatcher.
 		Dispatcher& dispatcher;

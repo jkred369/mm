@@ -8,9 +8,6 @@
 #include <algorithm>
 #include <array>
 #include <fstream>
-#include <string>
-#include <unordered_set>
-#include <vector>
 
 #include <EnumType.hpp>
 #include <NativeDefinition.hpp>
@@ -437,6 +434,14 @@ namespace mm
 					continue;
 				}
 
+				// check on product type
+				const ProductType productType = getProductType(instrument);
+				if (!productTypes.empty() && productTypes.find(productType) == productTypes.end())
+				{
+					LOGINFO("Skip product {} with undesired type: {} ", symbol, toValue(productType));
+					continue;
+				}
+
 				// determine product ID
 				{
 					auto it = symbolMap.find(symbol);
@@ -475,7 +480,7 @@ namespace mm
 				if (underlyingFound)
 				{
 					product.symbol = instrument.InstrumentID;
-					product.productType = getProductType(instrument);
+					product.productType = productType;
 					product.currency = FemasUtil::getCurrency(instrument.Currency);
 					product.exchange = FemasUtil::getExchange(instrument.ExchangeID);
 
