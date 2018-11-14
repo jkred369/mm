@@ -362,7 +362,7 @@ namespace mm
 
 	void FemasMarketDataSession::OnRspUnSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
-		if (info->ErrorID == 0)
+		if (info == nullptr || info->ErrorID == 0)
 		{
 			LOGINFO("Unsubscription finished for {}", instrument->InstrumentID);
 		}
