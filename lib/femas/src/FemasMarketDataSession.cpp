@@ -350,7 +350,7 @@ namespace mm
 
 	void FemasMarketDataSession::OnRspSubMarketData(CUstpFtdcSpecificInstrumentField *instrument, CUstpFtdcRspInfoField *info, int requestID, bool isLast)
 	{
-		if (info->ErrorID == 0)
+		if (info == nullptr || info->ErrorID == 0)
 		{
 			LOGINFO("Subscription established for {}", instrument->InstrumentID);
 		}
