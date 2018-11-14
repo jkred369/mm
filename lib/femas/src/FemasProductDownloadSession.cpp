@@ -28,10 +28,12 @@ namespace mm
 			ServiceContext& serviceContext,
 			const std::string productServiceName,
 			const std::string outputPath,
-			const FemasUserDetail& userDetail) :
+			const FemasUserDetail& userDetail,
+			const std::unordered_set<ProductType> productTypes) :
 		DispatchableService(dispatchKey, serviceName, serviceContext),
 		outputPath(outputPath),
 		userDetail(userDetail),
+		productTypes(productTypes),
 		dispatcher(serviceContext.getDispatcher()),
 		session(CUstpFtdcTraderApi::CreateFtdcTraderApi()),
 		productService(nullptr),
@@ -438,7 +440,7 @@ namespace mm
 				const ProductType productType = getProductType(instrument);
 				if (!productTypes.empty() && productTypes.find(productType) == productTypes.end())
 				{
-					LOGINFO("Skip product {} with undesired type: {} ", symbol, toValue(productType));
+					LOGINFO("Skip product {} with undesired type: {} ", symbol.toString(), toValue(productType));
 					continue;
 				}
 
