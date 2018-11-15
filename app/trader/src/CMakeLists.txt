@@ -43,3 +43,5 @@ target_link_libraries(Trader
 )
 
 configure_file("../config/simulation.cfg" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/simulation.cfg" COPYONLY)
+configure_file("../config/productDownload.cfg" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/productDownload.cfg" COPYONLY)
+configure_file("../config/backtest.cfg" "${CMAKE_CONFIG_OUTPUT_DIRECTORY}/backtest.cfg" COPYONLY)
