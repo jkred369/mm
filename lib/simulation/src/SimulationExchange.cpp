@@ -70,24 +70,26 @@ namespace mm
 		if (marketDataMessages.empty())
 		{
 			LOGERR("No market data loaded.");
-			return true;
 		}
 
 		LOGINFO("Starting market data replay in {} seconds...", LEAD_SLEEP_SECONDS);
 
-		std::size_t index = 0;
+		auto it = marketDataMessages.begin();
 		Runnable task = [&] () {
 
 			// firstly do publish
-			const std::shared_ptr<MarketDataMessage> message = marketDataMessages[index].second;
-			const Subscription subscription(SourceType::ALL, DataType::MARKET_DATA, message->instrumentId);
-
-			PublisherAdapter<MarketDataMessage>::publish(subscription, message);
-
-			// schedule for the next round
-			if (LIKELY(index < marketDataMessages.size() - 1))
+			if (LIKELY(it != marketDataMessages.end()))
 			{
-				const std::chrono::microseconds delay = marketDataMessages[++index].first;
+				const std::shared_ptr<MarketDataMessage> message = it->second;
+				const Subscription subscription(SourceType::ALL, DataType::MARKET_DATA, message->instrumentId);
+
+				PublisherAdapter<MarketDataMessage>::publish(subscription, message);
+			}
+
+			if (LIKELY(++it < marketDataMessages.end()))
+			{
+				// schedule for the next round
+				const std::chrono::microseconds delay = it->first;
 				scheduler.schedule(DispatchKey::MARKET_DATA, task, delay);
 			}
 			else
