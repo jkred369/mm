@@ -13,6 +13,7 @@
 #include <FemasProductDownloadSessionFactory.hpp>
 #include <ProductServiceFactory.hpp>
 #include <ServiceContextManager.hpp>
+#include <SimulationExchangeFactory.hpp>
 #include <SingleInstrumentArbFactory.hpp>
 
 int main(int argc, char** argv)
@@ -28,6 +29,7 @@ int main(int argc, char** argv)
 		!mm::FemasOrderSessionFactory::registered ||
 		!mm::FemasProductDownloadSessionFactory::registered ||
 		!mm::ProductServiceFactory::registered ||
+		!mm::SimulationExchangeFactory::registered ||
 		!mm::SingleInstrumentArbFactory::registered)
 	{
 		std::cerr << "Not all required service factory registered." << std::endl;

@@ -10,6 +10,7 @@ include_directories(
 	${CMAKE_SOURCE_DIR}/lib/threading/src
 	${CMAKE_SOURCE_DIR}/lib/service/src
 	${CMAKE_SOURCE_DIR}/lib/order/src
+	${CMAKE_SOURCE_DIR}/lib/simulation/src
 	${CMAKE_SOURCE_DIR}/lib/femas/src
 	${CMAKE_SOURCE_DIR}/lib/arb/src
 )
@@ -22,6 +23,7 @@ target_include_directories(Trader PUBLIC
 	${Bus_INCLUDES}
 	${Service_INCLUDES}
 	${Order_INCLUDES}
+	${Simulation_INCLUDES}
 	${Femas_INCLUDES}
 	${Arb_INCLUDES}
 )
@@ -38,6 +40,7 @@ target_link_libraries(Trader
 	Threading
 	Service
 	Order
+	Simulation
 	Femas
 	Arb
 )
