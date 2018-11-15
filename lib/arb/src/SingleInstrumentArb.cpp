@@ -94,9 +94,9 @@ namespace mm
 
 	bool SingleInstrumentArb::subscribe(const Subscription& subscription, IConsumer<OrderMessage>* consumer)
 	{
-		if (subscription.dataType != DataType::ORDER_SUMMARY)
+		if (subscription.dataType != DataType::NEW_ORDER)
 		{
-			LOGERR("Error subscribing to order summary message with invalid data type: {}", toValue(subscription.dataType));
+			LOGERR("Error subscribing to order message with invalid data type: {}", toValue(subscription.dataType));
 			return false;
 		}
 

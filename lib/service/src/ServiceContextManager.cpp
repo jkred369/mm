@@ -61,7 +61,7 @@ namespace mm
 
 			if (result == SIGTERM || result == SIGUSR1 || result == SIGUSR2)
 			{
-				LOGERR("Received signal {}, shutting down ...", result);
+				LOGINFO("Received signal {}, shutting down ...", result);
 				shutDownFlag = true;
 			}
 		}
