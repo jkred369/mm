@@ -33,6 +33,50 @@ namespace mm
 		static constexpr char FP_NAN_STRING[] = {'N', 'a', 'N'};
 
 		//
+		// Get the string end pointer.
+		//
+		// str : The string.
+		//
+		// return : The pointer to the end of the string.
+		//
+		static constexpr const char* stringEnd(const char *string) {
+		    return *string ? stringEnd(string + 1) : string;
+		}
+
+		//
+		// Skip any path separator.
+		//
+		// string : the path to operate on.
+		//
+		// return : true if a path separator can be skipped.
+		//
+		static constexpr bool slant(const char *string) {
+		    return *string == '/' ? true : (*string ? slant(string + 1) : false);
+		}
+
+		//
+		// Skip any path separator from the right.
+		//
+		// string : the path to operate on.
+		//
+		// return : true if a path separator can be skipped.
+		//
+		static constexpr const char* rslant(const char* string) {
+		    return *string == '/' ? (string + 1) : rslant(string - 1);
+		}
+
+		//
+		// extract only file name from the given path.
+		//
+		// path : the path c-style string.
+		//
+		// return : The file name pat of the string.
+		//
+		static constexpr const char* fileNameFromPath(const char* path) {
+		    return slant(path) ? rslant(stringEnd(path)) : path;
+		}
+
+		//
 		// trim the input string from start.
 		//
 		// s : The string to trim.

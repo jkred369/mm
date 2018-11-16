@@ -14,6 +14,7 @@
 #include "NativeDefinition.hpp"
 #include "SpdLogger.hpp"
 #include "TimeUtil.hpp"
+#include "StringUtil.hpp"
 
 namespace mm
 {
@@ -23,8 +24,11 @@ namespace mm
 #define LOG_STR_H(x) #x
 #define LOG_STR_HELPER(x) LOG_STR_H(x)
 
-#ifdef DEBUG
-#define LOG(level, ...) { if (UNLIKELY(!logger.get())) {logger = LoggerSingleton::getLogger(); } if (LIKELY(logger.get())) { logger->level("[" __FILE__ ":" LOG_STR_HELPER(__LINE__) "]" " " __VA_ARGS__); } }
+// Turn off the file and line based logging by comment out the following
+#define LOG_INCLUDE_LOCATION
+
+#ifdef LOG_INCLUDE_LOCATION
+#define LOG(level, fmt, ...) { if (UNLIKELY(!logger.get())) { logger = LoggerSingleton::getLogger(); } if (LIKELY(logger.get())) { logger->level(fmt " ({}:{})", ## __VA_ARGS__, StringUtil::fileNameFromPath(__FILE__), __LINE__); } }
 #else
 #define LOG(level, ...) { if (UNLIKELY(!logger.get())) {logger = LoggerSingleton::getLogger(); } if (LIKELY(logger.get())) { logger->level(__VA_ARGS__); } }
 #endif
