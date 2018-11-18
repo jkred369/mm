@@ -67,7 +67,7 @@ namespace mm
 				this->PublisherAdapter<MarketDataMessage>::publish(subscription, message);
 			}
 
-			if (LIKELY(++marketDataIt < marketDataMessages.end()))
+			if (LIKELY(++marketDataIt != marketDataMessages.end()))
 			{
 				// schedule for the next round
 				const std::chrono::microseconds delay = marketDataIt->first;

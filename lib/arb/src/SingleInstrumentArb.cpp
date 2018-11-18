@@ -82,6 +82,7 @@ namespace mm
 	void SingleInstrumentArb::consume(const std::shared_ptr<const MarketDataMessage>& message)
 	{
 		messages.push_back(message);
+		process();
 	}
 
 	void SingleInstrumentArb::consume(const std::shared_ptr<const OrderSummaryMessage>& message)
@@ -90,6 +91,8 @@ namespace mm
 		{
 			liveOrderId = 0;
 		}
+
+		process();
 	}
 
 	bool SingleInstrumentArb::subscribe(const Subscription& subscription, IConsumer<OrderMessage>* consumer)
@@ -139,6 +142,9 @@ namespace mm
 
 		const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, strategyId};
 		publish(subscription, order);
+
+		LOGINFO("Sent order {} to {} at {} on {}", order->orderId, toValue(order->side),
+				order->price, order->instrumentId);
 	}
 
 }
