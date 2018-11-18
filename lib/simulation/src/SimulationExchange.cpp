@@ -251,6 +251,7 @@ namespace mm
 	{
 		try
 		{
+			bool headerLoaded = false;
 			std::vector<std::string> items;
 
 			for (std::string line; std::getline(is, line); )
@@ -258,6 +259,12 @@ namespace mm
 				StringUtil::trim(line);
 				if (line.size() == 0 || line[0] == '#')
 				{
+					continue;
+				}
+
+				if (!headerLoaded)
+				{
+					headerLoaded = true;
 					continue;
 				}
 
