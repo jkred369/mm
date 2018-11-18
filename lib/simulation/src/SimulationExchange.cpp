@@ -110,7 +110,7 @@ namespace mm
 
 	bool SimulationExchange::subscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
-		if (UNLIKELY(lotSizeMap.find(subscription.key) != lotSizeMap.end()))
+		if (UNLIKELY(lotSizeMap.find(subscription.key) == lotSizeMap.end()))
 		{
 			return false;
 		}
@@ -125,7 +125,7 @@ namespace mm
 
 	void SimulationExchange::unsubscribe(const Subscription& subscription, IConsumer<MarketDataMessage>* consumer)
 	{
-		if (UNLIKELY(lotSizeMap.find(subscription.key) != lotSizeMap.end()))
+		if (UNLIKELY(lotSizeMap.find(subscription.key) == lotSizeMap.end()))
 		{
 			return;
 		}
@@ -138,7 +138,7 @@ namespace mm
 
 	bool SimulationExchange::subscribe(const Subscription& subscription, IConsumer<ExecutionReportMessage>* consumer)
 	{
-		if (UNLIKELY(lotSizeMap.find(subscription.key) != lotSizeMap.end()))
+		if (UNLIKELY(lotSizeMap.find(subscription.key) == lotSizeMap.end()))
 		{
 			return false;
 		}
@@ -153,7 +153,7 @@ namespace mm
 
 	void SimulationExchange::unsubscribe(const Subscription& subscription, IConsumer<ExecutionReportMessage>* consumer)
 	{
-		if (UNLIKELY(lotSizeMap.find(subscription.key) != lotSizeMap.end()))
+		if (UNLIKELY(lotSizeMap.find(subscription.key) == lotSizeMap.end()))
 		{
 			return;
 		}
