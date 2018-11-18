@@ -61,21 +61,28 @@ namespace mm
 			// firstly do publish
 			if (LIKELY(marketDataIt != marketDataMessages.end()))
 			{
+				const std::chrono::microseconds timestamp = marketDataIt->first;
 				const std::shared_ptr<MarketDataMessage> message = marketDataIt->second;
 				const Subscription subscription(SourceType::ALL, DataType::MARKET_DATA, message->instrumentId);
 
-				this->PublisherAdapter<MarketDataMessage>::publish(subscription, message);
-			}
+				lastMarketDataMap[message->instrumentId] = message;
+				PublisherAdapter<MarketDataMessage>::publish(subscription, message);
 
-			if (LIKELY(++marketDataIt != marketDataMessages.end()))
-			{
-				// schedule for the next round
-				const std::chrono::microseconds delay = marketDataIt->first;
-				scheduler.schedule(DispatchKey::MARKET_DATA, publishingTask, delay);
+				if (LIKELY(++marketDataIt != marketDataMessages.end()))
+				{
+					// schedule for the next round
+					const std::chrono::microseconds delay = marketDataIt->first - timestamp;
+					scheduler.schedule(DispatchKey::MARKET_DATA, publishingTask, delay);
+				}
+				else
+				{
+					LOGINFO("Market data replay finished.");
+				}
 			}
 			else
 			{
-				LOGINFO("Market data replay finished.");
+				// if we reach here it means nothing to replay at all
+				LOGINFO("No market data to replay. Market data replay finished.");
 			}
 		};
 	}
@@ -252,8 +259,9 @@ namespace mm
 		try
 		{
 			bool headerLoaded = false;
-			std::vector<std::string> items;
+			std::chrono::microseconds lastTimestamp;
 
+			std::vector<std::string> items;
 			for (std::string line; std::getline(is, line); )
 			{
 				StringUtil::trim(line);
@@ -287,9 +295,6 @@ namespace mm
 				const std::chrono::microseconds timestamp = std::chrono::microseconds(
 						static_cast<std::int64_t> (std::stod(items[2]) * 1000 * 1000));
 
-				const std::chrono::microseconds delay = marketDataMessages.empty() ?
-						std::chrono::microseconds(0) : timestamp - marketDataMessages.back().first;
-
 				// the market data
 				marketData->instrumentId = symbolMap[symbol];
 				marketData->last = std::stod(items[3]);
@@ -299,7 +304,7 @@ namespace mm
 				marketData->levels[toValue(Side::ASK)][0].price = std::stod(items[7]);
 				marketData->levels[toValue(Side::ASK)][0].qty = std::stod(items[8]);
 
-				marketDataMessages.push_back(std::make_pair(delay, marketData));
+				marketDataMessages.push_back(std::make_pair(timestamp, marketData));
 			}
 		}
 		catch (std::exception& e)
