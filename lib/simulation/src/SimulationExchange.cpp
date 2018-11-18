@@ -53,6 +53,31 @@ namespace mm
 
 		// loading up the market data ticks - could be big
 		loadMarketData(marketDataStream);
+
+		// prepare publishing
+		marketDataIt = marketDataMessages.begin();
+		publishingTask = [&] () {
+
+			// firstly do publish
+			if (LIKELY(marketDataIt != marketDataMessages.end()))
+			{
+				const std::shared_ptr<MarketDataMessage> message = marketDataIt->second;
+				const Subscription subscription(SourceType::ALL, DataType::MARKET_DATA, message->instrumentId);
+
+				this->PublisherAdapter<MarketDataMessage>::publish(subscription, message);
+			}
+
+			if (LIKELY(++marketDataIt < marketDataMessages.end()))
+			{
+				// schedule for the next round
+				const std::chrono::microseconds delay = marketDataIt->first;
+				scheduler.schedule(DispatchKey::MARKET_DATA, publishingTask, delay);
+			}
+			else
+			{
+				LOGINFO("Market data replay finished.");
+			}
+		};
 	}
 
 	SimulationExchange::~SimulationExchange()
@@ -73,32 +98,7 @@ namespace mm
 		}
 
 		LOGINFO("Starting market data replay in {} seconds...", LEAD_SLEEP_SECONDS);
-
-		auto it = marketDataMessages.begin();
-		Runnable task = [&] () {
-
-			// firstly do publish
-			if (LIKELY(it != marketDataMessages.end()))
-			{
-				const std::shared_ptr<MarketDataMessage> message = it->second;
-				const Subscription subscription(SourceType::ALL, DataType::MARKET_DATA, message->instrumentId);
-
-				PublisherAdapter<MarketDataMessage>::publish(subscription, message);
-			}
-
-			if (LIKELY(++it < marketDataMessages.end()))
-			{
-				// schedule for the next round
-				const std::chrono::microseconds delay = it->first;
-				scheduler.schedule(DispatchKey::MARKET_DATA, task, delay);
-			}
-			else
-			{
-				LOGINFO("Market data replay finished.");
-			}
-		};
-
-		scheduler.schedule(DispatchKey::MARKET_DATA, task, std::chrono::seconds(LEAD_SLEEP_SECONDS));
+		scheduler.schedule(DispatchKey::MARKET_DATA, publishingTask, std::chrono::seconds(LEAD_SLEEP_SECONDS));
 
 		return true;
 	}

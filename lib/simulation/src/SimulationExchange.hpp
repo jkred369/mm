@@ -148,6 +148,12 @@ namespace mm
 
 		// The map with the last market data for each instrument.
 		std::unordered_map<std::int64_t, std::shared_ptr<MarketDataMessage> > lastMarketDataMap;
+
+		// The iterator here to be accessed by publishing task
+		std::vector<std::pair<std::chrono::microseconds, std::shared_ptr<MarketDataMessage> > >::const_iterator marketDataIt;
+
+		// The actual publishing task
+		Runnable publishingTask;
 	};
 }
 
