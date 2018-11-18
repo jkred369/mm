@@ -48,14 +48,14 @@ namespace mm
 
 		// wire up all the subscriptions
 		if (!serviceContext.subscribe(
-				Subscription(SourceType::FEMAS_MARKET_DATA, DataType::MARKET_DATA, instrumentId),
+				Subscription(SourceType::ALL, DataType::MARKET_DATA, instrumentId),
 				dynamic_cast<IConsumer<MarketDataMessage>*> (this)))
 		{
 			return false;
 		}
 
 		if (!serviceContext.subscribe(
-				Subscription(SourceType::FEMAS_ORDER, DataType::ORDER_SUMMARY, strategyId),
+				Subscription(SourceType::ALL, DataType::ORDER_SUMMARY, strategyId),
 				dynamic_cast<IConsumer<OrderSummaryMessage>*> (this)))
 		{
 			return false;
