@@ -131,20 +131,25 @@ namespace mm
 		//
 
 		// assuming we have decided to generate a new order and its a buy
-		std::shared_ptr<OrderMessage> order = orderPool.getShared();
+		// also assume we can have only 1 outstanding order
+		if (liveOrderId == 0)
+		{
+			std::shared_ptr<OrderMessage> order = orderPool.getShared();
 
-		order->orderId = orderIdGenerator.generate(strategyId);
-		order->instrumentId = instrumentId;
-		order->side = Side::ASK;
-		order->totalQty = 1;
-		order->price = messages.back()->levels[toValue(Side::ASK)][0].price;
-		order->status = OrderStatus::LIVE;
+			order->orderId = orderIdGenerator.generate(strategyId);
+			order->instrumentId = instrumentId;
+			order->side = Side::ASK;
+			order->totalQty = 1;
+			order->price = messages.back()->levels[toValue(Side::ASK)][0].price;
+			order->status = OrderStatus::LIVE;
+			order->type = OrderType::IOC;
 
-		const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, strategyId};
-		publish(subscription, order);
+			const Subscription subscription = {SourceType::ARB, DataType::NEW_ORDER, strategyId};
+			publish(subscription, order);
 
-		LOGINFO("Sent order {} to {} at {} on {}", order->orderId, toValue(order->side),
-				order->price, order->instrumentId);
+			LOGINFO("Sent order {} to {} at {} on {}", order->orderId, toValue(order->side),
+					order->price, order->instrumentId);
+		}
 	}
 
 }

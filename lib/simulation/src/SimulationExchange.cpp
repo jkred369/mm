@@ -218,6 +218,8 @@ namespace mm
 		{
 			determineExecution(marketData);
 		}
+
+		// if order is IOC or FOK need to remove from book
 	}
 
 	void SimulationExchange::cancel(const std::shared_ptr<const OrderMessage>& message)
