@@ -37,7 +37,7 @@ namespace mm
 		static constexpr std::int64_t invalidOrderId = -1;
 
 		// The default shift factor.
-		static constexpr std::int64_t defaultShiftDigit = 6;
+		static constexpr std::int64_t defaultShiftDigit = 8;
 
 		// The default strategy shift digit.
 		static constexpr std::int64_t defaultStrategyDigit = 2;
