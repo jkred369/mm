@@ -296,13 +296,14 @@ namespace mm
 						static_cast<std::int64_t> (std::stod(items[2]) * 1000 * 1000));
 
 				// the market data
+				// field 4 is the size from last print to current print - not loaded now
 				marketData->instrumentId = symbolMap[symbol];
 				marketData->last = std::stod(items[3]);
-				marketData->volume = std::stol(items[4]);
-				marketData->levels[toValue(Side::BID)][0].price = std::stod(items[5]);
-				marketData->levels[toValue(Side::BID)][0].qty = std::stod(items[6]);
-				marketData->levels[toValue(Side::ASK)][0].price = std::stod(items[7]);
-				marketData->levels[toValue(Side::ASK)][0].qty = std::stod(items[8]);
+				marketData->volume = std::stol(items[5]);
+				marketData->levels[toValue(Side::BID)][0].price = std::stod(items[6]);
+				marketData->levels[toValue(Side::BID)][0].qty = std::stod(items[7]);
+				marketData->levels[toValue(Side::ASK)][0].price = std::stod(items[8]);
+				marketData->levels[toValue(Side::ASK)][0].qty = std::stod(items[9]);
 
 				marketDataMessages.push_back(std::make_pair(timestamp, marketData));
 			}
