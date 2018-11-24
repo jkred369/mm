@@ -177,7 +177,7 @@ namespace mm
 
 		symbolMap[product.symbol] = product.id;
 		lotSizeMap[product.id] = product.lotSize;
-		instrumentOrderMap[product.id] = std::unordered_map<std::int64_t, OrderSummaryMessage> ();
+		instrumentOrderMap[product.id] = std::unordered_map<std::int64_t, OrderDetail> ();
 	}
 
 	void SimulationExchange::sendOrder(const std::shared_ptr<const OrderMessage>& message)
@@ -207,7 +207,7 @@ namespace mm
 			summary.tradedNotional = 0;
 			summary.tradedQty = 0;
 
-			instrumentOrderMap[message->instrumentId].insert(std::make_pair(summary.orderId, summary));
+			instrumentOrderMap[message->instrumentId][summary.orderId] = OrderDetail(*message, summary);
 		}
 
 		const Subscription subscription(SourceType::ALL, DataType::EXEC_REPORT, message->strategyId);
@@ -218,8 +218,6 @@ namespace mm
 		{
 			determineExecution(marketData);
 		}
-
-		// if order is IOC or FOK need to remove from book
 	}
 
 	void SimulationExchange::cancel(const std::shared_ptr<const OrderMessage>& message)
@@ -236,12 +234,12 @@ namespace mm
 		}
 		else
 		{
-			std::unordered_map<std::int64_t, OrderSummaryMessage>& orders = instrumentOrderMap[message->instrumentId];
-			auto it = std::find_if(orders.begin(), orders.end(), [&] (const std::pair<std::int64_t, OrderSummaryMessage>& pair) {
+			std::unordered_map<std::int64_t, OrderDetail>& orders = instrumentOrderMap[message->instrumentId];
+			auto it = std::find_if(orders.begin(), orders.end(), [&] (const std::pair<std::int64_t, OrderDetail>& pair) {
 				return pair.first == message->orderId;
 			});
 
-			if (it == orders.end() || OrderStatusUtil::completed(it->second.status))
+			if (it == orders.end() || OrderStatusUtil::completed(it->second.summary.status))
 			{
 				response->status = OrderStatus::CANCEL_REJECTED;
 			}
@@ -322,10 +320,11 @@ namespace mm
 
 	void SimulationExchange::determineExecution(const std::shared_ptr<MarketDataMessage>& marketData)
 	{
-		std::unordered_map<std::int64_t, OrderSummaryMessage>& orderMap = instrumentOrderMap[marketData->instrumentId];
+		std::unordered_map<std::int64_t, OrderDetail>& orderMap = instrumentOrderMap[marketData->instrumentId];
 		for (auto it = orderMap.begin(); it != orderMap.end(); )
 		{
-			OrderSummaryMessage& summary = it->second;
+			OrderDetail& detail = it->second;
+			OrderSummaryMessage& summary = detail.summary;
 
 			// work out execution if any
 			if ((summary.side == Side::BID && summary.price >= marketData->levels[toValue(Side::ASK)][0].price) ||
@@ -345,6 +344,12 @@ namespace mm
 						execQty += levelQty;
 						execNotional += levelQty * marketData->levels[index][i].price;
 					}
+				}
+
+				// for IOC order the full qty must be done or nothing done
+				if (detail.initialOrder.type == OrderType::IOC && execQty != detail.initialOrder.totalQty)
+				{
+					execQty = 0;
 				}
 
 				// publish the execution
@@ -368,6 +373,12 @@ namespace mm
 
 					const Subscription subscription(SourceType::ALL, DataType::EXEC_REPORT, summary.strategyId);
 					PublisherAdapter<ExecutionReportMessage>::publish(subscription, trade);
+				}
+
+				// for IOC and FOK - the order would be completed with a status determined
+				if (detail.initialOrder.type == OrderType::IOC || detail.initialOrder.type == OrderType::FOK)
+				{
+					summary.status = execQty == detail.initialOrder.totalQty ? OrderStatus::FULL_FILLED : OrderStatus::CANCELLED;
 				}
 			}
 

@@ -93,6 +93,37 @@ namespace mm
 
 	private:
 
+		//
+		// This class holds all information needed for order processing.
+		//
+		struct OrderDetail
+		{
+			//
+			// Default constructor.
+			//
+			OrderDetail()
+			{
+			}
+
+			//
+			// Constructor.
+			//
+			// initialOrder : The initial message used to create the order.
+			// summary : The current order summary.
+			//
+			OrderDetail(const OrderMessage& initialOrder, const OrderSummaryMessage& summary) :
+				initialOrder(initialOrder),
+				summary(summary)
+			{
+			}
+
+			// The initial message used to create the order
+			OrderMessage initialOrder;
+
+			// The current summary of the order
+			OrderSummaryMessage summary;
+		};
+
 		// The int value for bid
 		static constexpr int BID = toValue(Side::BID);
 
@@ -144,7 +175,7 @@ namespace mm
 		std::vector<std::pair<std::chrono::microseconds, std::shared_ptr<MarketDataMessage> > > marketDataMessages;
 
 		// The map where key is the instrument ID and value is a set of the live orders.
-		std::unordered_map<std::int64_t, std::unordered_map<std::int64_t, OrderSummaryMessage> > instrumentOrderMap;
+		std::unordered_map<std::int64_t, std::unordered_map<std::int64_t, OrderDetail> > instrumentOrderMap;
 
 		// The map with the last market data for each instrument.
 		std::unordered_map<std::int64_t, std::shared_ptr<MarketDataMessage> > lastMarketDataMap;
