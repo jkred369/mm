@@ -90,6 +90,13 @@ namespace mm
 				LOGWARN("Order manager {} didn't subscribe to any order source.", serviceName);
 			}
 
+			if (serviceContext.subscribeAll(
+					Subscription(SourceType::ALL, DataType::EXEC_REPORT, ALL_ID),
+					dynamic_cast<IConsumer<ExecutionReportMessage>*> (this)) == 0)
+			{
+				LOGWARN("Order manager {} didn't subscribe to any execution report source.", serviceName);
+			}
+
 			return true;
 		}
 
@@ -103,6 +110,13 @@ namespace mm
 					dynamic_cast<IConsumer<OrderMessage>*> (this)) == 0)
 			{
 				LOGWARN("Order manager {} didn't unsubscribe from any order source.", serviceName);
+			}
+
+			if (serviceContext.unsubscribeAll(
+					Subscription(SourceType::ALL, DataType::EXEC_REPORT, ALL_ID),
+					dynamic_cast<IConsumer<ExecutionReportMessage>*> (this)) == 0)
+			{
+				LOGWARN("Order manager {} didn't unsubscribe to any execution report source.", serviceName);
 			}
 
 			DispatchableService::stop();
