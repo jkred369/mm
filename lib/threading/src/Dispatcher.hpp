@@ -136,7 +136,6 @@ namespace mm
 			// signal the thread to check flag if needed
 			if (waitOnEmpty && queue.empty())
 			{
-				std::lock_guard<Mutex> guard(mutex);
 				condition.notify_all();
 			}
 
@@ -160,7 +159,6 @@ namespace mm
 			// notify where needed
 			if (wasEmpty && waitOnEmpty)
 			{
-				std::lock_guard<Mutex> guard(mutex);
 				condition.notify_all();
 			}
 		}
