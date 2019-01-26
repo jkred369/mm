@@ -118,7 +118,6 @@ namespace mm
 
 					// notify then wait for thread
 					{
-						SpinLockGuard<Mutex> guard(mutex);
 						condition.notify_all();
 					}
 
@@ -188,7 +187,6 @@ namespace mm
 
 			// we always notify here so the scheduler thread will re-check the queue.
 			{
-				SpinLockGuard<Mutex> guard(mutex);
 				condition.notify_all();
 			}
 		}
