@@ -74,26 +74,6 @@ namespace mm
 		virtual void consume(const std::shared_ptr<const ProductMessage>& message) override;
 		virtual void consume(const std::shared_ptr<const ProductConstituentMessage>& message) override;
 
-		//
-		// Temporary function to visit all products in static way. Can only be called before started.
-		// TODO: eliminate this function.
-		//
-		// procedure : The procedure.
-		//
-		inline void visit(std::function<void(const std::pair<std::int64_t, std::shared_ptr<Product> >& pair)> function)
-		{
-			for (const std::pair<std::int64_t, std::shared_ptr<Product> >& pair : productMap)
-			{
-				try
-				{
-					function(pair);
-				}
-				catch (...)
-				{
-				}
-			}
-		}
-
 	private:
 
 		//
