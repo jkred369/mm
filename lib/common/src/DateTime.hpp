@@ -72,7 +72,7 @@ namespace mm
 	//
 	struct DateTimeUtil
 	{
-		// The epoch daet time.
+		// The epoch date time.
 		static const DateTime epochDateTime;
 
 		//
