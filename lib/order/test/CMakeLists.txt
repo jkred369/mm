@@ -24,6 +24,7 @@ target_link_libraries(OrderTest
 	Messaging
 	Threading
 	Service
+	Order
 )
 
 add_test(OrderTest, OrderTest)

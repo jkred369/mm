@@ -15,10 +15,13 @@ namespace mm
 	struct MathUtil
 	{
 		// The epsilon inverse.
-		static constexpr double E_INV = 1000000;
+		static constexpr double E_INV = 10000000;
 
 		// The epsilon used.
 		static constexpr double E = 1 / E_INV;
+
+		// The double compare epsilon - should be more than the rounding epsilon
+		static constexpr double E_CMP = E * 10;
 
 		//
 		// Round the value (always up) to avoid the floating point error issue.
@@ -41,7 +44,7 @@ namespace mm
 		//
 		// return : true if 2 values are differed by less than e in abs amount.
 		//
-		static inline bool equals(double lhs, double rhs, double e = E)
+		static inline bool equals(double lhs, double rhs, double e = E_CMP)
 		{
 			return std::abs(lhs - rhs) < e;
 		}
