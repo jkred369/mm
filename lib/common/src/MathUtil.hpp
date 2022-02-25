@@ -8,6 +8,8 @@
 #ifndef LIB_COMMON_SRC_MATHUTIL_HPP_
 #define LIB_COMMON_SRC_MATHUTIL_HPP_
 
+#include <algorithm>
+
 namespace mm
 {
 	struct MathUtil
@@ -28,6 +30,20 @@ namespace mm
 		static inline double round(double value)
 		{
 			return (value * E_INV + 1) * E;
+		}
+
+		//
+		// Compare 2 double variables with epsilon error term.
+		//
+		// lhs : left side var
+		// rhs : right side var
+		// e : error terms.
+		//
+		// return : true if 2 values are differed by less than e in abs amount.
+		//
+		static inline bool equals(double lhs, double rhs, double e = E)
+		{
+			return std::abs(lhs - rhs) < e;
 		}
 	};
 }

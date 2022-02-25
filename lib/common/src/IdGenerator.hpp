@@ -8,7 +8,7 @@
 #ifndef LIB_COMMON_SRC_IDGENERATOR_HPP_
 #define LIB_COMMON_SRC_IDGENERATOR_HPP_
 
-#include <mutex>
+#include <atomic>
 
 namespace mm
 {
@@ -19,7 +19,7 @@ namespace mm
 	//
 	// since the generator is on critical path we don't use virtual function.
 	//
-	template<typename Mutex = std::mutex> class NumericalIdGenerator
+	class NumericalIdGenerator
 	{
 	public:
 
@@ -40,7 +40,6 @@ namespace mm
 		//
 		std::int64_t generate()
 		{
-			std::unique_lock<Mutex> lock(mutex);
 			return prefix * shiftFactor + (++counter);
 		}
 
@@ -53,10 +52,7 @@ namespace mm
 		const std::int64_t shiftFactor;
 
 		// Counter for increment.
-		std::int64_t counter;
-
-		// The mutex for any thread safety.
-		Mutex mutex;
+		std::atomic<std::int64_t> counter;
 	};
 }
 
