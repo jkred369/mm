@@ -59,7 +59,7 @@ namespace mm
 		//
 		// string : The raw c string.
 		//
-		inline FixedSizeString<size>& operator = (const char* string)
+		inline const FixedSizeString<size>& operator = (const char* string)
 		{
 			length = std::min(size, std::strlen(string));
 			std::strncpy(buffer, string, length);
@@ -72,7 +72,7 @@ namespace mm
 		//
 		// string : The cpp string.
 		//
-		inline FixedSizeString<size>& operator = (const std::string& string)
+		inline const FixedSizeString<size>& operator = (const std::string& string)
 		{
 			length = std::min(size, string.size());
 			std::strncpy(buffer, string.c_str(), length);
@@ -88,18 +88,6 @@ namespace mm
 		// return : true if the contents are equal.
 		//
 		template<std::size_t RightSize> inline bool equals(const FixedSizeString<RightSize>& rhs) const
-		{
-			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
-		}
-
-		//
-		// Check if the contents are equal.
-		//
-		// rhs : The other string.
-		//
-		// return : true if the contents are equal.
-		//
-		inline bool equals(const FixedSizeString& rhs) const
 		{
 			return length == rhs.length && std::memcmp(buffer, rhs.buffer, length) == 0;
 		}
