@@ -28,7 +28,7 @@ target_link_libraries(TraderTest
 	Config
 	Messaging
 	Service
-	Femas
+#	Femas
 )
 
 add_test(TraderTest, TraderTest)
@@ -37,6 +37,6 @@ add_custom_command(
      TARGET TraderTest
      COMMENT "Run tests"
      POST_BUILD 
-     COMMAND ${CMAKE_COMMAND} -E copy TraderTest UnitTest
+#     COMMAND ${CMAKE_COMMAND} -E copy TraderTest UnitTest
      COMMAND TraderTest
 )

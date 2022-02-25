@@ -2,24 +2,24 @@ cmake_minimum_required(VERSION 2.6)
 project(MM)
 
 # define libraries
-# boost
+# boost version 1.58 to 1.66
 set(Boost_USE_STATIC_LIBS OFF) 
 set(Boost_USE_MULTITHREADED ON)  
 set(Boost_USE_STATIC_RUNTIME OFF)
- 
+
 find_package(Boost 1.58.0 COMPONENTS date_time filesystem regex system thread) 
 include_directories(${Boost_INCLUDE_DIRS})
 
-# tbb
-set(TBB_INCLUDE_DIR "/usr/include/tbb-2018.1")
-set(TBB_LIB_DIR "/usr/lib/tbb-2018.1/lib")
+# tbb version 2018 U1
+set(TBB_INCLUDE_DIR "/usr/local/include")
+set(TBB_LIB_DIR "/usr/local/lib")
 find_library(TBB_LIBS tbb HINTS "${TBB_LIB_DIR}")
 
 include_directories(${TBB_INCLUDE_DIR})
 
-# poco
-set(POCO_INCLUDE_DIR "/usr/include/poco-1.7.9")
-set(POCO_LIB_DIR "/usr/lib/poco-1.7.9")
+# poco version 1.7.9
+set(POCO_INCLUDE_DIR "/usr/local/include")
+set(POCO_LIB_DIR "/usr/local/lib")
 set(POCO_LIBS
 	"${POCO_LIB_DIR}/libPocoNet.so"
 	"${POCO_LIB_DIR}/libPocoUtil.so"
@@ -27,26 +27,26 @@ set(POCO_LIBS
 
 include_directories(${POCO_INCLUDE_DIR})
 
-# fmt
-set(FMT_INCLUDE_DIR "/usr/include/fmt")
-set(FMT_LIB_DIR "/usr/lib/fmt")
+# fmt version 8.0.0 shared build
+set(FMT_INCLUDE_DIR "/usr/local/include")
+set(FMT_LIB_DIR "/usr/local/lib")
 find_library(FMT_LIBS fmt HINTS "${FMT_LIB_DIR}")
 
 include_directories(${FMT_INCLUDE_DIR})
 
-# spdlog
-set(SPDLOG_INCLUDE_DIR "/usr/include/spdlog")
+# spdlog header
+set(SPDLOG_INCLUDE_DIR "/usr/local/include")
 
 include_directories(${SPDLOG_INCLUDE_DIR})
 
-# moody camel queue
-set(MOODY_CAMEL_INCLUDE_DIR "/usr/include/moodycamel")
+# moody camel queue header
+set(MOODY_CAMEL_INCLUDE_DIR "/usr/local/include")
 
 include_directories(${MOODY_CAMEL_INCLUDE_DIR})
 
-# gtest
-set(GTEST_INCLUDE_DIR "/usr/include/gtest")
-set(GTEST_LIB_DIR "/usr/lib/gtest-1.8.0")
+# gtest 1.8.0
+set(GTEST_INCLUDE_DIR "/usr/local/include")
+set(GTEST_LIB_DIR "/usr/local/lib")
 set(GTEST_LIBS
 	"${GTEST_LIB_DIR}/libgtest.a"
 	"${GTEST_LIB_DIR}/libgtest_main.a"

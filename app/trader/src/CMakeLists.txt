@@ -41,7 +41,7 @@ target_link_libraries(Trader
 	Service
 	Order
 	Simulation
-	Femas
+#	Femas
 	Arb
 )
 

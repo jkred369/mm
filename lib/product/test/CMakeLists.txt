@@ -31,6 +31,6 @@ add_custom_command(
      TARGET ProductTest
      COMMENT "Run tests"
      POST_BUILD 
-     COMMAND ${CMAKE_COMMAND} -E copy ProductTest UnitTest
+#     COMMAND ${CMAKE_COMMAND} -E copy ProductTest UnitTest
      COMMAND ProductTest
 )

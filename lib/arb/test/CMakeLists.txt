@@ -35,6 +35,6 @@ add_custom_command(
      TARGET ArbTest
      COMMENT "Run tests"
      POST_BUILD 
-     COMMAND ${CMAKE_COMMAND} -E copy ArbTest UnitTest
+#     COMMAND ${CMAKE_COMMAND} -E copy ArbTest UnitTest
      COMMAND ArbTest
 )

@@ -8,9 +8,9 @@
 #include <iostream>
 #include <thread>
 
-#include <FemasMarketDataSessionFactory.hpp>
-#include <FemasOrderSessionFactory.hpp>
-#include <FemasProductDownloadSessionFactory.hpp>
+//#include <FemasMarketDataSessionFactory.hpp>
+//#include <FemasOrderSessionFactory.hpp>
+//#include <FemasProductDownloadSessionFactory.hpp>
 #include <ProductServiceFactory.hpp>
 #include <ServiceContextManager.hpp>
 #include <SimulationExchangeFactory.hpp>
@@ -25,9 +25,9 @@ int main(int argc, char** argv)
 	}
 
 	// make sure factory is properly registered
-	if (!mm::FemasMarketDataSessionFactory::registered ||
-		!mm::FemasOrderSessionFactory::registered ||
-		!mm::FemasProductDownloadSessionFactory::registered ||
+	if (//!mm::FemasMarketDataSessionFactory::registered ||
+		//!mm::FemasOrderSessionFactory::registered ||
+		//!mm::FemasProductDownloadSessionFactory::registered ||
 		!mm::ProductServiceFactory::registered ||
 		!mm::SimulationExchangeFactory::registered ||
 		!mm::SingleInstrumentArbFactory::registered)
