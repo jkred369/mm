@@ -50,6 +50,41 @@ namespace mm
 		ASSERT_TRUE(MathUtil::equals(ladder.roundToTick(0.275), 0.28));
 		ASSERT_TRUE(MathUtil::equals(ladder.roundToTick(0.2749), 0.27));
 	}
+
+	TEST(TickLadderTest, TickUpCase)
+	{
+		std::vector<TickBand> ticks = { {0, 0.001}, {0.1, 0.005}, {0.25, 0.01} };
+		TickLadder ladder(ticks.begin(), ticks.end());
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.0), 0.001));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.099), 0.1));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.245), 0.25));
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.1), 0.105));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.25), 0.26));
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.003), 0.004));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.27), 0.28));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickUp(0.105), 0.11));
+	}
+
+	TEST(TickLadderTest, TickDownCase)
+	{
+		std::vector<TickBand> ticks = { {0, 0.001}, {0.1, 0.005}, {0.25, 0.01} };
+		TickLadder ladder(ticks.begin(), ticks.end());
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.0), 0.0));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.1), 0.099));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.25), 0.245));
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.001), 0.0));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.105), 0.1));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.26), 0.25));
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.003), 0.002));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.27), 0.26));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickDown(0.11), 0.105));
+	}
 }
 
 
