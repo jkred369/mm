@@ -48,6 +48,46 @@ namespace mm
 		{
 			return std::abs(lhs - rhs) < e;
 		}
+
+		//
+		// Check if lhs < rhs by significant amount.
+		//
+		// lhs : left side var
+		// rhs : right side var
+		// e : error terms.
+		//
+		// return : true if lhs < rhs by significant amount.
+		//
+		static inline bool less_than(double lhs, double rhs, double e = E_CMP)
+		{
+			return rhs - lhs > E_CMP;
+		}
+
+		//
+		// Check if lhs > rhs by significant amount.
+		//
+		// lhs : left side var
+		// rhs : right side var
+		// e : error terms.
+		//
+		// return : true if lhs > rhs by significant amount.
+		//
+		static inline bool greater_than(double lhs, double rhs, double e = E_CMP)
+		{
+			return lhs - rhs > E_CMP;
+		}
+
+		//
+		// Check if the double represents a valid market price
+		//
+		// price : The price.
+		//
+		// return : true if the given value can be a valid price.
+		//
+		static inline bool validPrice(double price)
+		{
+			return price > E_CMP;
+		}
 	};
 }
 

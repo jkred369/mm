@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <cmath>
-#include <limits>
 #include <stdexcept>
 
 #include <NativeDefinition.hpp>
@@ -19,7 +18,7 @@ mm::Logger mm::TickLadder::logger;
 
 namespace mm
 {
-	TickBand::TickBand(double lowerBound, double tickSize) : lowerBound(lowerBound), tickSize(tickSize), tickInverse(1 / tickSize)
+	TickBandData::TickBandData(double lowerBound, double tickSize) : lowerBound(lowerBound), tickSize(tickSize), tickInverse(1 / tickSize)
 	{
 		if (lowerBound < 0)
 		{
@@ -37,116 +36,173 @@ namespace mm
 		}
 	}
 
-	double TickLadder::roundToTick(double price) const
+	double TickLadder::roundToTick(double price, const TickBand* hint) const
 	{
-		if (UNLIKELY(price < 0))
+		if (UNLIKELY(!MathUtil::validPrice(price)))
 		{
-			LOGERR("Cannot round negative price: {}", price);
 			return 0.0;
 		}
 
-		std::size_t i = 0;
-		for (; i < ticks.size(); ++i)
+		const TickBand* tick = getBand(price, hint);
+		if (UNLIKELY(!tick))
 		{
-			if (ticks[i].lowerBound > price)
-			{
-				break;
-			}
+			LOGFATAL("Cannot get tick band for price {}", price);
+			return NAN;
 		}
 
-		const TickBand& tick = ticks[i - 1];
-		return MathUtil::round(tick.lowerBound + std::lround((price - tick.lowerBound) * tick.tickInverse) * tick.tickSize);
+		return MathUtil::round(tick->lowerBound +
+				std::lround((price - tick->lowerBound) * tick->tickInverse) * tick->tickSize);
 	}
 
-	double TickLadder::tickUp(double price) const
+	double TickLadder::tickUp(double price, const TickBand* hint) const
 	{
-		if (UNLIKELY(price < 0))
+		if (UNLIKELY(price < 0.0))
 		{
 			LOGERR("Cannot tick up negative price: {}", price);
 			return 0.0;
 		}
 
-		std::size_t i = 0;
-		for (; i < ticks.size(); ++i)
+		const TickBand* tick = getBand(price, hint);
+		if (UNLIKELY(!tick))
 		{
-			if (ticks[i].lowerBound > price)
-			{
-				break;
-			}
+			LOGFATAL("Cannot get tick band for price {}", price);
+			return NAN;
 		}
 
-		return MathUtil::round(price + ticks[i - 1].tickSize);
+		return MathUtil::round(price + tick->tickSize);
 	}
 
-	double TickLadder::tickDown(double price) const
+	double TickLadder::tickDown(double price, const TickBand* hint) const
 	{
-		if (UNLIKELY(price < 0))
+		if (UNLIKELY(!MathUtil::validPrice(price)))
 		{
-			LOGERR("Cannot tick down negative price: {}", price);
+			LOGERR("Cannot tick down non-positive price: {}", price);
 			return 0.0;
 		}
 
-		if (UNLIKELY(price == 0.0))
+		const TickBand* tick = getBand(price, hint);
+		if (UNLIKELY(!tick))
 		{
-			return 0.0;
+			LOGFATAL("Cannot get tick band for price {}", price);
+			return NAN;
 		}
 
-		std::size_t i = 0;
-		for (; i < ticks.size(); ++i)
+		if (MathUtil::equals(tick->lowerBound, price) && tick->index)
 		{
-			if (ticks[i].lowerBound >= price)
-			{
-				break;
-			}
+			tick = &ticks[tick->index - 1];
 		}
 
-		const double result = MathUtil::round(price - ticks[i - 1].tickSize);
-		return result >= 0 ? result : 0;
+		const double result = MathUtil::round(price - tick->tickSize);
+		return MathUtil::validPrice(result) ? result : 0.0;
 	}
 
-	double TickLadder::tickMove(double price, std::int64_t tickCount) const
+	double TickLadder::tickMoveUp(double price, std::int64_t tickCount, const TickBand* hint) const
 	{
-		if (UNLIKELY(price < 0))
+		if (UNLIKELY(price < 0.0))
 		{
 			LOGERR("Cannot tick move negative price: {}", price);
 			return 0.0;
 		}
 
-		std::size_t i = 0;
-		for (; i < ticks.size(); ++i)
+		if (UNLIKELY(!tickCount))
 		{
-			if (ticks[i].lowerBound > price)
+			return price;
+		}
+
+		if (UNLIKELY(tickCount < 0))
+		{
+			return tickMoveDown(price, std::abs(tickCount), hint);
+		}
+
+		const TickBand* tick = getBand(price, hint);
+		if (UNLIKELY(!tick))
+		{
+			LOGFATAL("Cannot get tick band for price {}", price);
+			return NAN;
+		}
+
+		double result = price;
+
+		for (size_t count = tickCount; count != 0; )
+		{
+			if (MathUtil::less_than(result + tick->tickSize * count, tick->upperBound))
 			{
+				result += tick->tickSize * count;
+				break;
+			}
+
+			count -= std::lround((tick->upperBound - result) * tick->tickInverse);
+			result = tick->upperBound;
+
+			if ((size_t) tick->index + 1 < ticks.size())
+			{
+				tick = &ticks[tick->index + 1];
+			}
+			else
+			{
+				LOGERR("Exhausted tick ladder for tick move up {}, {}", price, tickCount);
 				break;
 			}
 		}
 
-		// direction based start point
-		i -= tickCount > 0 ? 1 : 0;
+		return MathUtil::validPrice(result) ? 0.0 : MathUtil::round(result);
+	}
+
+	double TickLadder::tickMoveDown(double price, std::int64_t tickCount, const TickBand* hint) const
+	{
+		if (UNLIKELY(price < 0.0))
+		{
+			LOGERR("Cannot tick move negative price: {}", price);
+			return 0.0;
+		}
+
+		if (UNLIKELY(!tickCount))
+		{
+			return price;
+		}
+
+		if (UNLIKELY(tickCount < 0))
+		{
+			return tickMoveUp(price, std::abs(tickCount), hint);
+		}
+
+		const TickBand* tick = getBand(price, hint);
+		if (UNLIKELY(!tick))
+		{
+			LOGFATAL("Cannot get tick band for price {}", price);
+			return NAN;
+		}
+
+		if (MathUtil::equals(tick->lowerBound, price) && tick->index)
+		{
+			tick = &ticks[tick->index - 1];
+		}
 
 		double result = price;
-		const std::int64_t direction = tickCount > 0 ? 1 : -1;
 
-		for (std::int64_t count = std::abs(tickCount); count != 0; )
+		for (size_t count = tickCount; count != 0; )
 		{
-			const double upperBound = i < ticks.size() - 1 ? ticks[i + 1].lowerBound : std::numeric_limits<double>::max();
-			const long maxCount = std::lround((upperBound - ticks[i].lowerBound) * ticks[i].tickInverse);
-			const long actualCount = std::min(count, maxCount);
-
-			result += actualCount * ticks[i].tickSize * direction;
-			count -= actualCount;
-
-			if (direction < 0 && result <= ticks[i].lowerBound)
+			if (MathUtil::greater_than(result - tick->tickSize * count, tick->upperBound))
 			{
-				--i;
+				result -= tick->tickSize * count;
+				break;
 			}
-			else if (direction > 0 && result >= ticks[i + 1].lowerBound)
+
+			count -= std::lround((result - tick->lowerBound) * tick->tickInverse);
+			result = tick->lowerBound;
+
+			if (tick->index > 0)
 			{
-				++i;
+				tick = &ticks[tick->index - 1];
+			}
+			else
+			{
+				LOGERR("Exhausted tick ladder for tick move up {}, {}", price, tickCount);
+				break;
 			}
 		}
 
-		return result <= 0 ? 0.0 : MathUtil::round(result);
+		return MathUtil::validPrice(result) ? 0.0 : MathUtil::round(result);
 	}
 }
 
