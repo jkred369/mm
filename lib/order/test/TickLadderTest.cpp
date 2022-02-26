@@ -114,6 +114,14 @@ namespace mm
 
 		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.1, -99), 0.001));
 		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, -29), 0.105));
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.0, 130), 0.25));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.0, 131), 0.26));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.0, 140), 0.35));
+
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, -130), 0.0));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.26, -131), 0.0));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.35, -139), 0.001));
 	}
 
 }
