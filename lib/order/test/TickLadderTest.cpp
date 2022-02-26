@@ -99,9 +99,9 @@ namespace mm
 		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.1, 1), 0.105));
 		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.1, -1), 0.099));
 
-//		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, 0), 0.25));
-//		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, 1), 0.26));
-//		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, -1), 0.245));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, 0), 0.25));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, 1), 0.26));
+		ASSERT_TRUE(MathUtil::equals(ladder.tickMove(0.25, -1), 0.245));
 	}
 
 }
