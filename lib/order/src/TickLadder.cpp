@@ -125,7 +125,7 @@ namespace mm
 
 		for (size_t count = tickCount; count != 0; )
 		{
-			if (MathUtil::less_than(result + tick->tickSize * count, tick->upperBound))
+			if (!MathUtil::greater_than(result + tick->tickSize * count, tick->upperBound))
 			{
 				result += tick->tickSize * count;
 				break;
@@ -182,7 +182,7 @@ namespace mm
 
 		for (size_t count = tickCount; count != 0; )
 		{
-			if (MathUtil::greater_than(result - tick->tickSize * count, tick->lowerBound))
+			if (!MathUtil::less_than(result - tick->tickSize * count, tick->lowerBound))
 			{
 				result -= tick->tickSize * count;
 				break;
