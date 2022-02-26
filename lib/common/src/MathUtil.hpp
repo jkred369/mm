@@ -9,6 +9,7 @@
 #define LIB_COMMON_SRC_MATHUTIL_HPP_
 
 #include <algorithm>
+#include <cmath>
 
 namespace mm
 {
@@ -24,7 +25,7 @@ namespace mm
 		static constexpr double E_CMP = E * 10;
 
 		//
-		// Round the value (always up) to avoid the floating point error issue.
+		// Round the value to avoid the floating point error issue.
 		//
 		// value : The value to round.
 		//
@@ -32,7 +33,7 @@ namespace mm
 		//
 		static inline double round(double value)
 		{
-			return (value * E_INV + 1) * E;
+			return std::round(value * E_INV) * E;
 		}
 
 		//
@@ -60,7 +61,7 @@ namespace mm
 		//
 		static inline bool less_than(double lhs, double rhs, double e = E_CMP)
 		{
-			return rhs - lhs > E_CMP;
+			return rhs - lhs > e;
 		}
 
 		//
@@ -74,7 +75,7 @@ namespace mm
 		//
 		static inline bool greater_than(double lhs, double rhs, double e = E_CMP)
 		{
-			return lhs - rhs > E_CMP;
+			return lhs - rhs > e;
 		}
 
 		//
@@ -84,9 +85,9 @@ namespace mm
 		//
 		// return : true if the given value can be a valid price.
 		//
-		static inline bool validPrice(double price)
+		static inline bool validPrice(double price, double e = E_CMP)
 		{
-			return price > E_CMP;
+			return price > e;
 		}
 	};
 }

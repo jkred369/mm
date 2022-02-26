@@ -100,7 +100,7 @@ namespace mm
 	{
 		if (UNLIKELY(price < 0.0))
 		{
-			LOGERR("Cannot tick move negative price: {}", price);
+			LOGERR("Cannot move up negative price: {}", price);
 			return 0.0;
 		}
 
@@ -145,14 +145,14 @@ namespace mm
 			}
 		}
 
-		return MathUtil::validPrice(result) ? 0.0 : MathUtil::round(result);
+		return MathUtil::validPrice(result) ? MathUtil::round(result) : 0.0;
 	}
 
 	double TickLadder::tickMoveDown(double price, std::int64_t tickCount, const TickBand* hint) const
 	{
 		if (UNLIKELY(price < 0.0))
 		{
-			LOGERR("Cannot tick move negative price: {}", price);
+			LOGERR("Cannot move down negative price: {}", price);
 			return 0.0;
 		}
 
@@ -202,7 +202,7 @@ namespace mm
 			}
 		}
 
-		return MathUtil::validPrice(result) ? 0.0 : MathUtil::round(result);
+		return MathUtil::validPrice(result) ? MathUtil::round(result) : 0.0;
 	}
 }
 

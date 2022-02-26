@@ -94,12 +94,12 @@ namespace mm
 				throw std::invalid_argument("Lowest tick band must have lower bound = 0.");
 			}
 
-			for (auto i = 0; i < ticks.size(); ++i)
+			for (std::int64_t i = 0; i < (std::int64_t) ticks.size(); ++i)
 			{
 				TickBand& band = ticks[i];
 				band.index = i;
 
-				if (i + 1 < ticks.size())
+				if (i + 1 < (std::int64_t) ticks.size())
 				{
 					band.upperBound = ticks[i + 1].lowerBound;
 				}
