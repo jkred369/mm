@@ -11,6 +11,7 @@
 #include <IOReactor.hpp>
 #include <Logger.hpp>
 
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -49,8 +50,9 @@ namespace mm
 		{
 		}
 
-		// disable copying
+		// disable copying and assignment
 		Socket(const Socket&) = delete;
+		Socket& operator = (const Socket& ) = delete;
 
 		//
 		// Destructor will close the socket if any.
@@ -137,6 +139,34 @@ namespace mm
 		// Process the events - both read and write.
 		//
 		void process(uint32_t events)
+		{
+			if (events | EPOLLOUT)
+			{
+				send();
+			}
+
+			if (events | EPOLLIN)
+			{
+				recv();
+			}
+
+			if (events | EPOLLHUP)
+			{
+				LOGERR("Socket {}, {} got hang up.", socketName, sockfd);
+			}
+		}
+
+		void send()
+		{
+
+		}
+
+		void send(const char* data, size_t size)
+		{
+
+		}
+
+		void recv()
 		{
 
 		}

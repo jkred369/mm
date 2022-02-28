@@ -42,8 +42,9 @@ namespace mm
 			}
 		}
 
-		// disable copying
+		// disable copying and assignment
 		Poller(const Poller& ) = delete;
+		Poller& operator = (const Poller& ) = delete;
 
 		~Poller()
 		{
