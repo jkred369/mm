@@ -8,10 +8,18 @@
 #ifndef LIB_COMMON_SRC_SOCKET_HPP_
 #define LIB_COMMON_SRC_SOCKET_HPP_
 
-#include <Runnable.hpp>
+#include <IOReactor.hpp>
+#include <Logger.hpp>
 
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
+#include <errno.h>
+#include <netdb.h>
+#include <unistd.h>
+
+#include <cstring>
 #include <functional>
 #include <string>
 
@@ -24,24 +32,32 @@ namespace mm
 	{
 	public:
 
+		// Supported socket types
+		static constexpr int TCP = 0;
+		static constexpr int UDP = 1;
+
 		//
 		// Constructor.
 		//
+		// type : The type of socket.
 		// name : name of the socket.
 		//
-		Socket(std::string name = getName()) : socketName(name)
+		Socket(int type = TCP, std::string name = getName()) :
+			type(type),
+			socketName(name),
+			reactor( std::bind(&Socket::process, this) )
 		{
 		}
 
 		// disable copying
 		Socket(const Socket&) = delete;
 
+		//
+		// Destructor will close the socket if any.
+		//
 		~Socket()
 		{
-			if (fd != 0)
-			{
-
-			}
+			close();
 		}
 
 		//
@@ -61,7 +77,68 @@ namespace mm
 		//
 		inline int fd() const
 		{
-			return descriptor;
+			return sockfd;
+		}
+
+		//
+		// Connect to the given address and port.
+		//
+		bool connect(const char* address, int port)
+		{
+			const int actualType = type == UDP ? SOCK_DGRAM : SOCK_STREAM;
+			const int protocol = type == UDP ? udpProtocol() : tcpProtocol();
+
+			sockfd = socket(AF_INET, actualType | SOCK_NONBLOCK, protocol);
+			if (sockfd < 0)
+			{
+				const int err = errno;
+				LOGERR("Failed opening socket for {}, err = {}", name, err);
+
+				return false;
+			}
+
+			sockaddr_in addr;
+			{
+				std::memset(&addr, 0, sizeof(addr));
+				addr.sin_addr = inet_addr(address);
+				addr.sin_family = AF_INET;
+				addr.sin_port = port;
+			}
+
+			if (::connect(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0)
+			{
+				const int err = errno;
+				LOGERR("Failed connecting socket for {}, err = {}", name, err);
+
+				return false;
+			}
+
+			return true;
+		}
+
+		//
+		// Close the socket.
+		//
+		void close()
+		{
+			if (sockfd > 0)
+			{
+				if (::close(sockfd) != 0)
+				{
+					const int err = errno;
+					LOGERR("Error closing socket {}, err = {}", sockfd, err);
+
+					sockfd = 0;
+				}
+			}
+		}
+
+		//
+		// Process the events - both read and write.
+		//
+		void process(uint32_t events)
+		{
+
 		}
 
 	private:
@@ -79,14 +156,32 @@ namespace mm
 			return Name + (++Id);
 		}
 
+		static int tcpProtocol()
+		{
+			static int tcp = getprotobyname("tcp")->p_proto;
+			return tcp;
+		}
+
+		static int udpProtocol()
+		{
+			static int udp = getprotobyname("udp")->p_proto;
+			return udp;
+		}
+
+		// Logger of the socket.
+		static Logger logger;
+
+		// Type of the socket.
+		const int type;
+
 		// Name of the socket
 		const std::string socketName;
 
 		// The reactor.
-		const Runnable reactor;
+		const Reactor reactor;
 
 		// The actual fd.
-		int descriptor {0};
+		int sockfd {0};
 	};
 }
 

@@ -60,10 +60,10 @@ namespace mm
 		//
 		// Add the socket for the given operations.
 		//
-		// socket : socket concept from which a fd can be obtained.
+		// sock : socket concept from which a fd can be obtained.
 		// operations : Flags for operations.
 		//
-		template<typename Sock> void add(Sock& socket, int operations)
+		template<typename Sock> void add(Sock& sock, int operations)
 		{
 			// sanity check
 			if (!((operations & READ) || (operations & WRITE)))
@@ -72,9 +72,9 @@ namespace mm
 				return;
 			}
 
-			if (activeFds.find(socket.fd()) != activeFds.end())
+			if (activeFds.find(sock.fd()) != activeFds.end())
 			{
-				LOGERR("FD {} already added to poller {}", socket.fd(), name);
+				LOGERR("FD {} already added to poller {}", sock.fd(), name);
 				return;
 			}
 
@@ -87,17 +87,17 @@ namespace mm
 				if (operations & WRITE) events &= EPOLLOUT;
 			};
 
-			const epoll_event pollEvent {events, {&socket.reactor(), socket.fd(), 0, 0} };
+			const epoll_event pollEvent {events, {&sock.reactor(), sock.fd(), 0, 0} };
 
-			if (epoll_ctl(fd, EPOLL_CTL_ADD, socket.fd(), &pollEvent) == 0)
+			if (epoll_ctl(fd, EPOLL_CTL_ADD, sock.fd(), &pollEvent) == 0)
 			{
-				activeFds.insert(socket.fd());
-				LOGINFO("Socket {} added to poller {}", socket.fd(), name);
+				activeFds.insert(sock.fd());
+				LOGINFO("Socket {} added to poller {}", sock.fd(), name);
 			}
 			else
 			{
 				const int err = errno;
-				LOGFATAL("Failed adding socket {} to poller {} on err {}", socket.fd(), name, err);
+				LOGFATAL("Failed adding socket {} to poller {} on err {}", sock.fd(), name, err);
 			}
 		}
 
@@ -106,23 +106,23 @@ namespace mm
 		//
 		// socket : The socket to remove.
 		//
-		template<typename Sock> void remove(Sock& socket)
+		template<typename Sock> void remove(Sock& sock)
 		{
-			if (activeFds.find(socket.fd()) == activeFds.end())
+			if (activeFds.find(sock.fd()) == activeFds.end())
 			{
-				LOGERR("Cannot find FD {} from poller {}", socket.fd(), name);
+				LOGERR("Cannot find FD {} from poller {}", sock.fd(), name);
 				return;
 			}
 
-			if (epoll_ctrl(fd, EPOLL_CTL_DEL, socket.fd(), nullptr) == 0)
+			if (epoll_ctrl(fd, EPOLL_CTL_DEL, sock.fd(), nullptr) == 0)
 			{
-				activeFds.erase(socket.fd());
-				LOGINFO("Socket {} removed from poller {}", socket.fd(), name);
+				activeFds.erase(sock.fd());
+				LOGINFO("Socket {} removed from poller {}", sock.fd(), name);
 			}
 			else
 			{
 				const int err = errno;
-				LOGFATAL("Failed removing socket {} from poller {} on err {}", socket.fd(), name, err);
+				LOGFATAL("Failed removing socket {} from poller {} on err {}", sock.fd(), name, err);
 			}
 		}
 
@@ -145,7 +145,7 @@ namespace mm
 
 			for (int i = 0; i < count; ++i)
 			{
-				(*events[i].data.ptr)();
+				(*events[i].data.ptr)(events[i].events);
 			}
 		}
 
