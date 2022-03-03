@@ -8,6 +8,7 @@
 #ifndef LIB_COMMON_SRC_POLLER_HPP_
 #define LIB_COMMON_SRC_POLLER_HPP_
 
+#include <IOBase.hpp>
 #include <Logger.hpp>
 
 #include <sys/epoll.h>
@@ -27,10 +28,6 @@ namespace mm
 	class Poller
 	{
 	public:
-
-		// Flags for adding the epoll register operations
-		static constexpr int READ = 1;
-		static constexpr int WRITE = 2;
 
 		Poller(const std::string name = getName()) : name(name)
 		{
@@ -73,12 +70,6 @@ namespace mm
 				return;
 			}
 
-			if (activeFds.find(sock.fd()) != activeFds.end())
-			{
-				LOGERR("FD {} already added to poller {}", sock.fd(), name);
-				return;
-			}
-
 			int events = 0;
 			{
 				events &= EPOLLHUP;
@@ -88,11 +79,10 @@ namespace mm
 				if (operations & WRITE) events &= EPOLLOUT;
 			};
 
-			const epoll_event pollEvent {events, {&sock.reactor(), sock.fd(), 0, 0} };
+			const epoll_event pollEvent {events, {&sock.reactor(this), sock.fd(), 0, 0} };
 
 			if (epoll_ctl(fd, EPOLL_CTL_ADD, sock.fd(), &pollEvent) == 0)
 			{
-				activeFds.insert(sock.fd());
 				LOGINFO("Socket {} added to poller {}", sock.fd(), name);
 			}
 			else
@@ -109,15 +99,8 @@ namespace mm
 		//
 		template<typename Sock> void remove(Sock& sock)
 		{
-			if (activeFds.find(sock.fd()) == activeFds.end())
+			if (epoll_ctl(fd, EPOLL_CTL_DEL, sock.fd(), nullptr) == 0)
 			{
-				LOGERR("Cannot find FD {} from poller {}", sock.fd(), name);
-				return;
-			}
-
-			if (epoll_ctrl(fd, EPOLL_CTL_DEL, sock.fd(), nullptr) == 0)
-			{
-				activeFds.erase(sock.fd());
 				LOGINFO("Socket {} removed from poller {}", sock.fd(), name);
 			}
 			else
@@ -132,10 +115,9 @@ namespace mm
 		//
 		void poll()
 		{
-			const int size = activeFds.size();
-			epoll_event events[size];
+			epoll_event events[20];
 
-			const int count = epoll_wait(fd, events, size, -1);
+			const int count = epoll_wait(fd, events, sizeof(events), -1);
 			if (UNLIKELY(count < 0))
 			{
 				const int err = errno;
@@ -147,6 +129,18 @@ namespace mm
 			for (int i = 0; i < count; ++i)
 			{
 				(*events[i].data.ptr)(events[i].events);
+			}
+		}
+
+		template<typename Sock> void scheduleForSend(Sock& sock)
+		{
+			const int events = EPOLLIN | EPOLLOUT | EPOLLHUP | EPOLLERR;
+			const epoll_event pollEvent {events, {&sock.reactor(this), sock.fd(), 0, 0} };
+
+			if (epoll_ctl(fd, EPOLL_CTL_MOD, sock.fd(), events) != 0)
+			{
+				const int err = errno;
+				LOGFATAL("Failed schedule socket {} on poller {} with err {}", sock.fd(), name, err);
 			}
 		}
 
@@ -173,9 +167,6 @@ namespace mm
 
 		// name of the poller.
 		const std::string name;
-
-		// currently active FDs.
-		std::unordered_set<int> activeFds;
 	};
 }
 

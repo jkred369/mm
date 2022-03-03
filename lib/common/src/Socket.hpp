@@ -8,8 +8,9 @@
 #ifndef LIB_COMMON_SRC_SOCKET_HPP_
 #define LIB_COMMON_SRC_SOCKET_HPP_
 
-#include <IOReactor.hpp>
+#include <IOBase.hpp>
 #include <Logger.hpp>
+#include <Poller.hpp>
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -26,6 +27,16 @@
 
 namespace mm
 {
+	//
+	// The socket listener interface.
+	//
+	struct SocketListener
+	{
+		virtual ~SocketListener() {}
+
+		virtual void onData(const char* buffer, int size);
+	};
+
 	//
 	// This class implements a UDP or TCP socket connection and realize a Sock concept used in poller.
 	//
@@ -80,6 +91,22 @@ namespace mm
 		inline int fd() const
 		{
 			return sockfd;
+		}
+
+		void setListener(SocketListener* listener)
+		{
+			this->listener = listener;
+		}
+
+		SocketListener* getListener() const
+		{
+			return listener;
+		}
+
+		const Reactor& reactor(Poller* poller)
+		{
+			eventReactor = std::bind(&Socket::process, this, poller);
+			return eventReactor;
 		}
 
 		//
@@ -138,7 +165,7 @@ namespace mm
 		//
 		// Process the events - both read and write.
 		//
-		void process(uint32_t events)
+		void process(Poller* poller, uint32_t events)
 		{
 			if (events | EPOLLOUT)
 			{
@@ -163,12 +190,62 @@ namespace mm
 
 		void send(const char* data, size_t size)
 		{
+			const char* curr = data;
 
+			for (size_t curSize = size; size > 0; )
+			{
+				const ssize_t result = ::send(sockfd, curr, curSize, MSG_DONTWAIT);
+				if (result > 0)
+				{
+					if (result == curSize)
+					{
+						// job done all sent
+						break;
+					}
+					else if (result < curSize)
+					{
+						// next block
+						curSize -= result;
+						curr += result;
+					}
+					else
+					{
+						// error
+						LOGERR("Send buffer overflow, sent {}, buffer length {}", result, curSize);
+						break;
+					}
+				}
+				else
+				{
+					const int err = errno;
+					if ((err & EAGAIN) || (err & EWOULDBLOCK))
+					{
+						// adding this socket to epoll for out event
+					}
+					else
+					{
+						LOGERR("Error sending data on socket {} with err = {}", name, err);
+						break;
+					}
+				}
+			}
 		}
 
 		void recv()
 		{
+			const int size = ::recv(sockfd, buffer, sizeof(buffer), MSG_DONTWAIT);
+			if (UNLIKELY(size < 0))
+			{
+				const int err = errno;
+				LOGERR("Error reading socket {}, err = {}", sockfd, err);
 
+				return;
+			}
+
+			if (size && listener)
+			{
+				listener->onData(buffer, size);
+			}
 		}
 
 	private:
@@ -208,10 +285,17 @@ namespace mm
 		const std::string socketName;
 
 		// The reactor.
-		const Reactor reactor;
+		const Reactor eventReactor;
 
 		// The actual fd.
 		int sockfd {0};
+
+		// The receive buffer
+		char buffer[8192];
+
+		// The socket listener
+		SocketListener * listener {nullptr};
+
 	};
 }
 
